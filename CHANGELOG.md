@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Bug in OpenAIProvider not being able to read the environmental variables.
+- Bug in `OpenAIProvider.py` making it unable to read the environmental variable for OPENAI_API_KEY.
 
 ### Security
 
