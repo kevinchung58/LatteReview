@@ -1,5 +1,3 @@
-# 🛠️ Installation
-
 There are several ways to install LatteReview:
 
 ## 1. Install from PyPI (Recommended)

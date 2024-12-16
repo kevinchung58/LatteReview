@@ -20,14 +20,14 @@ theme:
         name: Switch to light mode
 
 nav:
-  - Home: index.md
-  - Installation: installation.md
-  - Quick Start: quickstart.md
-  - API Reference:
+  - ☕Home: index.md
+  - 🛠️Installation: installation.md
+  - 🚀 Quick Start: quickstart.md
+  - 💻API Reference:
       - Providers: api/providers.md
       - Agents: api/agents.md
       - Workflows: api/workflows.md
-  - About: about.md
+  - 💡About: about.md
 
 markdown_extensions:
   - pymdownx.highlight:

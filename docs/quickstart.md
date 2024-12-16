@@ -1,5 +1,3 @@
-# 🚀 Getting Started
-
 LatteReview enables you to create custom literature review workflows with multiple AI reviewers. Each reviewer can use different models and providers based on your needs. Please follow the below steps to perform a review task with LatteReview.
 
 ## Step 1: Set Up API Keys
