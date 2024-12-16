@@ -21,6 +21,7 @@ class ScoringReviewer(BaseAgent):
     score_set: List[int] = [1, 2]
     scoring_rules: str = "Your scores should follow the defined schema."
     generic_item_prompt: Optional[str] = Field(default=None)
+    input_description: str = "article title/abstract"
     reasoning: ReasoningType = ReasoningType.BRIEF
     max_retries: int = DEFAULT_MAX_RETRIES
 

@@ -39,7 +39,7 @@ class OpenAIProvider(BaseProvider):
         if not self.api_key and "OPENAI_API_KEY" in os.environ:
             self.api_key = os.getenv("OPENAI_API_KEY")
         else:
-            raise ClientCreationError("OPENAI_API_KEY environment variable is not set")
+            raise ClientCreationError("OPENAI_API_KEY environment variable is not set. Please pass your API key or set this variable.")
         try:
             if "gemini" not in self.model.lower():
                 return openai.AsyncOpenAI(api_key=self.api_key)

@@ -14,7 +14,7 @@ class ReviewWorkflowError(Exception):
 
 
 class ReviewWorkflow(pydantic.BaseModel):
-    workflow_schema: List[Dict[str, Any]]
+    workflow_schema: List[Dict[str, Any]] 
     memory: List[Dict] = list()
     reviewer_costs: Dict = dict()
     total_cost: float = 0.0

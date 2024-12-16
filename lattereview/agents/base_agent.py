@@ -29,7 +29,7 @@ class BaseAgent(BaseModel):
     max_concurrent_requests: int = DEFAULT_CONCURRENT_REQUESTS
     name: str = "BaseAgent"
     backstory: str = "a generic base agent"
-    input_description: str = "article title/abstract"
+    input_description: str = ""
     examples: Union[str, List[Union[str, Dict[str, Any]]]] = None
     reasoning: ReasoningType = ReasoningType.BRIEF
     system_prompt: Optional[str] = None

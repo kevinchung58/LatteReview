@@ -13,25 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New features introduced.
-- New configurations or options added.
+- NA
 
 ### Changed
 
 - Changed `data.xlsx` to `test_article_data.csv` which now has cleaner Column names and only contains 20 rows.
+- Passing the inputs_description to agents are now optional. The default value is "article title/abstract."
+- Expanded the "Quick Start" section in the README.md file.
 
 ### Deprecated
 
-- Features marked for removal in the future.
+- NA
 
 ### Removed
 
-- Features or functionality removed.
+- NA
 
 ### Fixed
 
-- Bugs resolved in this release.
+- Bug in OpenAIProvider not being able to read the environmental variables.
 
 ### Security
 
-- Security vulnerabilities patched.
+- NA
