@@ -1,8 +1,8 @@
-## 🚀 Getting Started
+# 🚀 Getting Started
 
 LatteReview enables you to create custom literature review workflows with multiple AI reviewers. Each reviewer can use different models and providers based on your needs. Please follow the below steps to perform a review task with LatteReview.
 
-### Step 1: Set Up API Keys
+## Step 1: Set Up API Keys
 
 To use LatteReview with different LLM engines (OpenAI, Anthropic, Google, etc.), you'll need to set up the API keys for the specific providers you plan to use. For example, if you're only using OpenAI models, you only need the OpenAI API key. Here are three ways to set up your API keys:
 
@@ -39,7 +39,7 @@ provider = OpenAIProvider(api_key="your-openai-key")  # Optional, will use envir
 
 Note: No API keys are needed if you're exclusively using local models through Ollama.
 
-### Step 2: Prepare Your Data
+## Step 2: Prepare Your Data
 
 Your input data should be in a CSV or Excel file with columns for the content you want to review. The column names should match the `inputs` specified in your workflow:
 
@@ -54,7 +54,7 @@ data = pd.DataFrame({
 })
 ```
 
-### Step 3: Create Reviewers
+## Step 3: Create Reviewers
 
 Create reviewer agents by configuring `ScoringReviewer` objects. Each reviewer needs:
 
@@ -75,7 +75,7 @@ reviewer1 = ScoringReviewer(
 )
 ```
 
-### Step 4: Create Review Workflow
+## Step 4: Create Review Workflow
 
 Define your workflow by specifying review rounds, reviewers, and input columns. The workflow automatically creates output columns for each reviewer based on their name and review round. For each reviewer, three columns are created:
 
@@ -107,7 +107,7 @@ workflow = ReviewWorkflow(
 
 In this example, the expert reviewer in round B can access both the original data columns and the outputs from round A's reviewers. The filter ensures the expert only reviews cases where the first two reviewers disagreed.
 
-### Step 5: Run the Workflow
+## Step 5: Run the Workflow
 
 Execute the workflow and get results:
 
@@ -121,7 +121,7 @@ results = asyncio.run(workflow(data))  # Returns DataFrame with all results
 # - round-{ROUND}_{REVIEWER_NAME}_reasoning: Extracted reasoning
 ```
 
-### Complete Working Example
+## Complete Working Example
 
 ```python
 from lattereview.providers import LiteLLMProvider

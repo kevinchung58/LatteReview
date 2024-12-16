@@ -1,8 +1,8 @@
-## 🛠️ Installation
+# 🛠️ Installation
 
 There are several ways to install LatteReview:
 
-### 1. Install from PyPI (Recommended)
+## 1. Install from PyPI (Recommended)
 
 ```bash
 pip install lattereview
@@ -21,7 +21,7 @@ pip install "lattereview[docs]"
 pip install "lattereview[all]"
 ```
 
-### 2. Install from Source Code
+## 2. Install from Source Code
 
 #### Option A: Using Git
 
@@ -55,14 +55,14 @@ pip install -r requirements.txt
 pip install -e ".[all]"
 ```
 
-### Verify Installation
+## Verify Installation
 
 ```python
 import lattereview
 print(lattereview.__version__)
 ```
 
-### Requirements
+## Requirements
 
 - Python 3.9 or later
 - Core dependencies (automatically installed):
@@ -72,7 +72,7 @@ print(lattereview.__version__)
   - pydantic (>=2.10.3)
   - And others as specified in `setup.py`
 
-### Troubleshooting
+## Troubleshooting
 
 If you encounter installation issues:
 
