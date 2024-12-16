@@ -6,6 +6,8 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Maintained: yes](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/prouzrokh/lattereview)
 
+<p><img src="images/robot.png" width="400"></p>
+
 A framework for multi-agent review workflows using large language models.
 
 ## Overview

@@ -22,7 +22,7 @@ theme:
 nav:
   - Home: index.md
   - Installation: installation.md
-  - Quick Start: usage/quickstart.md
+  - Quick Start: quickstart.md
   - API Reference:
       - Providers: api/providers.md
       - Agents: api/agents.md

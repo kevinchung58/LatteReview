@@ -113,7 +113,7 @@ Note: Models should support async operations and structured JSON outputs for opt
 
 ## 📖 Documentation
 
-Full documentation and API reference are available at the [`docs`](/docs) folder.
+Full documentation and API reference are available at: [https://pouriarouzrokh.github.io/LatteReview](https://pouriarouzrokh.github.io/LatteReview)
 
 ## 🛣️ Roadmap
 
