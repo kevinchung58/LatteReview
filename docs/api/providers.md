@@ -221,8 +221,6 @@ Common error scenarios:
 - Unsupported model configurations
 - Models not supporting structured outputs or JSON responses
 
-All operations are wrapped in try-except blocks with detailed error messages that help identify the source of the problem.
-
 ## Best Practices
 
 1. For all online APIs, prefer using LiteLLMProvider class as it provides unified access and error handling
