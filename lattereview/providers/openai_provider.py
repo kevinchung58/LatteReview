@@ -9,7 +9,7 @@ from .base_provider import BaseProvider, ProviderError, ClientCreationError, Res
 
 class OpenAIProvider(BaseProvider):
     provider: str = "OpenAI"
-    api_key: str = os.getenv("OPENAI_API_KEY", "")
+    api_key: str = None
     client: Optional[openai.AsyncOpenAI] = None
     model: str = "gpt-4o-mini"
     response_format_class: Optional[BaseModel] = None
@@ -36,7 +36,9 @@ class OpenAIProvider(BaseProvider):
     def create_client(self) -> openai.AsyncOpenAI:
         """Create and return the OpenAI client."""
         gemini_base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
-        if not self.api_key:
+        if not self.api_key and "OPENAI_API_KEY" in os.environ:
+            self.api_key = os.getenv("OPENAI_API_KEY")
+        else:
             raise ClientCreationError("OPENAI_API_KEY environment variable is not set")
         try:
             if "gemini" not in self.model.lower():
