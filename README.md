@@ -24,13 +24,13 @@ LatteReview is a powerful Python package designed to automate academic literatur
 pip install lattereview
 ```
 
-Please refer to our [installation guide](./installation.md) for detailed instructions.
+Please refer to our [installation guide](./docs/installation.md) for detailed instructions.
 
 ## 🚀 Quick Start
 
 LatteReview enables you to create custom literature review workflows with multiple AI reviewers. Each reviewer can use different models and providers based on your needs. Below is a working example of how you can use LatteReview for doing a quick title/abstract review with two junior and one senior reviewers (all AI agents)!
 
-Please refer to our [Getting Started](./getting-started.md) page for detailed instructions.
+Please refer to our [Quick Start](./docs/quickstart.md) page for detailed instructions.
 
 ```python
 from lattereview.providers import LiteLLMProvider
@@ -113,7 +113,7 @@ Note: Models should support async operations and structured JSON outputs for opt
 
 ## 📖 Documentation
 
-Full documentation and API reference are available at the [`docs`] folder.
+Full documentation and API reference are available at the [`docs`](/docs) folder.
 
 ## 🛣️ Roadmap
 
