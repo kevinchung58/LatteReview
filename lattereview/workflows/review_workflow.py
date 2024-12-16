@@ -4,7 +4,7 @@ import pandas as pd
 import json
 import hashlib
 
-from .agents.scoring_reviewer import ScoringReviewer
+from ..agents.scoring_reviewer import ScoringReviewer
 
 
 class ReviewWorkflowError(Exception):

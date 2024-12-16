@@ -13,13 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- NA
+- Added the package documentation to the `docs` folder.
+- Added a `data` folder within the `examples` folder.
 
 ### Changed
 
+- Updated the `README.md` file.
+- Moved `README.md` to the `docs` folder.
+- Changed `notebooks` folder to `examples`.
 - Changed `data.xlsx` to `test_article_data.csv` which now has cleaner Column names and only contains 20 rows.
-- Passing the inputs_description to agents are now optional. The default value is "article title/abstract."
-- Expanded the "Quick Start" section in the README.md file.
+- Moved the `review_workflow.py` to the `workflows` folder.
+- Passing the `inputs_description` to agents are now optional. The default value is "article title/abstract."
 
 ### Deprecated
 

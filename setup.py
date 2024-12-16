@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="lattereview",
-    version="0.1.0",
+    version="0.1.1",
     author="Pouria Rouzrokh",
     author_email="po.rouzrokh@gmail.com",
     description="A framework for multi-agent review workflows using large language models",
@@ -33,8 +33,35 @@ setup(
         "python-dotenv>=1.0.1",
         "tokencost>=0.1.17",
         "tqdm>=4.67.1",
-        "openpyxl>=3.1.5",
     ],
+    extras_require={
+        "dev": [
+            "black>=24.10.0",
+            "flake8>=7.1.1",
+            "ipykernel>=6.29.5",
+            "openpyxl>=3.1.5",
+        ],
+        "docs": [
+            "mkdocs>=1.5.0",
+            "mkdocs-material>=9.0.0",
+            "mkdocstrings>=0.24.0",
+            "mkdocstrings-python>=1.7.0",
+            "mkdocs-gen-files>=0.5.0",
+            "mkdocs-literate-nav>=0.6.0",
+        ],
+        "all": [
+            "black>=24.10.0",
+            "flake8>=7.1.1",
+            "ipykernel>=6.29.5",
+            "openpyxl>=3.1.5",
+            "mkdocs>=1.5.0",
+            "mkdocs-material>=9.0.0",
+            "mkdocstrings>=0.24.0",
+            "mkdocstrings-python>=1.7.0",
+            "mkdocs-gen-files>=0.5.0",
+            "mkdocs-literate-nav>=0.6.0",
+        ],
+    },
     package_data={
         'lattereview': ['generic_prompts/*.txt'],
     },
