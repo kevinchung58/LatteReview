@@ -18,8 +18,6 @@ This package is still under constant development.
 Breaking changes may occur at any time until v1.0.0 is released.
 ```
 
-</div>
-
 ## 🎯 Key Features
 
 - Multi-agent review system with customizable roles and expertise
