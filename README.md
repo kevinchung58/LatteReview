@@ -14,6 +14,8 @@ LatteReview is a powerful Python package designed to automate academic literatur
 >
 > 🚨 **This package is in BETA stage: Major changes and breaking updates are expected before v1.0.0!** <br>
 
+> ---
+
 ## 🎯 Key Features
 
 - Multi-agent review system with customizable roles and expertise
