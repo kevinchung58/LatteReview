@@ -1,10 +1,10 @@
-Review the input item below and evaluate it against the following criteria:
+Do the scoring task below by reading the input item and scoring it according to the provided scoring rules and scoring set:
 
 Scoring task: <<${scoring_task}$>>
 
 Input item: <<${item}$>>
 
-The possible scores for you to choose from are: ${score_set}$.
+The possible score set for you to choose from are: ${score_set}$.
 
 Your scoring should be based on the following rules: <<${scoring_rules}$>>
 
