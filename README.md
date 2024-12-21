@@ -127,7 +127,6 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 
 - [x] Implementing LiteLLM to add support for additional model providers
 - [x] Draft the package full documentation
-- [ ] Double check the `system prompt` syntax in the OpenAI API
 - [ ] Enable agents to return a percentage of certainty
 - [ ] Change the name of "memory" functionality to "logging" as logging is a more accurate description for what it does.
 - [ ] Enable agents to be grounded in static references (text provided by the user)
