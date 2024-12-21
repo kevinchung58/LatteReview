@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Placeholder for changes that will be added in the next release]
 
+## [0.1.2] - 2024-12-16
+
+### Added
+
+- NA
+
+### Changed
+
+- Renamed `score_review_test.md` to `scoring_review_test.md`
+- Updated the `README.md` file.
+
+### Deprecated
+
+- NA
+
+### Removed
+
+- NA
+
+### Fixed
+
+- Bug in `OpenAIProvider.py` making it unable to read the environmental variable for OPENAI_API_KEY.
+
+### Security
+
+- NA
+
 ## [0.1.1] - 2024-12-16
 
 ### Added

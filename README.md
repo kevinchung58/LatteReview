@@ -127,7 +127,6 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 
 - [x] Implementing LiteLLM to add support for additional model providers
 - [x] Draft the package full documentation
-- [ ] Rename the `review_prompt.txt` to `scoring_review_prompt.txt`
 - [ ] Double check the `system prompt` syntax in the OpenAI API
 - [ ] Enable agents to return a percentage of certainty
 - [ ] Change the name of "memory" functionality to "logging" as logging is a more accurate description for what it does.

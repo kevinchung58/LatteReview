@@ -35,7 +35,7 @@ class ScoringReviewer(BaseAgent):
             assert (
                 0 not in self.score_set
             ), "Score set must not contain 0. This value is reserved for uncertain scorings / errors."
-            prompt_path = Path(__file__).parent.parent / "generic_prompts" / "review_prompt.txt"
+            prompt_path = Path(__file__).parent.parent / "generic_prompts" / "scoring_review_prompt.txt"
             if not prompt_path.exists():
                 raise FileNotFoundError(f"Review prompt template not found at {prompt_path}")
             self.generic_item_prompt = prompt_path.read_text(encoding="utf-8")
