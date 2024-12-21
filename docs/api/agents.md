@@ -106,7 +106,7 @@ class ScoringReviewer(BaseAgent):
         "score": int,
     }
     scoring_task: Optional[str] = None
-    score_set: List[int] = [1, 2]
+    scoring_set: List[int] = [1, 2]
     scoring_rules: str = "Your scores should follow the defined schema."
     generic_item_prompt: Optional[str] = Field(default=None)
     input_description: str = "article title/abstract"
@@ -117,7 +117,7 @@ class ScoringReviewer(BaseAgent):
 ### Key Attributes
 
 - `scoring_task`: Description of the scoring task
-- `score_set`: List of valid scores
+- `scoring_set`: List of valid scores
 - `scoring_rules`: Rules for scoring items
 - `max_retries`: Maximum number of retry attempts for failed reviews
 
@@ -157,7 +157,7 @@ reviewer = ScoringReviewer(
     name="ReviewerOne",
     backstory="an expert reviewer in scientific literature",
     scoring_task="Evaluate papers for methodology quality",
-    score_set=[1, 2, 3, 4, 5],
+    scoring_set=[1, 2, 3, 4, 5],
     scoring_rules="Score 1-5 where 1 is poor and 5 is excellent",
     reasoning=ReasoningType.LONG
 )

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the `score_set` parameter of the `scooring_reviewer `to `scoring_set`.
 - Renamed `score_review_test.md` to `scoring_review_test.md`
 - Updated the `README.md` file.
 

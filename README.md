@@ -57,7 +57,7 @@ reviewer1 = ScoringReviewer(
     name="Alice",
     backstory="a radiologist with expertise in systematic reviews",
     scoring_task="Evaluate how relevant the article is to artificial intelligence applications in radiology",
-    score_set=[1, 2, 3, 4, 5],
+    scoring_set=[1, 2, 3, 4, 5],
     scoring_rules="Rate the relevance on a scale of 1 to 5, where 1 means not relevant to AI in radiology, and 5 means directly focused on AI in radiology",
     model_args={"temperature": 0.1}
 )
@@ -68,7 +68,7 @@ reviewer2 = ScoringReviewer(
     name="Bob",
     backstory="a computer scientist specializing in medical AI",
     scoring_task="Evaluate how relevant the article is to artificial intelligence applications in radiology",
-    score_set=[1, 2, 3, 4, 5],
+    scoring_set=[1, 2, 3, 4, 5],
     scoring_rules="Rate the relevance on a scale of 1 to 5, where 1 means not relevant to AI in radiology, and 5 means directly focused on AI in radiology",
     model_args={"temperature": 0.8}
 )
@@ -79,7 +79,7 @@ expert = ScoringReviewer(
     name="Carol",
     backstory="a professor of AI in medical imaging",
     scoring_task="Review Alice and Bob's relevance assessments of this article to AI in radiology",
-    score_set=[1, 2],
+    scoring_set=[1, 2],
     scoring_rules='Score 1 if you agree with Alice\'s assessment, 2 if you agree with Bob\'s assessment',
     model_args={"temperature": 0.1}
 )

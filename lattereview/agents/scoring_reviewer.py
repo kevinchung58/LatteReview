@@ -18,7 +18,7 @@ class ScoringReviewer(BaseAgent):
         "score": int,
     }
     scoring_task: Optional[str] = None
-    score_set: List[int] = [1, 2]
+    scoring_set: List[int] = [1, 2]
     scoring_rules: str = "Your scores should follow the defined schema."
     generic_item_prompt: Optional[str] = Field(default=None)
     input_description: str = "article title/abstract"
@@ -33,7 +33,7 @@ class ScoringReviewer(BaseAgent):
         try:
             assert self.reasoning != ReasoningType.NONE, "Reasoning type cannot be 'none' for ScoreReviewer"
             assert (
-                0 not in self.score_set
+                0 not in self.scoring_set
             ), "Score set must not contain 0. This value is reserved for uncertain scorings / errors."
             prompt_path = Path(__file__).parent.parent / "generic_prompts" / "scoring_review_prompt.txt"
             if not prompt_path.exists():
@@ -47,8 +47,8 @@ class ScoringReviewer(BaseAgent):
         """Build the agent's identity and configure the provider."""
         try:
             self.system_prompt = self.build_system_prompt()
-            self.score_set = str(self.score_set)
-            keys_to_replace = ["scoring_task", "score_set", "scoring_rules", "reasoning", "examples"]
+            self.scoring_set = str(self.scoring_set)
+            keys_to_replace = ["scoring_task", "scoring_set", "scoring_rules", "reasoning", "examples"]
 
             self.item_prompt = self.build_item_prompt(
                 self.generic_item_prompt, {key: getattr(self, key) for key in keys_to_replace}
