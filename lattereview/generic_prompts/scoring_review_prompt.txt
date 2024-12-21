@@ -1,15 +1,24 @@
-Do the scoring task below by reading the input item and scoring it according to the provided scoring rules and scoring set:
+**Review the input item below and complete the scoring task as instructed:**
 
-Input item: <<${item}$>>
+---
 
-Scoring task: <<${scoring_task}$>>
+**Input item:**
+<<${item}$>>
 
-The possible score set for you to choose from are: ${scoring_set}$.
+**Scoring task:**
+<<${scoring_task}$>>
 
-Your scoring should be based on the following rules: <<${scoring_rules}$>>
+---
 
-If you are highly uncertain about what score to return, return a score of "0". 
+**Instructions:**
 
-${reasoning}$
+1. **Score** the input item using only the values in this set: ${scoring_set}$.
+2. Follow these rules when determining your score: <<${scoring_rules}$>>.
+3. After assigning a score, report your certainty level as a value between **0** (not certain at all) and **100** (completely certain).
+4. Report your certainty level after you assigned a score.
 
-${examples}$
+---
+
+${reasoning}
+
+${examples}

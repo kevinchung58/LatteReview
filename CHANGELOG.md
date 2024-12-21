@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Placeholder for changes that will be added in the next release]
 
-## [0.1.2] - 2024-12-16
+## [0.2.0] - 2024-12-16
 
 ### Added
 
@@ -17,9 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated the `review_workflow` to dynamically add any output keys from reviewers to the workflow dataframe.
+- All agents now return a `certainty` score which is an integer between 0 to 100.
+- It is now possible to pass `0` to `scoring_set` of the ScoringReviewer agents as 0 is not used for denoting uncertainty anymore.
+- `ScoringReviewer` agent now only accepts `brief` and `cot` for reasoning. the `long` reasoning is now deprecated.
+- Updated the `scoring_review_prompt` for clarity and to reflect the above changes.
 - Renamed the `score_set` parameter of the `scooring_reviewer `to `scoring_set`.
-- Renamed `score_review_test.md` to `scoring_review_test.md`
-- Updated the `README.md` file.
+- Renamed `score_review_test.md` to `scoring_review_test.md`.
+- Updated the `scoring_review_test.ipynb` to reflect all the above changes.
+- Updated the `README.md` file to reflect all the above changes.
 
 ### Deprecated
 

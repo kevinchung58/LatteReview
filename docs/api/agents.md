@@ -37,13 +37,13 @@ class BaseAgent(BaseModel):
 
 ### Key Attributes
 
-- `response_format`: Defines the expected format of agent responses
+- `response_format`: Defines the expected format of agent responses, which now includes a mandatory `certainty` field.
 - `provider`: The LLM provider instance used by the agent
 - `model_args`: Arguments passed to the language model
 - `max_concurrent_requests`: Maximum number of concurrent requests (default: 20)
 - `name`: Agent's name
 - `backstory`: Agent's background story
-- `reasoning`: Type of reasoning (NONE, BRIEF, LONG, COT)
+- `reasoning`: Type of reasoning (NONE, BRIEF, COT)
 - `memory`: List storing agent's interactions
 - `identity`: Dictionary containing agent's configuration
 
@@ -104,6 +104,7 @@ class ScoringReviewer(BaseAgent):
     response_format: Dict[str, Any] = {
         "reasoning": str,
         "score": int,
+        "certainty": int
     }
     scoring_task: Optional[str] = None
     scoring_set: List[int] = [1, 2]
@@ -116,8 +117,10 @@ class ScoringReviewer(BaseAgent):
 
 ### Key Attributes
 
-- `scoring_task`: Description of the scoring task
-- `scoring_set`: List of valid scores
+- `generic_item_prompt`: The path to the template but dynamic prompt used for the `ScoringReviewer`.
+- `response_format`: The expected response format from the ScoringReviewer agent with three necessary keys: `reasoning`, `score`, and `certainty`.
+- `scoring_task`: Description of the scoring task.
+- `scoring_set`: List of valid scores (now supports 0 as a valid score)
 - `scoring_rules`: Rules for scoring items
 - `max_retries`: Maximum number of retry attempts for failed reviews
 
@@ -159,7 +162,7 @@ reviewer = ScoringReviewer(
     scoring_task="Evaluate papers for methodology quality",
     scoring_set=[1, 2, 3, 4, 5],
     scoring_rules="Score 1-5 where 1 is poor and 5 is excellent",
-    reasoning=ReasoningType.LONG
+    reasoning=ReasoningType.COT
 )
 ```
 

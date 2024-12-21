@@ -30,9 +30,7 @@ class ReviewWorkflow(pydantic.BaseModel):
                     if isinstance(review_task["reviewers"], list)
                     else [review_task["reviewers"]]
                 )
-                reviewer_names = [f"round-{round_id}_{reviewer.name}" for reviewer in reviewers]
-                inputs = review_task["inputs"] if isinstance(review_task["inputs"], list) else [review_task["inputs"]]
-                initial_inputs = [col for col in inputs if "_output_" not in col]
+                data_inputs = review_task["inputs"] if isinstance(review_task["inputs"], list) else [review_task["inputs"]]
 
                 # Validate reviewers
                 for reviewer in reviewers:
@@ -40,10 +38,13 @@ class ReviewWorkflow(pydantic.BaseModel):
                         raise ReviewWorkflowError(f"Invalid reviewer: {reviewer}")
 
                 # Validate input columns
-                for input_col in initial_inputs:
-                    if input_col not in __context["data"].columns:
-                        if input_col.split("_output")[0] not in reviewer_names:
-                            raise ReviewWorkflowError(f"Invalid input column: {input_col}")
+                for data_input in data_inputs:
+                    if data_input not in __context["data"].columns:
+                        reviewer_name = data_input.split("_")[1]
+                        reviewer = next(reviewer for reviewer in reviewers if reviewer.name == reviewer_name)
+                        assert reviewer is not None, f"Reviewer {reviewer_name} not found in provided inputs"
+                        response_keywords = reviewer.response_format.keys() # e.g., ["_output", "_score", "_reasoning", "_certainty"]
+                        assert data_input.split("_")[-1] in response_keywords, f"Invalid input: {data_input}"
         except Exception as e:
             raise ReviewWorkflowError(f"Error initializing Review Workflow: {e}")
 
@@ -68,11 +69,10 @@ class ReviewWorkflow(pydantic.BaseModel):
         parts = []
         content_keys = []
 
-        for input_col in inputs:
-            if "_output_" not in input_col:
-                value = str(row[input_col]).strip()
-                parts.append(f"=== {input_col} ===\n{value}")
-                content_keys.append(self._create_content_hash(value))
+        for data_input in inputs:
+            value = str(row[data_input]).strip()
+            parts.append(f"=== {data_input} ===\n{value}")
+            content_keys.append(self._create_content_hash(value))
 
         return "\n\n".join(parts), "-".join(content_keys)
 
@@ -84,7 +84,7 @@ class ReviewWorkflow(pydantic.BaseModel):
 
             for review_round, review_task in enumerate(self.workflow_schema):
                 round_id = review_task["round"]
-                self._log(f"\nStarting review round {round_id} ({review_round + 1}/{total_rounds})...")
+                self._log(f"\n====== Starting review round {round_id} ({review_round + 1}/{total_rounds}) ======\n")
 
                 reviewers = (
                     review_task["reviewers"]
@@ -122,17 +122,19 @@ class ReviewWorkflow(pydantic.BaseModel):
 
                 # Process each reviewer
                 for reviewer in reviewers:
+                    response_keywords = reviewer.response_format.keys()
+                    response_cols = [f"round-{round_id}_{reviewer.name}_{keyword}" for keyword in response_keywords]
                     output_col = f"round-{round_id}_{reviewer.name}_output"
-                    score_col = f"round-{round_id}_{reviewer.name}_score"
-                    reasoning_col = f"round-{round_id}_{reviewer.name}_reasoning"
 
-                    # Initialize the output column if it doesn't exist
+                    # Initialize the output column and all expected response columns if they don't exist
+                    # The output column is the entire output from the reviewer, while the response columns are specific
+
                     if output_col not in df.columns:
                         df[output_col] = None
-                    if score_col not in df.columns:
-                        df[score_col] = None
-                    if reasoning_col not in df.columns:
-                        df[reasoning_col] = None
+
+                    for response_col in response_cols:
+                        if response_col not in df.columns:
+                            df[response_col] = None
 
                     # Get reviewer outputs with metadata
                     outputs, review_cost = await reviewer.review_items(
@@ -153,8 +155,6 @@ class ReviewWorkflow(pydantic.BaseModel):
 
                     # Process outputs with content validation
                     processed_outputs = []
-                    processed_scores = []
-                    processed_reasoning = []
 
                     for output, expected_hash in zip(outputs, input_hashes):
                         try:
@@ -167,12 +167,6 @@ class ReviewWorkflow(pydantic.BaseModel):
                             processed_output["_content_hash"] = expected_hash
                             processed_outputs.append(processed_output)
 
-                            if "score" in processed_output:
-                                processed_scores.append(processed_output["score"])
-
-                            if "reasoning" in processed_output:
-                                processed_reasoning.append(processed_output["reasoning"])
-
                         except Exception as e:
                             self._log(f"Warning: Error processing output: {e}")
                             processed_outputs.append({"reasoning": None, "score": None, "_content_hash": expected_hash})
@@ -180,13 +174,13 @@ class ReviewWorkflow(pydantic.BaseModel):
                     # Update dataframe with validated outputs
                     output_dict = dict(zip(eligible_indices, processed_outputs))
                     df.loc[eligible_indices, output_col] = pd.Series(output_dict)
+                    
+                    for response_keyword in response_keywords:
+                        response_col = f"round-{round_id}_{reviewer.name}_{response_keyword}"
+                        response_dict = dict(zip(eligible_indices, [processed_output[response_keyword] for processed_output in processed_outputs]))
+                        df.loc[eligible_indices, response_col] = pd.Series(response_dict)
 
-                    score_dict = dict(zip(eligible_indices, processed_scores))
-                    df.loc[eligible_indices, score_col] = pd.Series(score_dict)
-
-                    reasoning_dict = dict(zip(eligible_indices, processed_reasoning))
-                    df.loc[eligible_indices, reasoning_col] = pd.Series(reasoning_dict)
-
+                    self._log(f"The following columns are present in the dataframe at the end of {reviewer.name}'s reivew in round {round_id}: {df.columns.tolist()}")
             return df
 
         except Exception as e:

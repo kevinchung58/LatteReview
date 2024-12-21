@@ -16,6 +16,7 @@ class ScoringReviewer(BaseAgent):
     response_format: Dict[str, Any] = {
         "reasoning": str,
         "score": int,
+        "certainty": int
     }
     scoring_task: Optional[str] = None
     scoring_set: List[int] = [1, 2]
@@ -31,10 +32,7 @@ class ScoringReviewer(BaseAgent):
     def model_post_init(self, __context: Any) -> None:
         """Initialize after Pydantic model initialization."""
         try:
-            assert self.reasoning != ReasoningType.NONE, "Reasoning type cannot be 'none' for ScoreReviewer"
-            assert (
-                0 not in self.scoring_set
-            ), "Score set must not contain 0. This value is reserved for uncertain scorings / errors."
+            assert self.reasoning != ReasoningType.NONE, "Reasoning type cannot be 'none' for ScoringReviewer"
             prompt_path = Path(__file__).parent.parent / "generic_prompts" / "scoring_review_prompt.txt"
             if not prompt_path.exists():
                 raise FileNotFoundError(f"Review prompt template not found at {prompt_path}")

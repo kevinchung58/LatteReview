@@ -12,7 +12,6 @@ class ReasoningType(Enum):
 
     NONE = "none"
     BRIEF = "brief"
-    LONG = "long"
     COT = "cot"
 
 
@@ -59,7 +58,8 @@ class BaseAgent(BaseModel):
         try:
             return self._clean_text(
                 f"""
-                Your name is <<{self.name}>> and you are <<{self.backstory}>>.
+                Your name is: <<{self.name}>> 
+                Your backstory is: <<{self.backstory}>>.
                 Your task is to review input itmes with the following description: <<{self.input_description}>>.
                 Your final output should have the following keys: \
                     {", ".join(f"{k} ({v})" for k, v in self.response_format.items())}.
@@ -96,12 +96,9 @@ class BaseAgent(BaseModel):
             reasoning_map = {
                 ReasoningType.NONE: "",
                 ReasoningType.BRIEF:
-                    "You must also provide a brief (1 sentence) reasoning for your scoring. First reason then score!",
-                ReasoningType.LONG:
-                    "You must also provide a detailed reasoning for your scoring. First reason then score!",
+                    "Provide a brief (1-sentence) explanation for your scoring. State your reasoning before giving the score.",
                 ReasoningType.COT:
-                    "You must also provide a reasoning for your scoring . Think step by step in your reasoning. \
-                        First reason then score!",
+                    "Provide a detailed, step-by-step explanation for your scoring. State your reasoning before giving the score.",
             }
 
             return self._clean_text(reasoning_map.get(reasoning, ""))

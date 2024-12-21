@@ -134,11 +134,13 @@ Optional Arguments:
   - Has access to all columns in the DataFrame, including outputs from previous rounds
   - Determines whether the row should be included in the current round's review
 
-The workflow automatically generates output columns for each reviewer in the format:
+The workflow automatically generates output columns for each key in the reviewer outputs, e.g.:
 
 - `round-{round_id}_{reviewer.name}_output`: Raw reviewer output
 - `round-{round_id}_{reviewer.name}_score`: Numerical score
 - `round-{round_id}_{reviewer.name}_reasoning`: Reasoning text
+- `round-{round_id}_{reviewer.name}_certainty`: certainty score
+- ...
 
 These output columns can be referenced in subsequent rounds as inputs or in filter conditions.
 

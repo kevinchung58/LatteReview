@@ -123,12 +123,11 @@ Note: Models should support async operations and structured JSON outputs for opt
 
 Full documentation and API reference are available at: [https://pouriarouzrokh.github.io/LatteReview](https://pouriarouzrokh.github.io/LatteReview)
 
-## 🛣️ Roadmap
+## 🛣️ Roadmap for Future Features
 
 - [x] Implementing LiteLLM to add support for additional model providers
 - [x] Draft the package full documentation
-- [ ] Enable agents to return a percentage of certainty
-- [ ] Change the name of "memory" functionality to "logging" as logging is a more accurate description for what it does.
+- [x] Enable agents to return a percentage of certainty
 - [ ] Enable agents to be grounded in static references (text provided by the user)
 - [ ] Enable agents to be grounded in dynamic references (i.e., recieve a function that outputs a text based on the input text. This function could, e.g., be a RAG function.)
 - [ ] Support for image-based inputs and multimodal analysis
@@ -136,9 +135,9 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 - [ ] Adding a notebook example for triplet extraction and building knowledge graphs
 - [ ] Writing the white paper for the package and public launch
 - [ ] Development of a no-code web application
-- [ ] (for v2) Adding conformal prediction tool for calibrating agents on their certainty scores
-- [ ] (for v2) Adding a dialogue tool for enabling agents to seek external help (from helper agents or parallel reviewer agents) during review.
-- [ ] (for v2) Adding a memory component to the agents for saving their own insights or insightful feedback they receive from the helper agents.
+- [ ] (for v>2.0.0) Adding conformal prediction tool for calibrating agents on their certainty scores
+- [ ] (for v>2.0.0) Adding a dialogue tool for enabling agents to seek external help (from helper agents or parallel reviewer agents) during review.
+- [ ] (for v>2.0.0) Adding a memory component to the agents for saving their own insights or insightful feedback they receive from the helper agents.
 
 ## 👨‍💻 Author
 
