@@ -9,6 +9,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Placeholder for changes that will be added in the next release]
 
+## [0.2.1] - 2024-12-16
+
+### Added
+
+- NA
+
+### Changed
+
+- The agents can now accept an `additional_context` argument of type string or Callable. If callable, expects an async function that accepts a single input review item (e.g., to retrieve the relevant context for that unique item in RAG use cases)
+- Added the `scoring_review_rag` use case to the example folders.
+- Moved `examples/scoring_review_test.ipynb` to `examples/scoring_review_simple/scoring_review_simple.ipynb`.
+- Updated all provider classes so that they can now directly accept classes inheriting from pydantic.BaseModel as `response_format_class`.
+- Updated the naming convention of prompts in the agent methods for further clarity.
+- Addressed a bug in the `scoring_review_prompt.txt` that caused the reasoning and examples not to be read by the agents.
+- Added `_` to all internal methods of `BaseAgent` class.
+- All example data spreadsheets are now named as `data.csv`.
+- Updated all the docs to reflect all the above changes.
+- Updated the `README.md` file to reflect all the above changes.
+
+### Deprecated
+
+- NA
+
+### Removed
+
+- NA
+
+### Fixed
+
+- NA
+
+### Security
+
+- NA
+
 ## [0.2.0] - 2024-12-16
 
 ### Added

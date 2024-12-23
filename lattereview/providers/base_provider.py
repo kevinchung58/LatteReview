@@ -41,7 +41,7 @@ class BaseProvider(pydantic.BaseModel):
     api_key: Optional[str] = None
     model: str = "default-model"
     system_prompt: str = "You are a helpful assistant."
-    response_format: Optional[Dict[str, Any]] = None
+    response_format: Optional[Any] = None
     last_response: Optional[Any] = None
 
     class Config:

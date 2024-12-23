@@ -1,10 +1,11 @@
 """OpenAI API provider implementation with comprehensive error handling and type safety."""
 
-from typing import Optional, List, Dict, Any, Tuple
+import inspect
+from typing import Optional, List, Dict, Any, Tuple, Union
 import os
 from pydantic import BaseModel, create_model
 import openai
-from .base_provider import BaseProvider, ProviderError, ClientCreationError, ResponseError
+from .base_provider import BaseProvider, ProviderError, ClientCreationError, ResponseError, InvalidResponseFormatError
 
 
 class OpenAIProvider(BaseProvider):
@@ -12,7 +13,7 @@ class OpenAIProvider(BaseProvider):
     api_key: str = None
     client: Optional[openai.AsyncOpenAI] = None
     model: str = "gpt-4o-mini"
-    response_format_class: Optional[BaseModel] = None
+    response_format_class: Optional[Any] = None
 
     def __init__(self, **data: Any) -> None:
         """Initialize the OpenAI provider with error handling."""
@@ -22,14 +23,17 @@ class OpenAIProvider(BaseProvider):
         except Exception as e:
             raise ClientCreationError(f"Failed to create OpenAI client: {str(e)}")
 
-    def set_response_format(self, response_format: Dict[str, Any]) -> None:
+    def set_response_format(self, response_format: Union[BaseModel, Dict[str, Any]]) -> None:
         """Set the response format for JSON responses."""
         try:
-            if not isinstance(response_format, dict):
-                raise ValueError("Response format must be a dictionary")
-            self.response_format = response_format
-            fields = {key: (value, ...) for key, value in response_format.items()}
-            self.response_format_class = create_model("ResponseFormat", **fields)
+            if not response_format:
+                raise InvalidResponseFormatError("Response format cannot be empty")
+            if isinstance(response_format, dict):
+                self.response_format = response_format
+                fields = {key: (value, ...) for key, value in response_format.items()}
+                self.response_format_class = create_model("ResponseFormat", **fields)
+            elif self._check_basemodel_class(response_format):
+                self.response_format_class = response_format
         except Exception as e:
             raise ProviderError(f"Error setting response format: {str(e)}")
 
@@ -121,3 +125,7 @@ class OpenAIProvider(BaseProvider):
             return response.choices[0].message.content
         except Exception as e:
             raise ResponseError(f"Error extracting content: {str(e)}")
+        
+    def _check_basemodel_class(self, arg):
+        """Check if the argument is a Pydantic BaseModel class."""
+        return inspect.isclass(arg) and issubclass(arg, BaseModel)

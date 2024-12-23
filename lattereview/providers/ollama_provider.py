@@ -1,17 +1,18 @@
 """Ollama API provider implementation using AsyncClient with comprehensive error handling and type safety."""
 
+import inspect
 from typing import Optional, List, Dict, Any, Union, Tuple, AsyncGenerator
 import json
 from ollama import AsyncClient
 from pydantic import BaseModel, create_model
-from .base_provider import BaseProvider, ProviderError, ClientCreationError, ResponseError
+from .base_provider import BaseProvider, ProviderError, ClientCreationError, ResponseError, InvalidResponseFormatError
 
 
 class OllamaProvider(BaseProvider):
     provider: str = "Ollama"
     client: Optional[AsyncClient] = None
     model: str = "llama3.2-vision:latest"  # Default model
-    response_format_class: Optional[BaseModel] = None
+    response_format_class: Optional[Any] = None
     invalid_keywords: List[str] = ["temperature", "max_tokens"]
     host: str = "http://localhost:11434"  # Default Ollama API endpoint
 
@@ -36,11 +37,14 @@ class OllamaProvider(BaseProvider):
     def set_response_format(self, response_format: Dict[str, Any]) -> None:
         """Set the response format for JSON responses."""
         try:
-            if not isinstance(response_format, dict):
-                raise ValueError("Response format must be a dictionary")
-            self.response_format = response_format
-            fields = {key: (value, ...) for key, value in response_format.items()}
-            self.response_format_class = create_model("ResponseFormat", **fields)
+            if not response_format:
+                raise InvalidResponseFormatError("Response format cannot be empty")
+            if isinstance(response_format, dict):
+                self.response_format = response_format
+                fields = {key: (value, ...) for key, value in response_format.items()}
+                self.response_format_class = create_model("ResponseFormat", **fields)
+            elif self._check_basemodel_class(response_format):
+                self.response_format_class = response_format
         except Exception as e:
             raise ProviderError(f"Error setting response format: {str(e)}")
 
@@ -167,3 +171,7 @@ class OllamaProvider(BaseProvider):
         """Close the client session."""
         if self.client:
             await self.client.aclose()
+
+    def _check_basemodel_class(self, arg):
+        """Check if the argument is a Pydantic BaseModel class."""
+        return inspect.isclass(arg) and issubclass(arg, BaseModel)

@@ -3,7 +3,7 @@
 import asyncio
 from pathlib import Path
 import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
 from pydantic import Field
 from .base_agent import BaseAgent, AgentError, ReasoningType
 from tqdm.asyncio import tqdm
@@ -21,7 +21,7 @@ class ScoringReviewer(BaseAgent):
     scoring_task: Optional[str] = None
     scoring_set: List[int] = [1, 2]
     scoring_rules: str = "Your scores should follow the defined schema."
-    generic_item_prompt: Optional[str] = Field(default=None)
+    generic_prompt: Optional[str] = Field(default=None)
     input_description: str = "article title/abstract"
     reasoning: ReasoningType = ReasoningType.BRIEF
     max_retries: int = DEFAULT_MAX_RETRIES
@@ -36,7 +36,7 @@ class ScoringReviewer(BaseAgent):
             prompt_path = Path(__file__).parent.parent / "generic_prompts" / "scoring_review_prompt.txt"
             if not prompt_path.exists():
                 raise FileNotFoundError(f"Review prompt template not found at {prompt_path}")
-            self.generic_item_prompt = prompt_path.read_text(encoding="utf-8")
+            self.generic_prompt = prompt_path.read_text(encoding="utf-8")
             self.setup()
         except Exception as e:
             raise AgentError(f"Error initializing agent: {str(e)}")
@@ -44,17 +44,17 @@ class ScoringReviewer(BaseAgent):
     def setup(self) -> None:
         """Build the agent's identity and configure the provider."""
         try:
-            self.system_prompt = self.build_system_prompt()
+            self.system_prompt = self._build_system_prompt()
             self.scoring_set = str(self.scoring_set)
             keys_to_replace = ["scoring_task", "scoring_set", "scoring_rules", "reasoning", "examples"]
 
-            self.item_prompt = self.build_item_prompt(
-                self.generic_item_prompt, {key: getattr(self, key) for key in keys_to_replace}
+            self.formatted_prompt = self._process_prompt(
+                self.generic_prompt, {key: getattr(self, key) for key in keys_to_replace}
             )
 
             self.identity = {
                 "system_prompt": self.system_prompt,
-                "item_prompt": self.item_prompt,
+                "formatted_prompt": self.formatted_prompt,
                 "model_args": self.model_args,
             }
 
@@ -74,8 +74,8 @@ class ScoringReviewer(BaseAgent):
 
             async def limited_review_item(item: str, index: int) -> tuple[int, Dict[str, Any], Dict[str, float]]:
                 async with semaphore:
-                    response, cost = await self.review_item(item)
-                    return index, response, cost
+                    response, input_prompt, cost = await self.review_item(item)
+                    return index, response, input_prompt, cost
 
             # Building the tqdm desc
             if tqdm_keywords:
@@ -88,26 +88,26 @@ class ScoringReviewer(BaseAgent):
             tasks = [limited_review_item(item, i) for i, item in enumerate(items)]
 
             # Collect results with indices
-            responses_costs = []
+            initial_results = []
             async for result in tqdm(asyncio.as_completed(tasks), total=len(items), desc=tqdm_desc):
-                responses_costs.append(await result)
+                initial_results.append(await result)
 
             # Sort by original index and separate response and cost
-            responses_costs.sort(key=lambda x: x[0])  # Sort by index
+            initial_results.sort(key=lambda x: x[0])  # Sort by index
             results = []
 
-            for i, response, cost in responses_costs:
+            for i, response, input_prompt, cost in initial_results:
                 if isinstance(cost, dict):
                     cost = cost["total_cost"]
                 self.cost_so_far += cost
                 results.append(response)
                 self.memory.append(
                     {
-                        "identity": self.identity,
-                        "item": items[i],
+                        "system_prompt": self.system_prompt,
+                        "model_args": self.model_args,
+                        "input_prompt": input_prompt,
                         "response": response,
                         "cost": cost,
-                        "model_args": self.model_args,
                     }
                 )
 
@@ -120,9 +120,19 @@ class ScoringReviewer(BaseAgent):
         num_tried = 0
         while num_tried < self.max_retries:
             try:
-                item_prompt = self.build_item_prompt(self.item_prompt, {"item": item})
-                response, cost = await self.provider.get_json_response(item_prompt, **self.model_args)
-                return response, cost
+                input_prompt = self._process_prompt(self.formatted_prompt, {"item": item})
+                if self.additional_context == "":
+                    context = self.additional_context
+                elif isinstance(self.additional_context, str):
+                        context = self._process_additional_context(self.additional_context)
+                elif isinstance(self.additional_context, Callable):
+                    context = await self.additional_context(item)
+                    context = self._process_additional_context(context)
+                else:
+                    raise AgentError("Additional context must be a string or callable")
+                input_prompt = self._process_prompt(input_prompt, {"additional_context": context})
+                response, cost = await self.provider.get_json_response(input_prompt, **self.model_args)
+                return response, input_prompt, cost
             except Exception as e:
                 warnings.warn(f"Error reviewing item: {str(e)}. Retrying {num_tried}/{self.max_retries}")
         raise AgentError("Error reviewing item!")

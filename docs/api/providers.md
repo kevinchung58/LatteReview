@@ -26,7 +26,7 @@ class BaseProvider(pydantic.BaseModel):
     api_key: Optional[str] = None
     model: str = "default-model"
     system_prompt: str = "You are a helpful assistant."
-    response_format: Optional[Dict[str, Any]] = None
+    response_format: Optional[Any] = None
     last_response: Optional[Any] = None
 ```
 
@@ -96,7 +96,7 @@ class OpenAIProvider(BaseProvider):
     api_key: str = None
     client: Optional[openai.AsyncOpenAI] = None
     model: str = "gpt-4o-mini"
-    response_format_class: Optional[BaseModel] = None
+    response_format_class: Optional[Any] = None
 ```
 
 ### Key Features
@@ -138,7 +138,7 @@ class OllamaProvider(BaseProvider):
     provider: str = "Ollama"
     client: Optional[AsyncClient] = None
     model: str = "llama3.2-vision:latest"
-    response_format_class: Optional[BaseModel] = None
+    response_format_class: Optional[Any] = None
     invalid_keywords: List[str] = ["temperature", "max_tokens"]
     host: str = "http://localhost:11434"
 ```
@@ -185,7 +185,7 @@ class LiteLLMProvider(BaseProvider):
     provider: str = "LiteLLM"
     model: str = "gpt-4o-mini"
     custom_llm_provider: Optional[str] = None
-    response_format_class: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None
+    response_format_class: Optional[Any] = None
 ```
 
 ### Key Features

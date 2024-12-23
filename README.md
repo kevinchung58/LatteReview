@@ -18,13 +18,19 @@ LatteReview is a powerful Python package designed to automate academic literatur
 
 ## 🎯 Key Features
 
-- Multi-agent review system with customizable roles and expertise
-- Support for multiple review rounds with hierarchical decision-making
-- Flexible model integration (OpenAI, Gemini, Claude, Groq, local models via Ollama)
-- Asynchronous processing for high-performance batch reviews
-- Structured output format with detailed scoring and reasoning
-- Comprehensive cost tracking and memory management
-- Extensible architecture for custom review workflows
+- Multi-agent review system with customizable roles and expertise levels for each reviewer
+- Support for multiple review rounds with hierarchical decision-making workflows
+- Review diverse content types including article titles, abstracts, custom texts, and images using LLM-powered reviewer agents
+- Define reviewer agents with specialized backgrounds and distinct evaluation capabilities
+- Create flexible review workflows where multiple agents operate in parallel or sequential arrangements
+- Enable reviewer agents to analyze peer feedback, cast votes, and propose corrections to other reviewers' assessments
+- Enhance reviews with item-specific context integration, supporting use cases like Retrieval Augmented Generation (RAG)
+- Broad compatibility with LLM providers through LiteLLM, including OpenAI and Ollama
+- Model-agnostic integration supporting OpenAI, Gemini, Claude, Groq, and local models via Ollama
+- High-performance asynchronous processing for efficient batch reviews
+- Standardized output format featuring detailed scoring metrics and reasoning transparency
+- Robust cost tracking and memory management systems
+- Extensible architecture supporting custom review workflow implementation
 
 ## 🛠️ Installation
 
@@ -128,8 +134,8 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 - [x] Implementing LiteLLM to add support for additional model providers
 - [x] Draft the package full documentation
 - [x] Enable agents to return a percentage of certainty
-- [ ] Enable agents to be grounded in static references (text provided by the user)
-- [ ] Enable agents to be grounded in dynamic references (i.e., recieve a function that outputs a text based on the input text. This function could, e.g., be a RAG function.)
+- [x] Enable agents to be grounded in static references (text provided by the user)
+- [x] Enable agents to be grounded in dynamic references (i.e., recieve a function that outputs a text based on the input text. This function could, e.g., be a RAG function.)
 - [ ] Support for image-based inputs and multimodal analysis
 - [ ] Development of `AbstractionReviewer` class for automated paper summarization
 - [ ] Adding a notebook example for triplet extraction and building knowledge graphs

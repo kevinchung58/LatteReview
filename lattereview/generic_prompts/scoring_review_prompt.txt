@@ -19,6 +19,8 @@
 
 ---
 
-${reasoning}
+${reasoning}$
 
-${examples}
+${additional_context}$
+
+${examples}$

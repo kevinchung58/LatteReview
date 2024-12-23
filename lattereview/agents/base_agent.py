@@ -1,6 +1,6 @@
 """Base agent class with consistent error handling and type safety."""
 
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any, Union, Callable
 from enum import Enum
 from pydantic import BaseModel, Field
 
@@ -32,10 +32,11 @@ class BaseAgent(BaseModel):
     examples: Union[str, List[Union[str, Dict[str, Any]]]] = None
     reasoning: ReasoningType = ReasoningType.BRIEF
     system_prompt: Optional[str] = None
-    item_prompt: Optional[str] = None
+    formatted_prompt: Optional[str] = None
     cost_so_far: float = 0
     memory: List[Dict[str, Any]] = []
     identity: Dict[str, Any] = {}
+    additional_context: Optional[Union[Callable, str]] = ""
 
     def __init__(self, **data: Any) -> None:
         """Initialize the base agent with error handling."""
@@ -53,7 +54,7 @@ class BaseAgent(BaseModel):
         """Setup the agent before use."""
         raise NotImplementedError("This method must be implemented by subclasses.")
 
-    def build_system_prompt(self) -> str:
+    def _build_system_prompt(self) -> str:
         """Build the system prompt for the agent."""
         try:
             return self._clean_text(
@@ -68,14 +69,14 @@ class BaseAgent(BaseModel):
         except Exception as e:
             raise AgentError(f"Error building system prompt: {str(e)}")
 
-    def build_item_prompt(self, base_prompt: str, item_dict: Dict[str, Any]) -> str:
+    def _process_prompt(self, base_prompt: str, item_dict: Dict[str, Any]) -> str:
         """Build the item prompt with variable substitution."""
         try:
             prompt = base_prompt
             if "examples" in item_dict:
-                item_dict["examples"] = self.process_examples(item_dict["examples"])
+                item_dict["examples"] = self._process_examples(item_dict["examples"])
             if "reasoning" in item_dict:
-                item_dict["reasoning"] = self.process_reasoning(item_dict["reasoning"])
+                item_dict["reasoning"] = self._process_reasoning(item_dict["reasoning"])
 
             for key, value in item_dict.items():
                 if value is not None:
@@ -87,7 +88,7 @@ class BaseAgent(BaseModel):
         except Exception as e:
             raise AgentError(f"Error building item prompt: {str(e)}")
 
-    def process_reasoning(self, reasoning: Union[str, ReasoningType]) -> str:
+    def _process_reasoning(self, reasoning: Union[str, ReasoningType]) -> str:
         """Process the reasoning type into a prompt string."""
         try:
             if isinstance(reasoning, str):
@@ -104,8 +105,12 @@ class BaseAgent(BaseModel):
             return self._clean_text(reasoning_map.get(reasoning, ""))
         except Exception as e:
             raise AgentError(f"Error processing reasoning: {str(e)}")
+        
+    def _process_additional_context(self, context: str):
+        context = f"Use the following additional context for your scoring: <<{context}>>"
+        return self._clean_text(context)
 
-    def process_examples(self, examples: Union[str, Dict[str, Any], List[Union[str, Dict[str, Any]]]]) -> str:
+    def _process_examples(self, examples: Union[str, Dict[str, Any], List[Union[str, Dict[str, Any]]]]) -> str:
         """Process examples into a formatted string."""
         try:
             if not examples:
@@ -124,7 +129,7 @@ class BaseAgent(BaseModel):
                     raise ValueError(f"Invalid example type: {type(example)}")
 
             return self._clean_text(
-                "<<Here is one or more examples of the performance you are expected to have: \n"
+                "Here is one or more examples of the performance you are expected to have: \n<<"
                 + "".join(examples_str)
                 + ">>"
             )

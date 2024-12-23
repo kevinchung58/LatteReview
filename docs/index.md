@@ -16,12 +16,19 @@ LatteReview is a Python framework that enables you to create and manage multi-ag
 
 ## Features
 
-- Support for multiple LLM providers (OpenAI, Ollama, and most models provided by LiteLLM)
-- Flexible agent-based architecture
-- Configurable review workflows
-- Asynchronous processing with concurrent requests
-- Cost tracking and monitoring
-- Comprehensive error handling and validation
+- Multi-agent review system with customizable roles and expertise levels for each reviewer
+- Support for multiple review rounds with hierarchical decision-making workflows
+- Review diverse content types including article titles, abstracts, custom texts, and images using LLM-powered reviewer agents
+- Define reviewer agents with specialized backgrounds and distinct evaluation capabilities
+- Create flexible review workflows where multiple agents operate in parallel or sequential arrangements
+- Enable reviewer agents to analyze peer feedback, cast votes, and propose corrections to other reviewers' assessments
+- Enhance reviews with item-specific context integration, supporting use cases like Retrieval Augmented Generation (RAG)
+- Broad compatibility with LLM providers through LiteLLM, including OpenAI and Ollama
+- Model-agnostic integration supporting OpenAI, Gemini, Claude, Groq, and local models via Ollama
+- High-performance asynchronous processing for efficient batch reviews
+- Standardized output format featuring detailed scoring metrics and reasoning transparency
+- Robust cost tracking and memory management systems
+- Extensible architecture supporting custom review workflow implementation
 
 ## Quick Links
 

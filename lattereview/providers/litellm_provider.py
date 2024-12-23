@@ -1,5 +1,6 @@
 """LiteLLM API provider implementation with comprehensive error handling and type safety."""
 
+import inspect
 from typing import Optional, List, Dict, Any, Union, Tuple, Type
 import json
 from pydantic import BaseModel, create_model
@@ -15,7 +16,7 @@ class LiteLLMProvider(BaseProvider):
     provider: str = "LiteLLM"
     model: str = "gpt-4o-mini"
     custom_llm_provider: Optional[str] = None
-    response_format_class: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None
+    response_format_class: Optional[Any] = None
 
     def __init__(self, custom_llm_provider: Optional[str] = None, **data: Any) -> None:
         """Initialize the LiteLLM provider."""
@@ -30,11 +31,12 @@ class LiteLLMProvider(BaseProvider):
         try:
             if not response_format:
                 raise InvalidResponseFormatError("Response format cannot be empty")
-            if not isinstance(response_format, dict):
-                raise InvalidResponseFormatError("Response format must be a dictionary")
-            self.response_format = response_format
-            fields = {key: (value, ...) for key, value in response_format.items()}
-            self.response_format_class = create_model("ResponseFormat", **fields)
+            if isinstance(response_format, dict):
+                self.response_format = response_format
+                fields = {key: (value, ...) for key, value in response_format.items()}
+                self.response_format_class = create_model("ResponseFormat", **fields)
+            elif self._check_basemodel_class(response_format):
+                self.response_format_class = response_format
         except Exception as e:
             raise ProviderError(f"Error setting response format: {str(e)}")
 
@@ -127,3 +129,7 @@ class LiteLLMProvider(BaseProvider):
 
         except Exception as e:
             raise ResponseError(f"Error extracting content: {str(e)}")
+        
+    def _check_basemodel_class(self, arg):
+        """Check if the argument is a Pydantic BaseModel class."""
+        return inspect.isclass(arg) and issubclass(arg, BaseModel)
