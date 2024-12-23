@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- [Placeholder for changes that will be added in the next release]
+- Adding support for input image items.
 
 ## [0.2.1] - 2024-12-16
 
