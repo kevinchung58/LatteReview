@@ -13,16 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- NA
+- The agents can now accept an `additional_context` argument of type string or Callable. If callable, expects an async function that accepts a single input review item (e.g., to retrieve the relevant context for that unique item in RAG use cases)
+- Added the `scoring_review_rag` use case to the example folders.
 
 ### Changed
 
-- The agents can now accept an `additional_context` argument of type string or Callable. If callable, expects an async function that accepts a single input review item (e.g., to retrieve the relevant context for that unique item in RAG use cases)
-- Added the `scoring_review_rag` use case to the example folders.
 - Moved `examples/scoring_review_test.ipynb` to `examples/scoring_review_simple/scoring_review_simple.ipynb`.
 - Updated all provider classes so that they can now directly accept classes inheriting from pydantic.BaseModel as `response_format_class`.
 - Updated the naming convention of prompts in the agent methods for further clarity.
-- Addressed a bug in the `scoring_review_prompt.txt` that caused the reasoning and examples not to be read by the agents.
 - Added `_` to all internal methods of `BaseAgent` class.
 - All example data spreadsheets are now named as `data.csv`.
 - Updated all the docs to reflect all the above changes.
@@ -38,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- NA
+- Addressed a bug in the `scoring_review_prompt.txt` that caused the reasoning and examples not to be read by the agents.
 
 ### Security
 
@@ -48,14 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- NA
+- All agents now return a `certainty` score which is an integer between 0 to 100.
+- It is now possible to pass `0` to `scoring_set` of the ScoringReviewer agents as 0 is not used for denoting uncertainty anymore.
 
 ### Changed
 
 - Updated the `review_workflow` to dynamically add any output keys from reviewers to the workflow dataframe.
-- All agents now return a `certainty` score which is an integer between 0 to 100.
-- It is now possible to pass `0` to `scoring_set` of the ScoringReviewer agents as 0 is not used for denoting uncertainty anymore.
-- `ScoringReviewer` agent now only accepts `brief` and `cot` for reasoning. the `long` reasoning is now deprecated.
+
 - Updated the `scoring_review_prompt` for clarity and to reflect the above changes.
 - Renamed the `score_set` parameter of the `scooring_reviewer `to `scoring_set`.
 - Renamed `score_review_test.md` to `scoring_review_test.md`.
@@ -64,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
-- NA
+- `ScoringReviewer` agent now only accepts `brief` and `cot` for reasoning. the `long` reasoning is now deprecated.
 
 ### Removed
 
