@@ -7,7 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Adding support for input image items.
+- Adding support for `AbstractionReviewer` class.
+
+## [0.3.0] - xxxx-xx-xx
+
+### Added
+
+-
+
+### Changed
+
+-
+
+### Deprecated
+
+- NA
+
+### Removed
+
+- NA
+
+### Fixed
+
+- Addressed a bug in the `scoring_review_prompt.txt` that caused the reasoning and examples not to be read by the agents.
+
+### Security
+
+- NA
 
 ## [0.2.1] - 2024-12-23
 
