@@ -40,6 +40,9 @@ setup(
             "flake8>=7.1.1",
             "ipykernel>=6.29.5",
             "openpyxl>=3.1.5",
+            "pillow>=11.0.0l",
+            "opencv-python>=4.10.0.84",
+            "matplotlib>=3.9.4"
         ],
         "docs": [
             "mkdocs>=1.5.0",
@@ -60,6 +63,9 @@ setup(
             "mkdocstrings-python>=1.7.0",
             "mkdocs-gen-files>=0.5.0",
             "mkdocs-literate-nav>=0.6.0",
+            "pillow>=11.0.0l",
+            "opencv-python>=4.10.0.84",
+            "matplotlib>=3.9.4"
         ],
     },
     package_data={

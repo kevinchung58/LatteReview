@@ -1,0 +1,13 @@
+image_path,description,target,color_circle,color_square,color_triangle
+data/image_0.jpg,"Image 1 with blue circle, cyan square, green triangle",circle,blue,cyan,green
+data/image_1.jpg,"Image 2 with orange circle, pink triangle, green square",circle,orange,green,pink
+data/image_2.jpg,"Image 3 with orange square, lime triangle, green circle",triangle,green,orange,lime
+data/image_3.jpg,"Image 4 with orange triangle, cyan square, pink circle",square,pink,cyan,orange
+data/image_4.jpg,"Image 5 with cyan circle, lime square, magenta triangle",triangle,cyan,lime,magenta
+data/image_5.jpg,"Image 6 with green square, orange triangle, pink circle",triangle,pink,green,orange
+data/image_6.jpg,"Image 7 with cyan square, purple circle, orange triangle",square,purple,cyan,orange
+data/image_7.jpg,"Image 8 with magenta circle, cyan square, yellow triangle",triangle,magenta,cyan,yellow
+data/image_8.jpg,"Image 9 with lime square, red circle, magenta triangle",circle,red,lime,magenta
+data/image_9.jpg,"Image 10 with green square, red circle, yellow triangle",triangle,red,green,yellow
+data/image_10.jpg,"Image 11 with blue square, lime triangle, red circle",square,red,blue,lime
+data/image_11.jpg,"Image 12 with cyan square, purple triangle, pink circle",square,pink,cyan,purple
