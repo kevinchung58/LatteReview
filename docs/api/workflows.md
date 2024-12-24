@@ -68,8 +68,8 @@ def get_total_cost(self) -> float:
 
 #### Internal Methods
 
-- `_create_content_hash()`: Generate hash for content tracking
-- `_format_input_text()`: Format input for reviewers
+- `_create_text_hash()`: Generate hash for content tracking
+- `_format_text_input()`: Format input for reviewers
 - `_log()`: Handle logging based on verbose setting
 
 ## Usage Examples

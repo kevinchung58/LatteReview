@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
--
+- Updated the variable and method names in `review_workflow.py` to clearly signal if they are dealing with text data.
 
 ### Deprecated
 
