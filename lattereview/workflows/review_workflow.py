@@ -1,8 +1,8 @@
-import pydantic
-from typing import List, Dict, Any, Union
-import pandas as pd
 import json
-import hashlib
+import os
+import pandas as pd
+import pydantic
+from typing import List, Dict, Any, Union 
 
 from ..agents.scoring_reviewer import ScoringReviewer
 
@@ -43,6 +43,14 @@ class ReviewWorkflow(pydantic.BaseModel):
                         assert reviewer is not None, f"Reviewer {reviewer_name} not found in provided inputs"
                         response_keywords = reviewer.response_format.keys() # e.g., ["_output", "_score", "_reasoning", "_certainty"]
                         assert text_input.split("_")[-1] in response_keywords, f"Invalid input: {text_input}"
+
+                # Validate image_input columns
+                image_inputs = review_task.get("image_inputs", [])
+                image_inputs = image_inputs if isinstance(image_inputs, list) else [image_inputs]
+                for image_input in image_inputs:
+                    if image_input not in __context["data"].columns:
+                        raise ReviewWorkflowError(f"Invalid image input: {image_input}")
+
         except Exception as e:
             raise ReviewWorkflowError(f"Error initializing Review Workflow: {e}")
 
@@ -57,22 +65,29 @@ class ReviewWorkflow(pydantic.BaseModel):
                 raise ReviewWorkflowError(f"Invalid data type: {type(data)}")
         except Exception as e:
             raise ReviewWorkflowError(f"Error running workflow: {e}")
-
-    def _create_text_hash(self, content: str) -> str:
-        """Create a hash of the content for tracking."""
-        return hashlib.md5(content.encode()).hexdigest()
-
+        
     def _format_text_input(self, row: pd.Series, text_inputs: List[str]) -> tuple:
         """Format input text with content tracking."""
         parts = []
-        content_keys = []
-
         for text_input in text_inputs:
             value = str(row[text_input]).strip()
             parts.append(f"=== {text_input} ===\n{value}")
-            content_keys.append(self._create_text_hash(value))
 
-        return "\n\n".join(parts), "-".join(content_keys)
+        return "\n\n".join(parts)
+    
+    def _format_image_input(self, row: pd.Series, image_inputs: List[str]) -> list:
+        """Format input images."""
+        image_input_item = []
+        for image_input in image_inputs:
+            if isinstance(row[image_input], str):
+                if row[image_input].endswith(".jpg") or row[image_input].endswith(".jpeg") or row[image_input].endswith(".png"):
+                    if os.path.exists(row[image_input]):
+                        image_input_item.append(row[image_input])
+                    else:
+                        self._log(f"Warning: Image not found: {row[image_input]}")
+                else:
+                    self._log(f"Warning: Invalid image format: {row[image_input]}")
+        return image_input_item
 
     async def run(self, data: pd.DataFrame) -> pd.DataFrame:
         """Run the review process with content validation."""
@@ -90,6 +105,8 @@ class ReviewWorkflow(pydantic.BaseModel):
                     else [review_task["reviewers"]]
                 )
                 text_inputs = review_task["text_inputs"] if isinstance(review_task["text_inputs"], list) else [review_task["text_inputs"]]
+                image_inputs = review_task.get("image_inputs", [])
+                image_inputs = image_inputs if isinstance(image_inputs, list) else [image_inputs]
                 filter_func = review_task.get("filter", lambda x: True)
 
                 # Apply filter and get eligible rows
@@ -102,20 +119,21 @@ class ReviewWorkflow(pydantic.BaseModel):
 
                 # Create input items with content tracking
                 text_input_items = []
-                text_input_hashes = []
+                image_input_items = []
                 eligible_indices = []
 
                 for idx in df[mask].index:
                     row = df.loc[idx]
-                    text_input, text_hash = self._format_text_input(row, text_inputs)
+                    
+                    # text_input_item is a single string that is made by combining all text_input columns
+                    text_input_item = self._format_text_input(row, text_inputs)
+                    text_input_item = (f"Review Task ID: {round_id}-{idx}\n" f"{text_input_item}")
+                    text_input_items.append(text_input_item)
 
-                    # Add metadata header
-                    text_input = (
-                        f"Review Task ID: {round_id}-{idx}\n" f"Content Hash: {text_hash}\n\n" f"{text_input}"
-                    )
+                    # image_input_item is a list of valid paths to the images provided in the row item
+                    image_input_item = self._format_image_input(row, image_inputs)
+                    image_input_items.append(image_input_item)
 
-                    text_input_items.append(text_input)
-                    text_input_hashes.append(text_hash)
                     eligible_indices.append(idx)
 
                 # Process each reviewer
@@ -137,6 +155,7 @@ class ReviewWorkflow(pydantic.BaseModel):
                     # Get reviewer outputs with metadata
                     outputs, review_cost = await reviewer.review_items(
                         text_input_items,
+                        # image_input_item,
                         {
                             "round": round_id,
                             "reviewer_name": reviewer.name,
@@ -154,20 +173,17 @@ class ReviewWorkflow(pydantic.BaseModel):
                     # Process outputs with content validation
                     processed_outputs = []
 
-                    for output, expected_hash in zip(outputs, text_input_hashes):
+                    for output in outputs:
                         try:
                             if isinstance(output, dict):
                                 processed_output = output
                             else:
                                 processed_output = json.loads(output)
-
-                            # Add content hash to output for validation
-                            processed_output["_text_hash"] = expected_hash
                             processed_outputs.append(processed_output)
 
                         except Exception as e:
                             self._log(f"Warning: Error processing output: {e}")
-                            processed_outputs.append({"reasoning": None, "score": None, "_text_hash": expected_hash})
+                            processed_outputs.append({"reasoning": None, "score": None})
 
                     # Update dataframe with validated outputs
                     output_dict = dict(zip(eligible_indices, processed_outputs))
