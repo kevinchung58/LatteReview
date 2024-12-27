@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 *data_old.csv
 code_base.md
+update_checklist.txt
 
 # C extensions
 *.so
