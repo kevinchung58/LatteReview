@@ -96,12 +96,12 @@ workflow = ReviewWorkflow(
         {
             "round": 'A',  # First round: Initial review by both reviewers
             "reviewers": [reviewer1, reviewer2],
-            "inputs": ["title", "abstract"]
+            "text_inputs": ["title", "abstract"]
         },
         {
             "round": 'B',  # Second round: Expert reviews only disagreements
             "reviewers": [expert],
-            "inputs": ["title", "abstract", "round-A_Alice_output", "round-A_Bob_output"],
+            "text_inputs": ["title", "abstract", "round-A_Alice_output", "round-A_Bob_output"],
             "filter": lambda row: row["round-A_Alice_score"] != row["round-A_Bob_score"]
         }
     ]

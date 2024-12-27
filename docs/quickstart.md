@@ -89,13 +89,13 @@ workflow = ReviewWorkflow(
         {
             "round": 'A',               # First round
             "reviewers": [reviewer1, reviewer2],
-            "inputs": ["title", "abstract"]  # Original data columns
+            "text_inputs": ["title", "abstract"]  # Original data columns
         },
         {
             "round": 'B',               # Second round
             "reviewers": [expert],
             # Access both original columns and previous reviewers' outputs
-            "inputs": ["title", "abstract", "round-A_reviewer1_output", "round-A_reviewer2_score"],
+            "text_inputs": ["title", "abstract", "round-A_reviewer1_output", "round-A_reviewer2_score"],
             # Optional filter to review only certain cases
             "filter": lambda row: row["round-A_reviewer1_score"] != row["round-A_reviewer2_score"]
         }
@@ -171,12 +171,12 @@ workflow = ReviewWorkflow(
         {
             "round": 'A',  # First round: Initial review by both reviewers
             "reviewers": [reviewer1, reviewer2],
-            "inputs": ["title", "abstract"]
+            "text_inputs": ["title", "abstract"]
         },
         {
             "round": 'B',  # Second round: Expert reviews only disagreements
             "reviewers": [expert],
-            "inputs": ["title", "abstract", "round-A_Alice_output", "round-A_Bob_output"],
+            "text_inputs": ["title", "abstract", "round-A_Alice_output", "round-A_Bob_output"],
             "filter": lambda row: row["round-A_Alice_score"] != row["round-A_Bob_score"]
         }
     ]
