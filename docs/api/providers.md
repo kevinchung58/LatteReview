@@ -1,6 +1,6 @@
 # Providers Module Documentation
 
-This module provides different language model provider implementations for the LatteReview package. It handles interactions with various LLM APIs in a consistent and type-safe manner.
+This module provides different language model provider implementations for the LatteReview package. It handles interactions with various LLM APIs in a consistent, type-safe manner and now supports image-based inputs in addition to text inputs.
 
 ## Overview
 
@@ -54,12 +54,13 @@ def create_client(self) -> Any:
 
 #### `get_response()`
 
-Get a text response from the model.
+Get a text or image response from the model.
 
 ```python
 async def get_response(
     self,
-    messages: Union[str, List[str]],
+    input_prompt: str,
+    image_path_list: List[str],
     message_list: Optional[List[Dict[str, str]]] = None,
     system_message: Optional[str] = None,
 ) -> tuple[Any, Dict[str, float]]:
@@ -74,7 +75,8 @@ Get a JSON-formatted response from the model.
 ```python
 async def get_json_response(
     self,
-    messages: Union[str, List[str]],
+    input_prompt: str,
+    image_path_list: List[str],
     message_list: Optional[List[Dict[str, str]]] = None,
     system_message: Optional[str] = None,
 ) -> tuple[Any, Dict[str, float]]:
@@ -86,7 +88,7 @@ async def get_json_response(
 
 ### Description
 
-Implementation for OpenAI's API, supporting both OpenAI models and Gemini models through a compatible endpoint.
+Implementation for OpenAI's API, supporting both OpenAI models and Gemini models through a compatible endpoint. The updated version supports processing text and image inputs.
 
 ### Class Definition
 
@@ -104,6 +106,7 @@ class OpenAIProvider(BaseProvider):
 - Automatic API key handling from environment variables
 - Support for OpenAI and Gemini models
 - JSON response validation
+- Image input handling
 - Comprehensive error handling
 
 ### Usage Example
@@ -118,18 +121,18 @@ provider = OpenAIProvider(model="gpt-4")
 provider = OpenAIProvider(model="gemini/gemini-1.5-flash")
 
 # Get a response
-response, cost = await provider.get_response("What is the capital of France?")
+response, cost = await provider.get_response("What is the capital of the country shown in this map?", ["path/to/image.jpg"])
 
 # Get JSON response
 provider.set_response_format({"key": str, "value": int})
-response, cost = await provider.get_json_response("Format this as JSON")
+response, cost = await provider.get_json_response("Format this as JSON", [])
 ```
 
 ## OllamaProvider
 
 ### Description
 
-Implementation for local Ollama models, supporting both chat and streaming responses.
+Implementation for local Ollama models, supporting both chat and streaming responses. The updated version handles image inputs for advanced tasks.
 
 ### Class Definition
 
@@ -148,6 +151,7 @@ class OllamaProvider(BaseProvider):
 - Local model support
 - Streaming capability
 - Free cost tracking (local models)
+- Image input processing
 - Connection management
 
 ### Usage Example
@@ -161,11 +165,15 @@ provider = OllamaProvider(
     host="http://localhost:11434"
 )
 
-# Get normal response
-response, cost = await provider.get_response("What is the capital of France?")
+# Get response
+response, cost = await provider.get_response("What is the capital of the country shown in this map?", ["path/to/image1.png"])
+
+# Get JSON response with schema
+provider.set_response_format({"answer": str, "confidence": float})
+response, cost = await provider.get_json_response("What is the capital of France?", [])
 
 # Stream response
-async for chunk in provider.get_response("Tell me a story", stream=True):
+async for chunk in provider.get_response("Tell me a story", [], stream=True):
     print(chunk, end="")
 
 # Clean up
@@ -176,7 +184,7 @@ await provider.close()
 
 ### Description
 
-A unified provider implementation using LiteLLM, enabling access to multiple LLM providers through a single interface.
+A unified provider implementation using LiteLLM, enabling access to multiple LLM providers through a single interface. It now supports text and image-based interactions.
 
 ### Class Definition
 
@@ -192,6 +200,7 @@ class LiteLLMProvider(BaseProvider):
 
 - Support for multiple model providers
 - JSON schema validation
+- Image input handling
 - Cost tracking integration
 - Tool calls handling
 
@@ -202,15 +211,13 @@ from lattereview.providers import LiteLLMProvider
 
 # Initialize with different models
 provider = LiteLLMProvider(model="gpt-4o-mini")
-# provider = LiteLLMProvider(model="claude-3-5-sonnet-20241022")
-# provider = LiteLLMProvider(model="gemini/gemini-1.5-flash")
 
 # Get response
-response, cost = await provider.get_response("What is the capital of France?")
+response, cost = await provider.get_response("What is the capital of the country shown in this map?", ["path/to/image1.png"])
 
 # Get JSON response with schema
 provider.set_response_format({"answer": str, "confidence": float})
-response, cost = await provider.get_json_response("What is the capital of France?")
+response, cost = await provider.get_json_response("What is the capital of France?", [])
 ```
 
 ## Error Handling
@@ -220,12 +227,13 @@ Common error scenarios:
 - API key errors (missing or invalid keys)
 - Unsupported model configurations
 - Models not supporting structured outputs or JSON responses
+- Invalid image file paths
 
 ## Best Practices
 
-1. For all online APIs, prefer using LiteLLMProvider class as it provides unified access and error handling
-2. For local APIs, use OllamaProvider directly (rather than through LiteLLMProvider) for better performance and control
-3. Set API keys at the environment level using the python-dotenv package and .env files for better security
+1. For all online APIs, prefer using LiteLLMProvider class as it provides unified access and error handling.
+2. For local APIs, use OllamaProvider directly (rather than through LiteLLMProvider) for better performance and control.
+3. Set API keys at the environment level using the python-dotenv package and .env files for better security.
 
 ## Limitations
 

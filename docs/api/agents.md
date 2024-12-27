@@ -1,6 +1,6 @@
 # Agents Module Documentation
 
-This module provides the core agent functionality for the LatteReview package, implementing agent-based review workflows.
+This module provides the core agent functionality for the LatteReview package, implementing agent-based review workflows. The updated version supports text and image inputs for review tasks.
 
 ## Overview
 
@@ -116,7 +116,7 @@ Clears the agent's memory and resets cost tracking.
 
 ### Overview
 
-`ScoringReviewer` extends `BaseAgent` to implement specialized reviewing capabilities with scoring functionality.
+`ScoringReviewer` extends `BaseAgent` to implement specialized reviewing capabilities with scoring functionality. The updated version supports image inputs in addition to text inputs.
 
 ### Class Definition
 
@@ -150,14 +150,15 @@ class ScoringReviewer(BaseAgent):
 #### Review Operations
 
 ```python
-async def review_items(self, items: List[str], tqdm_keywords: dict = None) -> List[Dict[str, Any]]
+async def review_items(self, text_input_strings: List[str], image_path_lists: List[List[str]] = None, tqdm_keywords: dict = None) -> List[Dict[str, Any]]
 ```
 
 Reviews multiple items concurrently with progress tracking and error handling.
 
 Parameters:
 
-- `items`: List of items to review
+- `text_input_strings`: List of text items to review
+- `image_path_lists`: List of lists containing image file paths for each review item
 - `tqdm_keywords`: Optional keywords for progress bar customization
 
 Returns:
@@ -165,14 +166,15 @@ Returns:
 - List of review results and associated costs
 
 ```python
-async def review_item(self, item: str) -> tuple[Dict[str, Any], Dict[str, float]]
+async def review_item(self, text_input_string: str, image_path_list: List[str] = []) -> tuple[Dict[str, Any], Dict[str, float]]
 ```
 
 Reviews a single item with retry logic and additional context handling.
 
 Parameters:
 
-- `item`: Item to review
+- `text_input_string`: Text input for the review
+- `image_path_list`: List of image paths related to the input
 
 Returns:
 
@@ -206,8 +208,9 @@ reviewer = ScoringReviewer(
 )
 
 # Review items
-items = ["Content A", "Content B"]
-results, costs = await reviewer.review_items(items)
+text_items = ["Content A", "Content B"]
+image_paths = [["path/to/image1.png"], []]
+results, costs = await reviewer.review_items(text_items, image_paths)
 ```
 
 ### Advanced Configuration

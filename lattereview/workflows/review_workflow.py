@@ -2,7 +2,7 @@ import json
 import os
 import pandas as pd
 import pydantic
-from typing import List, Dict, Any, Union 
+from typing import List, Dict, Any, Union
 
 from ..agents.scoring_reviewer import ScoringReviewer
 
@@ -14,7 +14,7 @@ class ReviewWorkflowError(Exception):
 
 
 class ReviewWorkflow(pydantic.BaseModel):
-    workflow_schema: List[Dict[str, Any]] 
+    workflow_schema: List[Dict[str, Any]]
     memory: List[Dict] = list()
     reviewer_costs: Dict = dict()
     total_cost: float = 0.0
@@ -35,13 +35,19 @@ class ReviewWorkflow(pydantic.BaseModel):
                         raise ReviewWorkflowError(f"Invalid reviewer: {reviewer}")
 
                 # Validate text_input columns
-                text_inputs = review_task["text_inputs"] if isinstance(review_task["text_inputs"], list) else [review_task["text_inputs"]]
+                text_inputs = (
+                    review_task["text_inputs"]
+                    if isinstance(review_task["text_inputs"], list)
+                    else [review_task["text_inputs"]]
+                )
                 for text_input in text_inputs:
                     if text_input not in __context["data"].columns:
                         reviewer_name = text_input.split("_")[1]
                         reviewer = next(reviewer for reviewer in reviewers if reviewer.name == reviewer_name)
                         assert reviewer is not None, f"Reviewer {reviewer_name} not found in provided inputs"
-                        response_keywords = reviewer.response_format.keys() # e.g., ["_output", "_score", "_reasoning", "_certainty"]
+                        response_keywords = (
+                            reviewer.response_format.keys()
+                        )  # e.g., ["_output", "_score", "_reasoning", "_certainty"]
                         assert text_input.split("_")[-1] in response_keywords, f"Invalid input: {text_input}"
 
                 # Validate image_input columns
@@ -65,7 +71,7 @@ class ReviewWorkflow(pydantic.BaseModel):
                 raise ReviewWorkflowError(f"Invalid data type: {type(data)}")
         except Exception as e:
             raise ReviewWorkflowError(f"Error running workflow: {e}")
-        
+
     def _format_text_input(self, row: pd.Series, text_inputs: List[str]) -> tuple:
         """Format input text with content tracking."""
         parts = []
@@ -74,20 +80,24 @@ class ReviewWorkflow(pydantic.BaseModel):
             parts.append(f"=== {text_input} ===\n{value}")
 
         return "\n\n".join(parts)
-    
+
     def _format_image_input(self, row: pd.Series, image_inputs: List[str]) -> list:
         """Format input images."""
-        image_input_item = []
+        image_path_list = []
         for image_input in image_inputs:
             if isinstance(row[image_input], str):
-                if row[image_input].endswith(".jpg") or row[image_input].endswith(".jpeg") or row[image_input].endswith(".png"):
+                if (
+                    row[image_input].endswith(".jpg")
+                    or row[image_input].endswith(".jpeg")
+                    or row[image_input].endswith(".png")
+                ):
                     if os.path.exists(row[image_input]):
-                        image_input_item.append(row[image_input])
+                        image_path_list.append(row[image_input])
                     else:
                         self._log(f"Warning: Image not found: {row[image_input]}")
                 else:
                     self._log(f"Warning: Invalid image format: {row[image_input]}")
-        return image_input_item
+        return image_path_list
 
     async def run(self, data: pd.DataFrame) -> pd.DataFrame:
         """Run the review process with content validation."""
@@ -104,7 +114,11 @@ class ReviewWorkflow(pydantic.BaseModel):
                     if isinstance(review_task["reviewers"], list)
                     else [review_task["reviewers"]]
                 )
-                text_inputs = review_task["text_inputs"] if isinstance(review_task["text_inputs"], list) else [review_task["text_inputs"]]
+                text_inputs = (
+                    review_task["text_inputs"]
+                    if isinstance(review_task["text_inputs"], list)
+                    else [review_task["text_inputs"]]
+                )
                 image_inputs = review_task.get("image_inputs", [])
                 image_inputs = image_inputs if isinstance(image_inputs, list) else [image_inputs]
                 filter_func = review_task.get("filter", lambda x: True)
@@ -118,21 +132,21 @@ class ReviewWorkflow(pydantic.BaseModel):
                 self._log(f"Processing {mask.sum()} eligible rows")
 
                 # Create input items with content tracking
-                text_input_items = []
-                image_input_items = []
+                text_input_strings = []
+                image_path_lists = []
                 eligible_indices = []
 
                 for idx in df[mask].index:
                     row = df.loc[idx]
-                    
-                    # text_input_item is a single string that is made by combining all text_input columns
-                    text_input_item = self._format_text_input(row, text_inputs)
-                    text_input_item = (f"Review Task ID: {round_id}-{idx}\n" f"{text_input_item}")
-                    text_input_items.append(text_input_item)
 
-                    # image_input_item is a list of valid paths to the images provided in the row item
-                    image_input_item = self._format_image_input(row, image_inputs)
-                    image_input_items.append(image_input_item)
+                    # text_input_string is a single string that is made by combining all text_input columns
+                    text_input_string = self._format_text_input(row, text_inputs)
+                    text_input_string = f"Review Task ID: {round_id}-{idx}\n" f"{text_input_string}"
+                    text_input_strings.append(text_input_string)
+
+                    # image_path_list is a list of valid paths to the images provided in the row item
+                    image_path_list = self._format_image_input(row, image_inputs)
+                    image_path_lists.append(image_path_list)
 
                     eligible_indices.append(idx)
 
@@ -154,8 +168,8 @@ class ReviewWorkflow(pydantic.BaseModel):
 
                     # Get reviewer outputs with metadata
                     outputs, review_cost = await reviewer.review_items(
-                        text_input_items,
-                        # image_input_item,
+                        text_input_strings,
+                        image_path_lists,
                         {
                             "round": round_id,
                             "reviewer_name": reviewer.name,
@@ -188,13 +202,20 @@ class ReviewWorkflow(pydantic.BaseModel):
                     # Update dataframe with validated outputs
                     output_dict = dict(zip(eligible_indices, processed_outputs))
                     df.loc[eligible_indices, output_col] = pd.Series(output_dict)
-                    
+
                     for response_keyword in response_keywords:
                         response_col = f"round-{round_id}_{reviewer.name}_{response_keyword}"
-                        response_dict = dict(zip(eligible_indices, [processed_output[response_keyword] for processed_output in processed_outputs]))
+                        response_dict = dict(
+                            zip(
+                                eligible_indices,
+                                [processed_output[response_keyword] for processed_output in processed_outputs],
+                            )
+                        )
                         df.loc[eligible_indices, response_col] = pd.Series(response_dict)
 
-                    self._log(f"The following columns are present in the dataframe at the end of {reviewer.name}'s reivew in round {round_id}: {df.columns.tolist()}")
+                    self._log(
+                        f"The following columns are present in the dataframe at the end of {reviewer.name}'s reivew in round {round_id}: {df.columns.tolist()}"
+                    )
             return df
 
         except Exception as e:

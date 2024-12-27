@@ -57,7 +57,8 @@ class BaseProvider(pydantic.BaseModel):
 
     async def get_response(
         self,
-        messages: Union[str, List[str]],
+        input_prompt: str,
+        image_path_list: List[str],
         message_list: Optional[List[Dict[str, str]]] = None,
         system_message: Optional[str] = None,
     ) -> tuple[Any, Dict[str, float]]:
@@ -66,7 +67,8 @@ class BaseProvider(pydantic.BaseModel):
 
     async def get_json_response(
         self,
-        messages: Union[str, List[str]],
+        input_prompt: str,
+        image_path_list: List[str],
         message_list: Optional[List[Dict[str, str]]] = None,
         system_message: Optional[str] = None,
     ) -> tuple[Any, Dict[str, float]]:
@@ -74,7 +76,11 @@ class BaseProvider(pydantic.BaseModel):
         raise NotImplementedError("Subclasses must implement get_json_response")
 
     def _prepare_message_list(
-        self, message: str, message_list: Optional[List[Dict[str, str]]] = None, system_message: Optional[str] = None
+        self,
+        input_prompt: str,
+        image_path_list: List[str],
+        message_list: Optional[List[Dict[str, str]]] = None,
+        system_message: Optional[str] = None,
     ) -> List[Dict[str, str]]:
         """Prepare the list of messages to be sent to the provider."""
         raise NotImplementedError("Subclasses must implement _prepare_message_list")

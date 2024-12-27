@@ -13,19 +13,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--
+- Workflows and agents can now accept a list of images to process both textual and image input data (if supported by the chosen model)
+- Added the `scoring_review_image` use case to the example folders.
+- Added the `base_functionalites` use case to the example folders and removed it from the `scoring_review_simple` example.
 
 ### Changed
 
-- Updated the variable and method names in `review_workflow.py` to clearly signal if they are dealing with text data.
+- Updated the variable and method names in all scripts to clearly signal if they are dealing with text or image data.
+- Updated all the docs to reflect all the above changes.
+- Updated the `README.md` file to reflect all the above changes.
 
 ### Deprecated
 
-- Removed the hashing validation in the `review_workflow.py`.
+- NA
 
 ### Removed
 
-- NA
+- Removed the hashing validation in the `review_workflow.py`.
+- Removed the output validation in the `OllamaProvider.py`
 
 ### Fixed
 

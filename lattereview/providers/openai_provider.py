@@ -1,5 +1,6 @@
 """OpenAI API provider implementation with comprehensive error handling and type safety."""
 
+import base64
 import inspect
 from typing import Optional, List, Dict, Any, Tuple, Union
 import os
@@ -43,7 +44,9 @@ class OpenAIProvider(BaseProvider):
         if not self.api_key and "OPENAI_API_KEY" in os.environ:
             self.api_key = os.getenv("OPENAI_API_KEY")
         else:
-            raise ClientCreationError("OPENAI_API_KEY environment variable is not set. Please pass your API key or set this variable.")
+            raise ClientCreationError(
+                "OPENAI_API_KEY environment variable is not set. Please pass your API key or set this variable."
+            )
         try:
             if "gemini" not in self.model.lower():
                 return openai.AsyncOpenAI(api_key=self.api_key)
@@ -53,47 +56,72 @@ class OpenAIProvider(BaseProvider):
             raise ClientCreationError(f"Failed to create OpenAI client: {str(e)}")
 
     async def get_response(
-        self, messages: str, message_list: Optional[List[Dict[str, str]]] = None, **kwargs: Any
+        self,
+        input_prompt: str,
+        image_path_list: List[str] = [],
+        message_list: Optional[List[Dict[str, str]]] = None,
+        **kwargs: Any,
     ) -> Tuple[Any, Dict[str, float]]:
         """Get a response from OpenAI."""
         try:
-            message_list = self._prepare_message_list(messages, message_list)
+            message_list = self._prepare_message_list(input_prompt, image_path_list, message_list)
             response = await self._fetch_response(message_list, kwargs)
             txt_response = self._extract_content(response)
-            cost = self._get_cost(input_messages=messages, completion_text=txt_response)
+            cost = self._get_cost(input_messages=input_prompt, completion_text=txt_response)
             return txt_response, cost
         except Exception as e:
             raise ResponseError(f"Error getting response: {str(e)}")
 
     async def get_json_response(
-        self, messages: str, message_list: Optional[List[Dict[str, str]]] = None, **kwargs: Any
+        self,
+        input_prompt: str,
+        image_path_list: List[str] = [],
+        message_list: Optional[List[Dict[str, str]]] = None,
+        **kwargs: Any,
     ) -> Tuple[Any, Dict[str, float]]:
         """Get a JSON response from OpenAI."""
         try:
             if not self.response_format_class:
                 raise ValueError("Response format is not set")
-            message_list = self._prepare_message_list(messages, message_list)
+            message_list = self._prepare_message_list(input_prompt, image_path_list, message_list)
             response = await self._fetch_json_response(message_list, kwargs)
             txt_response = self._extract_content(response)
-            cost = self._get_cost(input_messages=messages, completion_text=txt_response)
+            cost = self._get_cost(input_messages=input_prompt, completion_text=txt_response)
             return txt_response, cost
         except Exception as e:
             raise ResponseError(f"Error getting JSON response: {str(e)}")
 
     def _prepare_message_list(
         self,
-        messages: str,
+        input_prompt: str,
+        image_path_list: List[str] = [],
         message_list: Optional[List[Dict[str, str]]] = None,
+        system_message: Optional[str] = None,
     ) -> List[Dict[str, str]]:
         """Prepare the message list for the API call."""
         try:
             if message_list:
-                message_list.append({"role": "user", "content": messages})
+                if len(image_path_list) == 0:
+                    message_list.append({"role": "user", "content": input_prompt})
+                else:
+                    content = [{"type": "text", "text": input_prompt}]
+                    for image_input in image_path_list:
+                        content.append({"type": "image_url", "image_url": {"url": self._encode_image(image_input)}})
+                    message_list.append({"role": "user", "content": content})
             else:
-                message_list = [
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "user", "content": messages},
-                ]
+                if len(image_path_list) == 0:
+                    message_list = [
+                        {"role": "system", "content": system_message or self.system_prompt},
+                        {"role": "user", "content": input_prompt},
+                    ]
+                else:
+                    content = [{"type": "text", "text": input_prompt}]
+                    for image_input in image_path_list:
+                        content.append({"type": "image_url", "image_url": {"url": self._encode_image(image_input)}})
+                    message_list = [
+                        {"role": "system", "content": system_message or self.system_prompt},
+                        {"role": "user", "content": content},
+                    ]
             return message_list
         except Exception as e:
             raise ProviderError(f"Error preparing message list: {str(e)}")
@@ -125,7 +153,13 @@ class OpenAIProvider(BaseProvider):
             return response.choices[0].message.content
         except Exception as e:
             raise ResponseError(f"Error extracting content: {str(e)}")
-        
+
+    # Function to encode the image
+    def _encode_image(self, image_path):
+        with open(image_path, "rb") as image_file:
+            base64_image = base64.b64encode(image_file.read()).decode("utf-8")
+            return f"data:image/{image_path.split('.')[-1]};base64,{base64_image}"
+
     def _check_basemodel_class(self, arg):
         """Check if the argument is a Pydantic BaseModel class."""
         return inspect.isclass(arg) and issubclass(arg, BaseModel)

@@ -1,5 +1,6 @@
 """LiteLLM API provider implementation with comprehensive error handling and type safety."""
 
+import base64
 import inspect
 from typing import Optional, List, Dict, Any, Union, Tuple, Type
 import json
@@ -40,38 +41,16 @@ class LiteLLMProvider(BaseProvider):
         except Exception as e:
             raise ProviderError(f"Error setting response format: {str(e)}")
 
-    def _prepare_message_list(
-        self, messages: str, message_list: Optional[List[Dict[str, str]]] = None, system_message: Optional[str] = None
-    ) -> List[Dict[str, str]]:
-        """Prepare the message list for the API call."""
-        try:
-            if message_list:
-                message_list.append({"role": "user", "content": messages})
-            else:
-                message_list = [
-                    {"role": "system", "content": system_message or self.system_prompt},
-                    {"role": "user", "content": messages},
-                ]
-            return message_list
-        except Exception as e:
-            raise ProviderError(f"Error preparing message list: {str(e)}")
-
-    async def _fetch_response(self, message_list: List[Dict[str, str]], kwargs: Optional[Dict[str, Any]] = None) -> Any:
-        """Fetch the raw response from LiteLLM."""
-        try:
-            response = await acompletion(
-                model=self.model, messages=message_list, custom_llm_provider=self.custom_llm_provider, **(kwargs or {})
-            )
-            return response
-        except Exception as e:
-            raise ResponseError(f"Error fetching response: {str(e)}")
-
     async def get_response(
-        self, messages: str, message_list: Optional[List[Dict[str, str]]] = None, **kwargs: Any
+        self,
+        input_prompt: str,
+        image_path_list: List[str] = [],
+        message_list: Optional[List[Dict[str, str]]] = None,
+        **kwargs: Any,
     ) -> Tuple[Any, Dict[str, float]]:
         """Get a response from LiteLLM."""
         try:
-            message_list = self._prepare_message_list(messages, message_list)
+            message_list = self._prepare_message_list(input_prompt, image_path_list, message_list)
             response = await self._fetch_response(message_list, kwargs)
             txt_response = self._extract_content(response)
             cost = completion_cost(completion_response=response)
@@ -81,14 +60,18 @@ class LiteLLMProvider(BaseProvider):
             raise ResponseError(f"Error getting response: {str(e)}")
 
     async def get_json_response(
-        self, messages: str, message_list: Optional[List[Dict[str, str]]] = None, **kwargs: Any
+        self,
+        input_prompt: str,
+        image_path_list: List[str] = [],
+        message_list: Optional[List[Dict[str, str]]] = None,
+        **kwargs: Any,
     ) -> Tuple[Any, Dict[str, float]]:
         """Get a JSON response from LiteLLM using the defined schema."""
         try:
             if not self.response_format_class:
                 raise ValueError("Response format is not set")
 
-            message_list = self._prepare_message_list(messages, message_list)
+            message_list = self._prepare_message_list(input_prompt, image_path_list, message_list)
 
             # Pass response format directly to acompletion
             kwargs["response_format"] = self.response_format_class
@@ -105,6 +88,51 @@ class LiteLLMProvider(BaseProvider):
             return txt_response, cost
         except Exception as e:
             raise ResponseError(f"Error getting JSON response: {str(e)}")
+
+    def _prepare_message_list(
+        self,
+        input_prompt: str,
+        image_path_list: List[str],
+        message_list: Optional[List[Dict[str, str]]] = None,
+        system_message: Optional[str] = None,
+    ) -> List[Dict[str, str]]:
+        """Prepare the message list for the API call."""
+        try:
+            if message_list:
+                if len(image_path_list) == 0:
+                    message_list.append({"role": "user", "content": input_prompt})
+                else:
+                    content = [{"type": "text", "text": input_prompt}]
+                    for image_input in image_path_list:
+                        content.append({"type": "image_url", "image_url": {"url": self._encode_image(image_input)}})
+                    message_list.append({"role": "user", "content": content})
+            else:
+                if len(image_path_list) == 0:
+                    message_list = [
+                        {"role": "system", "content": system_message or self.system_prompt},
+                        {"role": "user", "content": input_prompt},
+                    ]
+                else:
+                    content = [{"type": "text", "text": input_prompt}]
+                    for image_input in image_path_list:
+                        content.append({"type": "image_url", "image_url": {"url": self._encode_image(image_input)}})
+                    message_list = [
+                        {"role": "system", "content": system_message or self.system_prompt},
+                        {"role": "user", "content": content},
+                    ]
+            return message_list
+        except Exception as e:
+            raise ProviderError(f"Error preparing message list: {str(e)}")
+
+    async def _fetch_response(self, message_list: List[Dict[str, str]], kwargs: Optional[Dict[str, Any]] = None) -> Any:
+        """Fetch the raw response from LiteLLM."""
+        try:
+            response = await acompletion(
+                model=self.model, messages=message_list, custom_llm_provider=self.custom_llm_provider, **(kwargs or {})
+            )
+            return response
+        except Exception as e:
+            raise ResponseError(f"Error fetching response: {str(e)}")
 
     def _extract_content(self, response: Any) -> str:
         """Extract content from the response, handling both direct content and tool calls."""
@@ -129,7 +157,13 @@ class LiteLLMProvider(BaseProvider):
 
         except Exception as e:
             raise ResponseError(f"Error extracting content: {str(e)}")
-        
+
+    # Function to encode the image
+    def _encode_image(self, image_path):
+        with open(image_path, "rb") as image_file:
+            base64_image = base64.b64encode(image_file.read()).decode("utf-8")
+            return f"data:image/{image_path.split('.')[-1]};base64,{base64_image}"
+
     def _check_basemodel_class(self, arg):
         """Check if the argument is a Pydantic BaseModel class."""
         return inspect.isclass(arg) and issubclass(arg, BaseModel)

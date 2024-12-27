@@ -13,11 +13,7 @@ DEFAULT_MAX_RETRIES = 3
 
 
 class ScoringReviewer(BaseAgent):
-    response_format: Dict[str, Any] = {
-        "reasoning": str,
-        "score": int,
-        "certainty": int
-    }
+    response_format: Dict[str, Any] = {"reasoning": str, "score": int, "certainty": int}
     scoring_task: Optional[str] = None
     scoring_set: List[int] = [1, 2]
     scoring_rules: str = "Your scores should follow the defined schema."
@@ -66,15 +62,21 @@ class ScoringReviewer(BaseAgent):
         except Exception as e:
             raise AgentError(f"Error in setup: {str(e)}")
 
-    async def review_items(self, items: List[str], tqdm_keywords: dict = None) -> List[Dict[str, Any]]:
+    async def review_items(
+        self, text_input_strings: List[str], image_path_lists: List[List[str]] = None, tqdm_keywords: dict = None
+    ) -> List[Dict[str, Any]]:
         """Review a list of items asynchronously with concurrency control and progress bar."""
         try:
             self.setup()
+            if not image_path_lists:
+                image_path_lists = [[]] * len(text_input_strings)
             semaphore = asyncio.Semaphore(self.max_concurrent_requests)
 
-            async def limited_review_item(item: str, index: int) -> tuple[int, Dict[str, Any], Dict[str, float]]:
+            async def limited_review_item(
+                text_input_string: str, image_path_list: List[str], index: int
+            ) -> tuple[int, Dict[str, Any], Dict[str, float]]:
                 async with semaphore:
-                    response, input_prompt, cost = await self.review_item(item)
+                    response, input_prompt, cost = await self.review_item(text_input_string, image_path_list)
                     return index, response, input_prompt, cost
 
             # Building the tqdm desc
@@ -82,14 +84,17 @@ class ScoringReviewer(BaseAgent):
                 tqdm_desc = f"""{[f'{k}: {v}' for k, v in tqdm_keywords.items()]} - \
                     {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
             else:
-                tqdm_desc = f"Reviewing {len(items)} items - {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                tqdm_desc = f"Reviewing {len(text_input_strings)} items - {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
 
             # Create tasks with indices
-            tasks = [limited_review_item(item, i) for i, item in enumerate(items)]
+            tasks = [
+                limited_review_item(text_input_string, image_path_list, i)
+                for i, (text_input_string, image_path_list) in enumerate(zip(text_input_strings, image_path_lists))
+            ]
 
             # Collect results with indices
             initial_results = []
-            async for result in tqdm(asyncio.as_completed(tasks), total=len(items), desc=tqdm_desc):
+            async for result in tqdm(asyncio.as_completed(tasks), total=len(text_input_strings), desc=tqdm_desc):
                 initial_results.append(await result)
 
             # Sort by original index and separate response and cost
@@ -115,23 +120,25 @@ class ScoringReviewer(BaseAgent):
         except Exception as e:
             raise AgentError(f"Error reviewing items: {str(e)}")
 
-    async def review_item(self, item: str) -> tuple[Dict[str, Any], Dict[str, float]]:
+    async def review_item(
+        self, text_input_string: str, image_path_list: List[str] = []
+    ) -> tuple[Dict[str, Any], Dict[str, float]]:
         """Review a single item asynchronously with error handling."""
         num_tried = 0
         while num_tried < self.max_retries:
             try:
-                input_prompt = self._process_prompt(self.formatted_prompt, {"item": item})
+                input_prompt = self._process_prompt(self.formatted_prompt, {"item": text_input_string})
                 if self.additional_context == "":
                     context = self.additional_context
                 elif isinstance(self.additional_context, str):
-                        context = self._process_additional_context(self.additional_context)
+                    context = self._process_additional_context(self.additional_context)
                 elif isinstance(self.additional_context, Callable):
-                    context = await self.additional_context(item)
+                    context = await self.additional_context(text_input_string)
                     context = self._process_additional_context(context)
                 else:
                     raise AgentError("Additional context must be a string or callable")
                 input_prompt = self._process_prompt(input_prompt, {"additional_context": context})
-                response, cost = await self.provider.get_json_response(input_prompt, **self.model_args)
+                response, cost = await self.provider.get_json_response(input_prompt, image_path_list, **self.model_args)
                 return response, input_prompt, cost
             except Exception as e:
                 warnings.warn(f"Error reviewing item: {str(e)}. Retrying {num_tried}/{self.max_retries}")

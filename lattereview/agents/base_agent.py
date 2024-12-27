@@ -96,16 +96,14 @@ class BaseAgent(BaseModel):
 
             reasoning_map = {
                 ReasoningType.NONE: "",
-                ReasoningType.BRIEF:
-                    "Provide a brief (1-sentence) explanation for your scoring. State your reasoning before giving the score.",
-                ReasoningType.COT:
-                    "Provide a detailed, step-by-step explanation for your scoring. State your reasoning before giving the score.",
+                ReasoningType.BRIEF: "Provide a brief (1-sentence) explanation for your scoring. State your reasoning before giving the score.",
+                ReasoningType.COT: "Provide a detailed, step-by-step explanation for your scoring. State your reasoning before giving the score.",
             }
 
             return self._clean_text(reasoning_map.get(reasoning, ""))
         except Exception as e:
             raise AgentError(f"Error processing reasoning: {str(e)}")
-        
+
     def _process_additional_context(self, context: str):
         context = f"Use the following additional context for your scoring: <<{context}>>"
         return self._clean_text(context)

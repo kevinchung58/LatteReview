@@ -56,11 +56,16 @@ class OllamaProvider(BaseProvider):
             raise ClientCreationError(f"Failed to create Ollama client: {str(e)}")
 
     async def get_response(
-        self, messages: str, message_list: Optional[List[Dict[str, str]]] = None, stream: bool = False, **kwargs: Any
+        self,
+        input_prompt: str,
+        image_path_list: List[str] = [],
+        message_list: Optional[List[Dict[str, str]]] = None,
+        stream: bool = False,
+        **kwargs: Any,
     ) -> Union[Tuple[Any, Dict[str, float]], AsyncGenerator[str, None]]:
         """Get a response from Ollama, with optional streaming support."""
         try:
-            message_list = self._prepare_message_list(messages, message_list)
+            message_list = self._prepare_message_list(input_prompt, image_path_list, message_list)
 
             if stream:
                 return self._stream_response(message_list, kwargs)
@@ -77,14 +82,18 @@ class OllamaProvider(BaseProvider):
             raise ResponseError(f"Error getting response: {str(e)}")
 
     async def get_json_response(
-        self, messages: str, message_list: Optional[List[Dict[str, str]]] = None, **kwargs: Any
+        self,
+        input_prompt: str,
+        image_path_list: List[str] = [],
+        message_list: Optional[List[Dict[str, str]]] = None,
+        **kwargs: Any,
     ) -> Tuple[Any, Dict[str, float]]:
         """Get a JSON response from Ollama using the defined schema."""
         try:
             if not self.response_format_class:
                 raise ValueError("Response format is not set")
 
-            message_list = self._prepare_message_list(messages, message_list)
+            message_list = self._prepare_message_list(input_prompt, image_path_list, message_list)
 
             # Update system message to request JSON output
             if message_list and message_list[0]["role"] == "system":
@@ -100,12 +109,6 @@ class OllamaProvider(BaseProvider):
 
             response = await self._fetch_response(message_list, cleaned_kwargs)
             txt_response = self._extract_content(response)
-            # try:
-            #     # Validate response against schema
-            #     validated_response = self.response_format_class.model_validate_json(txt_response)
-            #     txt_response = validated_response.model_dump()
-            # except Exception as e:
-            #     raise ResponseError(f"Response validation failed: {str(e)}\nResponse: {txt_response}")
             cost = {"input_cost": 0, "output_cost": 0, "total_cost": 0}  # Ollama models are local and therefore free.
             return txt_response, cost
         except Exception as e:
@@ -113,17 +116,20 @@ class OllamaProvider(BaseProvider):
 
     def _prepare_message_list(
         self,
-        messages: str,
+        input_prompt: str,
+        image_path_list: List[str],
         message_list: Optional[List[Dict[str, str]]] = None,
     ) -> List[Dict[str, str]]:
         """Prepare the message list for the API call."""
         try:
+            if len(image_path_list) == 0:
+                image_path_list = None
             if message_list:
-                message_list.append({"role": "user", "content": messages})
+                message_list.append({"role": "user", "content": input_prompt, "images": image_path_list})
             else:
                 message_list = [
                     {"role": "system", "content": self.system_prompt},
-                    {"role": "user", "content": messages},
+                    {"role": "user", "content": input_prompt, "images": image_path_list},
                 ]
             return message_list
         except Exception as e:
