@@ -115,7 +115,7 @@ class OpenAIProvider(BaseProvider):
 from lattereview.providers import OpenAIProvider
 
 # Initialize with OpenAI model
-provider = OpenAIProvider(model="gpt-4")
+provider = OpenAIProvider(model="gpt-4o")
 
 # Initialize with Gemini model
 provider = OpenAIProvider(model="gemini/gemini-1.5-flash")

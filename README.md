@@ -137,7 +137,7 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 - [x] Enable agents to be grounded in static references (text provided by the user)
 - [x] Enable agents to be grounded in dynamic references (i.e., recieve a function that outputs a text based on the input text. This function could, e.g., be a RAG function.)
 - [x] Support for image-based inputs and multimodal analysis
-- [ ] Development of `AbstractionReviewer` class for automated paper summarization
+- [x] Development of `AbstractionReviewer` class for automated paper summarization
 - [ ] Adding a notebook example for triplet extraction and building knowledge graphs
 - [ ] Writing the white paper for the package and public launch
 - [ ] Development of a no-code web application

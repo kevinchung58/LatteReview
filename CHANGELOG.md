@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Finalizing the LatteReviewer white paper
+- Writing the white paper for the package and public launch
 
-## [0.4.0] - xxxx-xx-xx
+## [0.4.0] - 2024-12-27
 
 ### Added
 
@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Addressed a bug in `base_prompt.py` that prevented the placeholders in generic propmt to be appropriately removed if their value is empty.
 - Moved the `generic_prompt` attribute to `base_agent.py`.
+- Updated all the docs to reflect all the above changes.
+- Updated the `README.md` file to reflect all the above changes.
 
 ### Deprecated
 
@@ -36,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - NA
 
-## [0.3.0] - xxxx-xx-xx
+## [0.3.0] - 2024-12-26
 
 ### Added
 
