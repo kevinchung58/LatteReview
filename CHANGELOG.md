@@ -17,8 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed `BaseAgent` to `BasicReviewer`.
+- Moved many joint functionalities betwee `ScoringReviewer` and `AbstractionReviewer` to the `BasicReviewer`.
+- The reviewer agents will not load promps from their own scripts.
 - Addressed a bug in `base_prompt.py` that prevented the placeholders in generic propmt to be appropriately removed if their value is empty.
-- Moved the `generic_prompt` attribute to `base_agent.py`.
+- Moved the `generic_prompt` attribute to `basic_reviewer.py`.
 - Updated all the docs to reflect all the above changes.
 - Updated the `README.md` file to reflect all the above changes.
 
@@ -28,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- NA
+- The `generic_prompts` folder is removed. Generic prompts are now defined in the body of the script for each custom reviewer class.
 
 ### Fixed
 
@@ -81,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved `examples/scoring_review_test.ipynb` to `examples/scoring_review_simple/scoring_review_simple.ipynb`.
 - Updated all provider classes so that they can now directly accept classes inheriting from pydantic.BaseModel as `response_format_class`.
 - Updated the naming convention of prompts in the agent methods for further clarity.
-- Added `_` to all internal methods of `BaseAgent` class.
+- Added `_` to all internal methods of `BasicReviewer` class.
 - All example data spreadsheets are now named as `data.csv`.
 - Updated all the docs to reflect all the above changes.
 - Updated the `README.md` file to reflect all the above changes.
