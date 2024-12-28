@@ -1,0 +1,24 @@
+**Review the input item below and extract the specified keys as instructed:**
+
+---
+
+**Input Item:**  
+<<${item}$>>
+
+**Keys to Extract and Their Expected Formats:**  
+<<${response_format}$>>
+
+---
+
+**Instructions:**  
+
+Follow the detailed guidelines below for extracting the specified keys:  
+
+<<${instructions}$>>
+
+---
+
+<<${additional_context}$>>
+
+<<${examples}$>>
+

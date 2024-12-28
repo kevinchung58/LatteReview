@@ -7,7 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Adding support for `AbstractionReviewer` class.
+- Finalizing the LatteReviewer white paper
+
+## [0.4.0] - xxxx-xx-xx
+
+### Added
+
+- Added support for `AbstractionReviewer` agents.
+
+### Changed
+
+- Addressed a bug in `base_prompt.py` that prevented the placeholders in generic propmt to be appropriately removed if their value is empty.
+- Moved the `generic_prompt` attribute to `base_agent.py`.
+
+### Deprecated
+
+- NA
+
+### Removed
+
+- NA
+
+### Fixed
+
+- NA
+
+### Security
+
+- NA
 
 ## [0.3.0] - xxxx-xx-xx
 

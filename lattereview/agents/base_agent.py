@@ -22,7 +22,8 @@ class AgentError(Exception):
 
 
 class BaseAgent(BaseModel):
-    response_format: Dict[str, Any]
+    generic_prompt: Optional[str] = None
+    response_format: Dict[str, Any] = None
     provider: Optional[Any] = None
     model_args: Dict[str, Any] = Field(default_factory=dict)
     max_concurrent_requests: int = DEFAULT_CONCURRENT_REQUESTS
@@ -79,10 +80,10 @@ class BaseAgent(BaseModel):
                 item_dict["reasoning"] = self._process_reasoning(item_dict["reasoning"])
 
             for key, value in item_dict.items():
-                if value is not None:
+                if value != "" and value is not None:
                     prompt = prompt.replace(f"${{{key}}}$", str(value))
                 else:
-                    prompt = prompt.replace(f"${{{key}}}$", "")
+                    prompt = prompt.replace(f"<<${{{key}}}$>>", "")
 
             return self._clean_text(prompt)
         except Exception as e:
