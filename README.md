@@ -21,7 +21,7 @@ LatteReview is a powerful Python package designed to automate academic literatur
 - Multi-agent review system with customizable roles and expertise levels for each reviewer
 - Support for multiple review rounds with hierarchical decision-making workflows
 - Review diverse content types including article titles, abstracts, custom texts, and images using LLM-powered reviewer agents
-- Define reviewer agents with specialized backgrounds and distinct evaluation capabilities
+- Define reviewer agents with specialized backgrounds and distinct evaluation capabilities (e.g., scoring or concept abstraction)
 - Create flexible review workflows where multiple agents operate in parallel or sequential arrangements
 - Enable reviewer agents to analyze peer feedback, cast votes, and propose corrections to other reviewers' assessments
 - Enhance reviews with item-specific context integration, supporting use cases like Retrieval Augmented Generation (RAG)
