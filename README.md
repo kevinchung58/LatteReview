@@ -139,7 +139,7 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 - [x] Support for image-based inputs and multimodal analysis
 - [x] Development of `AbstractionReviewer` class for automated paper summarization
 - [x] Showcase how `AbstractionReviewer` class could be used to analyse the literature around a certain topic.
-- [x] Adding a section to the docs on how to create custom reviewer agents.
+- [x] Adding a tutorial example and also a section to the docs on how to create custom reviewer agents.
 - [ ] Writing the white paper for the package and public launch
 - [ ] Development of a no-code web application
 - [ ] (for v>2.0.0) Adding conformal prediction tool for calibrating agents on their certainty scores
