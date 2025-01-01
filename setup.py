@@ -43,7 +43,7 @@ setup(
             "pillow>=11.0.0",
             "matplotlib>=3.9.4",
             "networkx>=3.2.1",
-            "pyvis>=0.3.2"
+            "pyvis>=0.3.2",
         ],
         "docs": [
             "mkdocs>=1.5.0",
@@ -67,7 +67,7 @@ setup(
             "pillow>=11.0.0",
             "matplotlib>=3.9.4",
             "networkx>=3.2.1",
-            "pyvis>=0.3.2"
+            "pyvis>=0.3.2",
         ],
     },
     package_data={

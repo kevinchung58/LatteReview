@@ -60,7 +60,7 @@ class BasicReviewer(BaseModel):
     def setup(self) -> None:
         """Build the agent's identity and configure the provider."""
         try:
-            
+
             # Build the reviewer task-specific prompt
             if not self.generic_prompt and not self.prompt_path:
                 raise FileNotFoundError(f"No prompt_path found. Either provide a generic_prompt or a prompt_path.")
@@ -183,10 +183,10 @@ class BasicReviewer(BaseModel):
             self.identity = {}
         except Exception as e:
             raise AgentError(f"Error resetting memory: {str(e)}")
-        
+
     def _extract_prompt_keywords(self, prompt: str) -> list[str]:
         """Extracts all keywords between <<${...}$>> from the given prompt."""
-        pattern = r'(?:<<)?\$\{(.*?)\}\$(?:>>)?'
+        pattern = r"(?:<<)?\$\{(.*?)\}\$(?:>>)?"
         return re.findall(pattern, prompt)
 
     def _clean_text(self, text: str) -> str:
@@ -196,7 +196,7 @@ class BasicReviewer(BaseModel):
             return " ".join(" ".join(line.split()) for line in lines)
         except Exception as e:
             raise AgentError(f"Error cleaning text: {str(e)}")
-        
+
     def _log(self, x):
         """Log message if verbose mode is enabled."""
         if self.verbose:

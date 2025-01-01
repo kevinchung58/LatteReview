@@ -54,4 +54,3 @@ class ScoringReviewer(BasicReviewer):
             self.setup()
         except Exception as e:
             raise AgentError(f"Error initializing agent: {str(e)}")
-    
