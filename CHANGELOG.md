@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
+## [0.5.0] - 2025-1-1
+
+### Added
+
+- Added support for `AbstractionReviewer` agents.
+
+### Changed
+
+- Renamed the `examples` folder to `tutorials`.
+
+### Deprecated
+
+- NA
+
+### Removed
+
+- NA
+
+### Fixed
+
+- NA
+
+### Security
+
+- NA
+
 ## [0.4.0] - 2024-12-27
 
 ### Added
