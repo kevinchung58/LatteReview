@@ -9,7 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
-## [0.5.0] - 2025-1-1
+## [0.5.1] - 2025-1-1
+
+### Added
+
+- NA
+
+### Changed
+
+- NA
+
+### Deprecated
+
+- NA
+
+### Removed
+
+- NA
+
+### Fixed
+
+- The `BasicReviewer` is now directly importable from the agents module.
+
+### Security
+
+- NA
+
+## [0.5.0] - 2024-12-31
 
 ### Added
 

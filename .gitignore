@@ -5,6 +5,7 @@ __pycache__/
 *data_old.csv
 code_base.md
 update_checklist.txt
+tutorials/custom_reviewer
 
 # C extensions
 *.so
