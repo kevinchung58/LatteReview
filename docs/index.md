@@ -34,7 +34,7 @@ LatteReview is a Python framework that enables you to create and manage multi-ag
 
 - [Installation Guide](installation.md)
 - [Quick Start Guide](quickstart.md)
-- [Tutorial notebooks](https://github.com/prouzrokh/lattereview/tutorials)
+- [Tutorial notebooks](https://github.com/PouriaRouzrokh/LatteReview/tree/main/tutorials)
 - [API Reference](api/workflows.md)
 - [GitHub Repository](https://github.com/PouriaRouzrokh/LatteReview)
 

@@ -1,5 +1,7 @@
 LatteReview enables you to create custom literature review workflows with multiple AI reviewers. Each reviewer can use different models and providers based on your needs. Please follow the below steps to perform a review task with LatteReview.
 
+💡Also, please check our [tutorial notebooks](https://github.com/PouriaRouzrokh/LatteReview/tree/main/tutorials) that provide complete code examples for all main functionalities of the LatteReview package.
+
 ## Step 1: Set Up API Keys
 
 To use LatteReview with different LLM engines (OpenAI, Anthropic, Google, etc.), you'll need to set up the API keys for the specific providers you plan to use. For example, if you're only using OpenAI models, you only need the OpenAI API key. Here are three ways to set up your API keys:

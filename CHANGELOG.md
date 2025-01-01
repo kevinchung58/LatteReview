@@ -13,11 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added support for `AbstractionReviewer` agents.
+- Added a section to the docs on how to create custom reviewer agents.
 
 ### Changed
 
 - Renamed the `examples` folder to `tutorials`.
+- Updated the `README.md` file to reflect all the above changes.
 
 ### Deprecated
 
