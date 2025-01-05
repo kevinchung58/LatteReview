@@ -48,7 +48,7 @@ Please refer to our [Quick Start](./docs/quickstart.md) page and [Documentation]
 
 ```python
 from lattereview.providers import LiteLLMProvider
-from lattereview.agents import ScoringReviewer
+from lattereview.agents import TitleAbstractReviewer
 from lattereview.workflows import ReviewWorkflow
 import pandas as pd
 import asyncio
