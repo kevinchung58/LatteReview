@@ -167,7 +167,7 @@ If you find LatteReview helpful in your research or work, consider supporting it
 
 ### Ways to Support:
 
-- [Become my sponsor on GitHub!](https://github.com/sponsors/PouriaRouzrokh)
+- [Become my sponsor](https://github.com/sponsors/PouriaRouzrokh) on GitHub
 - [Treat me to a coffee](http://ko-fi.com/pouriarouzrokh) on Ko-fi ☕
 - [Star the repository](https://github.com/PouriaRouzrokh/LatteReview) to help others discover the project
 - Submit bug reports, feature requests, or contribute code
