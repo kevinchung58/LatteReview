@@ -44,7 +44,7 @@ Please refer to our [installation guide](./docs/installation.md) for detailed in
 
 LatteReview enables you to create custom literature review workflows with multiple AI reviewers. Each reviewer can use different models and providers based on your needs. Below is a working example of how you can use LatteReview for doing a quick title/abstract review with two junior and one senior reviewers (all AI agents)!
 
-Please refer to our [Quick Start](./docs/quickstart.md) page and [Documentation](./docs/index.md) page for detailed instructions.
+Please refer to our [Quick Start](./docs/quickstart.md) page and [Documentation](https://pouriarouzrokh.github.io/LatteReview/) page for detailed instructions.
 
 ```python
 from lattereview.providers import LiteLLMProvider
