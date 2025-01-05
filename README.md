@@ -5,6 +5,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Maintained: yes](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/prouzrokh/lattereview)
+[![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor%20me-GitHub%20Sponsors-pink.svg)](https://github.com/sponsors/PouriaRouzrokh)
 [![Support me on Ko-fi](https://img.shields.io/badge/Support%20me-Ko--fi-orange.svg)](http://ko-fi.com/pouriarouzrokh)
 
 <p><img src="docs/images/robot.png" width="400"></p>
@@ -166,6 +167,7 @@ If you find LatteReview helpful in your research or work, consider supporting it
 
 ### Ways to Support:
 
+- [Become my sponsor on GitHub!](https://github.com/sponsors/PouriaRouzrokh)
 - [Treat me to a coffee](http://ko-fi.com/pouriarouzrokh) on Ko-fi ☕
 - [Star the repository](https://github.com/PouriaRouzrokh/LatteReview) to help others discover the project
 - Submit bug reports, feature requests, or contribute code
