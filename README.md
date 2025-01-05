@@ -44,7 +44,7 @@ Please refer to our [installation guide](./docs/installation.md) for detailed in
 
 LatteReview enables you to create custom literature review workflows with multiple AI reviewers. Each reviewer can use different models and providers based on your needs. Below is a working example of how you can use LatteReview for doing a quick title/abstract review with two junior and one senior reviewers (all AI agents)!
 
-Please refer to our [Quick Start](./docs/quickstart.md) page for detailed instructions.
+Please refer to our [Quick Start](./docs/quickstart.md) page and [Documentation](./docs/index.md) page for detailed instructions.
 
 ```python
 from lattereview.providers import LiteLLMProvider
@@ -58,36 +58,34 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # First Reviewer: Conservative approach
-reviewer1 = ScoringReviewer(
+reviewer1 = TitleAbstractReviewer(
     provider=LiteLLMProvider(model="gpt-4o-mini"),
     name="Alice",
     backstory="a radiologist with expertise in systematic reviews",
-    scoring_task="Evaluate how relevant the article is to artificial intelligence applications in radiology",
-    scoring_set=[1, 2, 3, 4, 5],
-    scoring_rules="Rate the relevance on a scale of 1 to 5, where 1 means not relevant to AI in radiology, and 5 means directly focused on AI in radiology",
-    model_args={"temperature": 0.1}
+    inclusion_criteria="The study must focus on applications of artificial intelligence in radiology.",
+    exclusion_criteria="Exclude studies that are not peer-reviewed or not written in English.",
+    model_args={"temperature": 0.2},
 )
 
 # Second Reviewer: More exploratory approach
-reviewer2 = ScoringReviewer(
+reviewer2 = TitleAbstractReviewer(
     provider=LiteLLMProvider(model="gemini/gemini-1.5-flash"),
     name="Bob",
     backstory="a computer scientist specializing in medical AI",
-    scoring_task="Evaluate how relevant the article is to artificial intelligence applications in radiology",
-    scoring_set=[1, 2, 3, 4, 5],
-    scoring_rules="Rate the relevance on a scale of 1 to 5, where 1 means not relevant to AI in radiology, and 5 means directly focused on AI in radiology",
-    model_args={"temperature": 0.8}
+    inclusion_criteria="The study must focus on applications of artificial intelligence in radiology.",
+    exclusion_criteria="Exclude studies that are not peer-reviewed or not written in English.",
+    model_args={"temperature": 0.2},
 )
 
 # Expert Reviewer: Resolves disagreements
-expert = ScoringReviewer(
+expert = TitleAbstractReviewer(
     provider=LiteLLMProvider(model="gpt-4o"),
     name="Carol",
     backstory="a professor of AI in medical imaging",
-    scoring_task="Review Alice and Bob's relevance assessments of this article to AI in radiology",
-    scoring_set=[1, 2],
-    scoring_rules='Score 1 if you agree with Alice\'s assessment, 2 if you agree with Bob\'s assessment',
-    model_args={"temperature": 0.1}
+    inclusion_criteria="The study must focus on applications of artificial intelligence in radiology.",
+    exclusion_criteria="Exclude studies that are not peer-reviewed or not written in English.",
+    model_args={"temperature": 0.2},
+    additional_context="Alice and Bob disagree with each other on whether or not to include this article. You can find their reasonings above.",
 )
 
 # Define workflow
@@ -102,7 +100,7 @@ workflow = ReviewWorkflow(
             "round": 'B',  # Second round: Expert reviews only disagreements
             "reviewers": [expert],
             "text_inputs": ["title", "abstract", "round-A_Alice_output", "round-A_Bob_output"],
-            "filter": lambda row: row["round-A_Alice_score"] != row["round-A_Bob_score"]
+            "filter": lambda row: row["round-A_Alice_evaluation"] != row["round-A_Bob_evaluation"]
         }
     ]
 )
@@ -140,6 +138,8 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 - [x] Development of `AbstractionReviewer` class for automated paper summarization
 - [x] Showcase how `AbstractionReviewer` class could be used to analyse the literature around a certain topic.
 - [x] Adding a tutorial example and also a section to the docs on how to create custom reviewer agents.
+- [x] Adding a `TitleAbstractReviewer` agent and adding a tutorial for it.
+- [x] Evaluating LatteReview.
 - [ ] Writing the white paper for the package and public launch
 - [ ] Development of a no-code web application
 - [ ] (for v>2.0.0) Adding conformal prediction tool for calibrating agents on their certainty scores

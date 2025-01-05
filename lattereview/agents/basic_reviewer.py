@@ -13,14 +13,6 @@ from tqdm.asyncio import tqdm
 DEFAULT_CONCURRENT_REQUESTS = 20
 
 
-class ReasoningType(Enum):
-    """Enumeration for reasoning types."""
-
-    NONE = "none"
-    BRIEF = "brief"
-    COT = "cot"
-
-
 class AgentError(Exception):
     """Base exception for agent-related errors."""
 
@@ -38,13 +30,13 @@ class BasicReviewer(BaseModel):
     backstory: str = "a generic base agent"
     input_description: str = ""
     examples: Union[str, List[Union[str, Dict[str, Any]]]] = None
-    reasoning: ReasoningType = ReasoningType.NONE
+    reasoning: str = None
     system_prompt: Optional[str] = None
     formatted_prompt: Optional[str] = None
     cost_so_far: float = 0
     memory: List[Dict[str, Any]] = []
     identity: Dict[str, Any] = {}
-    additional_context: Optional[Union[Callable, str]] = ""
+    additional_context: Optional[Union[Callable, str]] = None
     verbose: bool = True
 
     class Config:
@@ -123,24 +115,23 @@ class BasicReviewer(BaseModel):
                 if value != "" and value is not None:
                     prompt = prompt.replace(f"${{{key}}}$", str(value))
                 else:
-                    prompt = prompt.replace(f"<<${{{key}}}$>>", "")
+                    prompt = prompt.replace(f"${{{key}}}$", "")
 
             return self._clean_text(prompt)
         except Exception as e:
             raise AgentError(f"Error building item prompt: {str(e)}")
 
-    def _process_reasoning(self, reasoning: Union[str, ReasoningType]) -> str:
+    def _process_reasoning(self, reasoning: str) -> str:
         """Process the reasoning type into a prompt string."""
         try:
             if isinstance(reasoning, str):
-                reasoning = ReasoningType(reasoning.lower())
+                reasoning = reasoning.lower()
 
             reasoning_map = {
-                ReasoningType.NONE: "",
-                ReasoningType.BRIEF: "Provide a brief (1-sentence) explanation for your scoring. State your reasoning before giving the score.",
-                ReasoningType.COT: "Provide a detailed, step-by-step explanation for your scoring. State your reasoning before giving the score.",
+                None: "",
+                "brief": "Provide a brief (1-sentence) explanation for your scoring. State your reasoning before giving the score.",
+                "cot": "Provide a detailed, step-by-step explanation for your scoring. State your reasoning before giving the score.",
             }
-
             return self._clean_text(reasoning_map.get(reasoning, ""))
         except Exception as e:
             raise AgentError(f"Error processing reasoning: {str(e)}")
@@ -268,7 +259,7 @@ class BasicReviewer(BaseModel):
         while num_tried < self.max_retries:
             try:
                 input_prompt = self._process_prompt(self.formatted_prompt, {"item": text_input_string})
-                if self.additional_context == "":
+                if self.additional_context == "" or not self.additional_context:
                     context = self.additional_context
                 elif isinstance(self.additional_context, str):
                     context = self._process_additional_context(self.additional_context)

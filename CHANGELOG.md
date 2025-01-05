@@ -9,6 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
+## [0.6.0] - 2025-1-4
+
+### Added
+
+- Added `TitleAbstractReviewer` agent.
+- Added a tutorial for the `TitleAbstractReviewer` agent.
+- Evaluated lattereeview using the `TitleAbstractReviewer` agent.
+
+### Changed
+
+- Addressed a bug in prompts and `BaseAgent` which prevented the correct removal of additional_context and examples where they were not provided to the agents.
+- Updated all the docs to reflect all the above changes.
+- Updated the `README.md` file to reflect all the above changes.
+
+### Deprecated
+
+- NA
+
+### Removed
+
+- The `ReasoningType` is now removed and `reasoning` in agents receives simple string variables.
+
+### Fixed
+
+- The `BasicReviewer` is now directly importable from the agents module.
+
+### Security
+
+- NA
+
 ## [0.5.1] - 2025-1-1
 
 ### Added

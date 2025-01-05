@@ -1,7 +1,7 @@
 """Reviewer agent implementation with consistent error handling and type safety."""
 
 from typing import Dict, Any, Optional
-from .basic_reviewer import BasicReviewer, AgentError, ReasoningType
+from .basic_reviewer import BasicReviewer, AgentError
 
 DEFAULT_MAX_RETRIES = 3
 
@@ -27,9 +27,9 @@ Follow the detailed guidelines below for extracting the specified keys:
 
 ---
 
-<<${additional_context}$>>
+${additional_context}$
 
-<<${examples}$>>
+${examples}$
 
 """
 
@@ -44,7 +44,7 @@ class AbstractionReviewer(BasicReviewer):
     def model_post_init(self, __context: Any) -> None:
         """Initialize after Pydantic model initialization."""
         try:
-            assert self.reasoning == ReasoningType.NONE, "Reasoning type should be None for AbstractionReviewer"
+            assert self.reasoning == None, "Reasoning type should be None for AbstractionReviewer"
             self.response_format = self.abstraction_keys
             self.setup()
         except Exception as e:

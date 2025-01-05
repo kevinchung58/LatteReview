@@ -56,32 +56,33 @@ data = pd.DataFrame({
 
 ## Step 3: Create Reviewers
 
-Create reviewer agents by configuring `ScoringReviewer` objects. Each reviewer needs:
+Create reviewer agents by configuring `TitleAbstractReviewer` objects. Each reviewer needs:
 
 - A provider (e.g., LiteLLMProvider, OpenAIProvider, OllamaProvider)
 - A unique name
-- A scoring task and rules
+- Inclusion and exclusion criteria
+- A reasoning argument that defaults to `brief` but can also be set to `cot` for detailed step-by-step reasoning. This cannot be `None`.
 - Optional configuration like temperature and model parameters
 
 ```python
-# Example of creating a scoring reviewer
-reviewer1 = ScoringReviewer(
+# Example of creating a TitleAbstractReviewer
+reviewer1 = TitleAbstractReviewer(
     provider=LiteLLMProvider(model="gpt-4o-mini"),  # Choose your model provider
     name="Alice",                                    # Unique name for the reviewer
-    scoring_task="Your review task description",     # What to evaluate
-    scoring_set=[1, 2, 3, 4, 5],                      # Possible scores
-    scoring_rules="Rules for assigning scores",      # How to score
-    model_args={"temperature": 0.1}                  # Model configuration
+    inclusion_criteria="Must be relevant to AI in medical imaging.",
+    exclusion_criteria="Exclude papers focusing only on basic sciences.",
+    reasoning="brief",                               # Reasoning explanation
+    model_args={"temperature": 0.1}                 # Model configuration
 )
 ```
 
 ## Step 4: Create Review Workflow
 
-Define your workflow by specifying review rounds, reviewers, and input columns. The workflow automatically creates output columns for each reviewer based on their name and review round. For each reviewer, three columns are created:
+Define your workflow by specifying review rounds, reviewers, and input columns. The workflow automatically creates output columns for each reviewer based on their name and review round. For each reviewer, two columns are created:
 
 - `round-{ROUND}_{REVIEWER_NAME}_output`: Full output dictionary
-- `round-{ROUND}_{REVIEWER_NAME}_score`: Extracted score
-- `round-{ROUND}_{REVIEWER_NAME}_reasoning`: Extracted reasoning
+- `round-{ROUND}_{REVIEWER_NAME}_evaluation`: Extracted evaluation score
+- `round-{ROUND}_{REVIEWER_NAME}_reasoning`: Extracted reasoning explanation, which follows the reasoning style (`brief` or `cot`) defined for the agent.
 
 These automatically generated columns can be used as inputs in subsequent rounds, allowing later reviewers to access and evaluate the outputs of previous reviewers:
 
@@ -97,9 +98,9 @@ workflow = ReviewWorkflow(
             "round": 'B',               # Second round
             "reviewers": [expert],
             # Access both original columns and previous reviewers' outputs
-            "text_inputs": ["title", "abstract", "round-A_reviewer1_output", "round-A_reviewer2_score"],
+            "text_inputs": ["title", "abstract", "round-A_reviewer1_output", "round-A_reviewer2_output"],
             # Optional filter to review only certain cases
-            "filter": lambda row: row["round-A_reviewer1_score"] != row["round-A_reviewer2_score"]
+            "filter": lambda row: row["round-A_reviewer1_evaluation"] != row["round-A_reviewer2_evaluation"]
         }
     ]
 )
@@ -117,15 +118,15 @@ results = asyncio.run(workflow(data))  # Returns DataFrame with all results
 
 # Results include original columns plus new columns for each reviewer:
 # - round-{ROUND}_{REVIEWER_NAME}_output: Full output dictionary
-# - round-{ROUND}_{REVIEWER_NAME}_score: Extracted score
-# - round-{ROUND}_{REVIEWER_NAME}_reasoning: Extracted reasoning
+# - round-{ROUND}_{REVIEWER_NAME}_evaluation: Extracted evaluation score
+# - round-{ROUND}_{REVIEWER_NAME}_reasoning: Reasoning explanation based on the defined style (`brief` or `cot`)
 ```
 
 ## Complete Working Example
 
 ```python
 from lattereview.providers import LiteLLMProvider
-from lattereview.agents import ScoringReviewer
+from lattereview.agents import TitleAbstractReviewer
 from lattereview.workflows import ReviewWorkflow
 import pandas as pd
 import asyncio
@@ -135,35 +136,35 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # First Reviewer: Conservative approach
-reviewer1 = ScoringReviewer(
+reviewer1 = TitleAbstractReviewer(
     provider=LiteLLMProvider(model="gpt-4o-mini"),
     name="Alice",
     backstory="a radiologist with expertise in systematic reviews",
-    scoring_task="Evaluate how relevant the article is to artificial intelligence applications in radiology",
-    scoring_set=[1, 2, 3, 4, 5],
-    scoring_rules="Rate the relevance on a scale of 1 to 5, where 1 means not relevant to AI in radiology, and 5 means directly focused on AI in radiology",
+    inclusion_criteria="Must be relevant to artificial intelligence in radiology.",
+    exclusion_criteria="Exclude studies that are not peer-reviewed.",
+    reasoning="brief",
     model_args={"temperature": 0.1}
 )
 
 # Second Reviewer: More exploratory approach
-reviewer2 = ScoringReviewer(
+reviewer2 = TitleAbstractReviewer(
     provider=LiteLLMProvider(model="gemini/gemini-1.5-flash"),
     name="Bob",
     backstory="a computer scientist specializing in medical AI",
-    scoring_task="Evaluate how relevant the article is to artificial intelligence applications in radiology",
-    scoring_set=[1, 2, 3, 4, 5],
-    scoring_rules="Rate the relevance on a scale of 1 to 5, where 1 means not relevant to AI in radiology, and 5 means directly focused on AI in radiology",
+    inclusion_criteria="Relevant to artificial intelligence in radiology.",
+    exclusion_criteria="Exclude studies focused solely on hardware.",
+    reasoning="cot",
     model_args={"temperature": 0.8}
 )
 
 # Expert Reviewer: Resolves disagreements
-expert = ScoringReviewer(
+expert = TitleAbstractReviewer(
     provider=LiteLLMProvider(model="gpt-4o"),
     name="Carol",
     backstory="a professor of AI in medical imaging",
-    scoring_task="Review Alice and Bob's relevance assessments of this article to AI in radiology",
-    scoring_set=[1, 2],
-    scoring_rules='Score 1 if you agree with Alice\'s assessment, 2 if you agree with Bob\'s assessment',
+    inclusion_criteria="Must align with at least one of Alice or Bob's recommendations.",
+    exclusion_criteria="Exclude only if both Alice and Bob disagreed.",
+    reasoning="brief",
     model_args={"temperature": 0.1}
 )
 
@@ -179,7 +180,7 @@ workflow = ReviewWorkflow(
             "round": 'B',  # Second round: Expert reviews only disagreements
             "reviewers": [expert],
             "text_inputs": ["title", "abstract", "round-A_Alice_output", "round-A_Bob_output"],
-            "filter": lambda row: row["round-A_Alice_score"] != row["round-A_Bob_score"]
+            "filter": lambda row: row["round-A_Alice_evaluation"] != row["round-A_Bob_evaluation"]
         }
     ]
 )

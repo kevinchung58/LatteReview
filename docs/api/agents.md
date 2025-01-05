@@ -4,11 +4,12 @@ This document provides a comprehensive explanation of the agents module within t
 
 ## Overview
 
-The agents module is a central part of LatteReview, implementing agent-based workflows for reviewing and processing inputs like text and images. The module includes three primary classes:
+The agents module is a central part of LatteReview, implementing agent-based workflows for reviewing and processing inputs like text and images. The module includes the following primary classes:
 
 - **`BasicReviewer`**: The abstract base class that serves as the foundation for all agent types.
 - **`ScoringReviewer`**: A concrete implementation designed to review and score inputs based on defined criteria.
-- **`AbstractionReviewer`**: A specialized agent introduced for structured data extraction tasks.
+- **`AbstractionReviewer`**: A specialized agent for structured data extraction tasks.
+- **`TitleAbstractReviewer`**: A specialized agent for reviewing and evaluating article titles and abstracts against defined criteria.
 
 ## BasicReviewer Class
 
@@ -30,7 +31,7 @@ class BasicReviewer(BaseModel):
     backstory: str = "a generic base agent"
     input_description: str = ""
     examples: Union[str, List[Union[str, Dict[str, Any]]]] = None
-    reasoning: ReasoningType = ReasoningType.NONE
+    reasoning: str = None
     system_prompt: Optional[str] = None
     formatted_prompt: Optional[str] = None
     cost_so_far: float = 0
@@ -52,7 +53,7 @@ class BasicReviewer(BaseModel):
 - **`backstory`**: Description of the agent's role.
 - **`input_description`**: Description of the input format.
 - **`examples`**: Examples for the model’s guidance.
-- **`reasoning`**: Type of reasoning employed (e.g., `ReasoningType.BRIEF`).
+- **`reasoning`**: Type of reasoning employed (e.g., `brief`).
 - **`system_prompt`**: Generated system-level prompt for the model.
 - **`formatted_prompt`**: Fully constructed input prompt.
 - **`cost_so_far`**: Tracks cumulative API costs.
@@ -77,7 +78,7 @@ class BasicReviewer(BaseModel):
 
 #### Reasoning and Examples
 
-- **`_process_reasoning(self, reasoning: Union[str, ReasoningType])`**: Maps reasoning types to corresponding text.
+- **`_process_reasoning(self, reasoning: str)`**: Maps reasoning types to corresponding text.
 - **`_process_examples(self, examples: Union[str, Dict[str, Any], List[Union[str, Dict[str, Any]]]])`**: Formats examples consistently for prompt use.
 
 #### Additional Utilities
@@ -101,9 +102,6 @@ The `ScoringReviewer` extends `BasicReviewer` to provide scoring functionalities
 ### Class Definition
 
 ```python
-
-DEFAULT_MAX_RETRIES = 3
-
 class ScoringReviewer(BasicReviewer):
     response_format: Dict[str, Any] = {
         "reasoning": str,
@@ -113,7 +111,7 @@ class ScoringReviewer(BasicReviewer):
     scoring_task: Optional[str] = None
     scoring_set: List[int] = [1, 2]
     scoring_rules: str = "Your scores should follow the defined schema."
-    reasoning: ReasoningType = ReasoningType.BRIEF
+    reasoning: str = "brief"
     max_retries: int = DEFAULT_MAX_RETRIES
 ```
 
@@ -143,9 +141,6 @@ The `AbstractionReviewer` is a specialized agent for extracting structured infor
 
 ```python
 class AbstractionReviewer(BasicReviewer):
-
-    DEFAULT_MAX_RETRIES = 3
-
     generic_prompt: Optional[str] = generic_prompt
     input_description: str = "article title/abstract"
     abstraction_keys: Dict
@@ -155,7 +150,7 @@ class AbstractionReviewer(BasicReviewer):
     def model_post_init(self, __context: Any) -> None:
         """Initialize after Pydantic model initialization."""
         try:
-            assert self.reasoning == ReasoningType.NONE, "Reasoning type should be None for AbstractionReviewer"
+            assert self.reasoning == None, "Reasoning type should be None for AbstractionReviewer"
             self.response_format = self.abstraction_keys
             self.setup()
         except Exception as e:
@@ -173,6 +168,51 @@ class AbstractionReviewer(BasicReviewer):
 ### Key Methods
 
 - **`model_post_init(self, __context: Any)`**: Ensures the initialization matches the agent’s abstraction-specific requirements.
+- **`review_items(self, text_input_strings: List[str], image_path_lists: List[List[str]] = None)`**: Handles multiple inputs.
+- **`review_item(self, text_input_string: str, image_path_list: List[str] = [])`**: Processes a single input.
+
+---
+
+## TitleAbstractReviewer Class
+
+### Overview
+
+The `TitleAbstractReviewer` is a specialized agent for reviewing and evaluating article titles and abstracts. It supports the evaluation of inclusion and exclusion criteria and provides a reasoning-backed evaluation score.
+
+### Class Definition
+
+```python
+class TitleAbstractReviewer(BasicReviewer):
+    generic_prompt: Optional[str] = generic_prompt
+    inclusion_criteria: str = ""
+    exclusion_criteria: str = ""
+    response_format: Dict[str, Any] = {"reasoning": str, "evaluation": int}
+    input_description: str = "article title/abstract"
+    reasoning: str = "brief"
+    max_retries: int = DEFAULT_MAX_RETRIES
+
+    def model_post_init(self, __context: Any) -> None:
+        """Initialize after Pydantic model initialization."""
+        try:
+            assert self.reasoning != None, "Reasoning type cannot be None for TitleAbstractReviewer"
+            self.setup()
+        except Exception as e:
+            raise AgentError(f"Error initializing agent: {str(e)}")
+```
+
+### Key Attributes
+
+- **`generic_prompt`**: Template string for creating prompts.
+- **`inclusion_criteria`**: Criteria for including an article.
+- **`exclusion_criteria`**: Criteria for excluding an article.
+- **`response_format`**: Structure of the evaluation output, including reasoning and evaluation.
+- **`input_description`**: Description of the expected input.
+- **`reasoning`**: Type of reasoning employed.
+- **`max_retries`**: Retry limit for failed tasks.
+
+### Key Methods
+
+- **`model_post_init(self, __context: Any)`**: Ensures the initialization matches the agent’s requirements.
 - **`review_items(self, text_input_strings: List[str], image_path_lists: List[List[str]] = None)`**: Handles multiple inputs.
 - **`review_item(self, text_input_string: str, image_path_list: List[str] = [])`**: Processes a single input.
 
@@ -202,7 +242,7 @@ reviewer = ScoringReviewer(
     name="ContentQualityReviewer",
     scoring_task="Assess the quality of given content",
     scoring_set=[1, 2, 3, 4, 5],
-    reasoning=ReasoningType.BRIEF
+    reasoning="brief"
 )
 
 # Review content
@@ -210,153 +250,27 @@ text_items = ["Content piece A", "Content piece B"]
 results, costs = await reviewer.review_items(text_items)
 ```
 
-### AbstractionReviewer Example
+### TitleAbstractReviewer Example
 
 ```python
-from lattereview.agents import AbstractionReviewer
+from lattereview.agents import TitleAbstractReviewer
 from lattereview.providers import OpenAIProvider
 
-# Create an AbstractionReviewer instance
-reviewer = AbstractionReviewer(
+# Create a TitleAbstractReviewer instance
+reviewer = TitleAbstractReviewer(
     provider=OpenAIProvider(model="gpt-4o"),
-    abstraction_keys={"title": str, "abstract": str},
-    key_descriptions={
-        "title": "Extract the article title.",
-        "abstract": "Extract the article abstract."
-    }
+    inclusion_criteria="Must be a peer-reviewed study",
+    exclusion_criteria="Does not focus on AI in healthcare",
+    reasoning="brief"
 )
 
-# Extract structured data
-text_items = ["Title: Advances in AI\nAbstract: A review of recent progress..."]
+# Review titles and abstracts
+text_items = [
+    "Title: Advances in AI\nAbstract: A review of recent progress...",
+    "Title: Basic Chemistry\nAbstract: Discussion of periodic elements..."
+]
 results, costs = await reviewer.review_items(text_items)
 ```
-
----
-
-## Creating Custom Reviewers
-
-For specific use cases, users might need a reviewer agent that differs from existing ones like `ScoringReviewer` or `AbstractionReviewer`. The LatteReview package is designed to make this process straightforward. By inheriting the `BasicReviewer` class, you can create a custom reviewer tailored to your requirements.
-
-### Overview of the Workflow
-
-To create a custom reviewer:
-
-1. **Inherit the `BasicReviewer` class**: Your custom reviewer class should extend `BasicReviewer`.
-2. **Define a Prompt**: Develop a prompt tailored to your specific task. This prompt should use placeholders for dynamic input substitution.
-3. **Specify the Input and Response Formats**:
-   - Define the structure of the input your reviewer expects (e.g., text or images).
-   - Specify the format of the expected output (e.g., keys and their data types).
-4. **Implement Initialization**: Override the `model_post_init` method to ensure all configurations (like prompt and response format) are properly set up.
-5. **Pass Custom Arguments**: Pass additional arguments specific to your task when initializing the class.
-
-### Note on Prompt Placeholders
-
-When creating prompts for your custom reviewer, input arguments should be enclosed within `<<${...}$>>`. This syntax ensures dynamic substitution of values at runtime. For example, if your prompt includes `<<${item}$>>`, the corresponding value will be replaced with the actual input during execution.
-
-### Example: Creating a Sentiment Analysis Reviewer
-
-Below is an example of how to create a `SentimentAnalysisReviewer` to analyze text sentiment.
-
-#### Custom Prompt
-
-```plaintext
-**Analyze the sentiment of the input text below:**
-
----
-
-**Input Text:**
-<<${item}$>>
-
-**Task:**
-1. Identify the sentiment (Positive, Neutral, Negative).
-2. Provide a brief reasoning for the sentiment.
-
----
-
-**Instructions:**
-- Ensure the reasoning is concise and relevant to the text content.
-- Return the results in the following format:
-  - `sentiment`: str (Positive, Neutral, Negative)
-  - `reasoning`: str (Brief explanation of sentiment determination)
-```
-
-#### Implementation
-
-```python
-from typing import Dict, Any, Optional
-from lattereview.agents.basic_reviewer import BasicReviewer, AgentError, ReasoningType
-
-class SentimentAnalysisReviewer(BasicReviewer):
-    generic_prompt: Optional[str] = """
-    **Analyze the sentiment of the input text below:**
-
-    **Input Text:**
-    <<${item}$>>
-
-    **Task:**
-    1. Identify the sentiment (Positive, Neutral, Negative).
-    2. Provide a brief reasoning for the sentiment.
-
-    **Instructions:**
-    - Ensure the reasoning is concise and relevant to the text content.
-    - Return the results in the following format:
-      - `sentiment`: str (Positive, Neutral, Negative)
-      - `reasoning`: str (Brief explanation of sentiment determination)
-    """
-    response_format: Dict[str, Any] = {
-        "sentiment": str,
-        "reasoning": str,
-    }
-    input_description: str = "plain text input for sentiment analysis"
-
-    def model_post_init(self, __context: Any) -> None:
-        """Initialize after Pydantic model initialization."""
-        try:
-            assert self.reasoning == ReasoningType.BRIEF, "Reasoning must be BRIEF for SentimentAnalysisReviewer"
-            self.setup()
-        except Exception as e:
-            raise AgentError(f"Error initializing SentimentAnalysisReviewer: {str(e)}")
-```
-
-#### Using the Custom Reviewer
-
-```python
-from lattereview.providers import OpenAIProvider
-from custom_reviewers import SentimentAnalysisReviewer  # Assuming the custom class is in this module
-
-# Initialize the custom reviewer
-sentiment_reviewer = SentimentAnalysisReviewer(
-    provider=OpenAIProvider(model="gpt-4o"),
-    name="SentimentReviewer",
-    reasoning=ReasoningType.BRIEF,
-)
-
-# Provide input data
-text_items = [
-    "I absolutely loved this product!",
-    "The experience was okay, nothing special.",
-    "I am very disappointed with the service."
-]
-
-# Run sentiment analysis
-results, costs = await sentiment_reviewer.review_items(text_items)
-
-# Display results
-for text, result in zip(text_items, results):
-    print(f"Text: {text}")
-    print(f"Sentiment: {result['sentiment']}")
-    print(f"Reasoning: {result['reasoning']}")
-    print()
-```
-
-### Key Points
-
-- Custom reviewers inherit from `BasicReviewer`, ensuring compatibility with LatteReview workflows.
-- Prompts are dynamic, using placeholders for substitution at runtime.
-- Custom reviewers can specify unique logic and configurations in `model_post_init`.
-- Use cases for custom reviewers include but are not limited to sentiment analysis, compliance checks, or creative text generation.
-
-By following this pattern, you can extend the LatteReview package to meet the needs of diverse tasks and workflows.
 
 ---
 

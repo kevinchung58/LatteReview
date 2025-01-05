@@ -1,7 +1,7 @@
 """Reviewer agent implementation with consistent error handling and type safety."""
 
 from typing import List, Dict, Any, Optional
-from .basic_reviewer import BasicReviewer, AgentError, ReasoningType
+from .basic_reviewer import BasicReviewer, AgentError
 
 DEFAULT_MAX_RETRIES = 3
 
@@ -44,13 +44,13 @@ class ScoringReviewer(BasicReviewer):
     scoring_task: Optional[str] = None
     scoring_set: List[int] = [1, 2]
     scoring_rules: str = "Your scores should follow the defined schema."
-    reasoning: ReasoningType = ReasoningType.BRIEF
+    reasoning: str = "brief"
     max_retries: int = DEFAULT_MAX_RETRIES
 
     def model_post_init(self, __context: Any) -> None:
         """Initialize after Pydantic model initialization."""
         try:
-            assert self.reasoning != ReasoningType.NONE, "Reasoning type cannot be 'none' for ScoringReviewer"
+            assert self.reasoning != None, "Reasoning type cannot be None for ScoringReviewer"
             self.setup()
         except Exception as e:
             raise AgentError(f"Error initializing agent: {str(e)}")

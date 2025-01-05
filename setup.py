@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="lattereview",
-    version="0.5.1",
+    version="0.6.0",
     author="Pouria Rouzrokh",
     author_email="po.rouzrokh@gmail.com",
     description="A framework for multi-agent review workflows using large language models",
@@ -44,6 +44,7 @@ setup(
             "matplotlib>=3.9.4",
             "networkx>=3.2.1",
             "pyvis>=0.3.2",
+            "scikit-learn>=1.6.0",
         ],
         "docs": [
             "mkdocs>=1.5.0",
@@ -68,6 +69,7 @@ setup(
             "matplotlib>=3.9.4",
             "networkx>=3.2.1",
             "pyvis>=0.3.2",
+            "scikit-learn>=1.6.0",
         ],
     },
     package_data={
