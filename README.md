@@ -5,6 +5,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Maintained: yes](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/prouzrokh/lattereview)
+[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me-Ko--fi-orange.svg)](http://ko-fi.com/pouriarouzrokh)
 
 <p><img src="docs/images/robot.png" width="400"></p>
 
