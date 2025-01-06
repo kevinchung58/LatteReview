@@ -11,6 +11,8 @@ The providers module includes:
 - `OllamaProvider`: Implementation for local Ollama models
 - `LiteLLMProvider`: Implementation using LiteLLM for unified API access
 
+** You can use any of the models offered by the providers above as far as they support structured outputs. **
+
 ## BaseProvider
 
 ### Description

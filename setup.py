@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="lattereview",
-    version="0.6.0",
+    version="0.7.0",
     author="Pouria Rouzrokh",
     author_email="po.rouzrokh@gmail.com",
     description="A framework for multi-agent review workflows using large language models",
@@ -28,7 +28,7 @@ setup(
         "nest-asyncio>=1.6.0",
         "ollama>=0.4.4",
         "openai>=1.57.4",
-        "pandas>=2.2.3",
+        "pandas>=2.2.2",
         "pydantic>=2.10.3",
         "python-dotenv>=1.0.1",
         "tokencost>=0.1.17",

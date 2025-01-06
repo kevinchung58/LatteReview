@@ -2,10 +2,9 @@
 
 import asyncio
 import datetime
-from enum import Enum
 import os
 from pathlib import Path
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 import re
 from typing import List, Optional, Dict, Any, Union, Callable
 from tqdm.asyncio import tqdm
