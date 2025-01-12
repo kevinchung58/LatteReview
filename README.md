@@ -149,7 +149,7 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 
 ## 👨‍💻 Authors
 
-<table>
+<table border="0">
 <tr>
 <td style="width: 80px;">
 <img src="https://github.com/PouriaRouzrokh.png?size=80" alt="Pouria Rouzrokh" style="border-radius: 50%;" />
