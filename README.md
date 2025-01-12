@@ -149,15 +149,29 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 
 ## 👨‍💻 Authors
 
+![Pouria Rouzrokh](https://github.com/PouriaRouzrokh.png?size=50)
 **Pouria Rouzrokh, MD, MPH, MHPE**  
 Medical Practitioner and Machine Learning Engineer  
 Incoming Radiology Resident @Yale University  
 Former Data Scientist @Mayo Clinic AI Lab
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/prouzrokh?style=social)](https://twitter.com/prouzrokh)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://linkedin.com/in/pouria-rouzrokh)
-[![Google Scholar](https://img.shields.io/badge/Google%20Scholar-Profile-green)](https://scholar.google.com/citations?user=Ksv9I0sAAAAJ&hl=en)
+[![Twitter Follow](https://img.shields.io/twitter/follow/prouzrokh?style=social)](https://x.com/prouzrokh)  
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://linkedin.com/in/pouria-rouzrokh)  
+[![Google Scholar](https://img.shields.io/badge/Google%20Scholar-Profile-green)](https://scholar.google.com/citations?user=Ksv9I0sAAAAJ&hl=en)  
+[![GitHub](https://img.shields.io/badge/GitHub-Profile-black)](https://github.com/PouriaRouzrokh)  
 [![Email](https://img.shields.io/badge/Email-Contact-red)](mailto:po.rouzrokh@gmail.com)
+
+---
+
+![Moein Shariatnia](https://github.com/moein-shariatnia.png?size=50)
+**Moein Shariatnia, MDE**  
+Medical Practitioner and Machine Learning Engineer
+
+[![Twitter Follow](https://img.shields.io/twitter/follow/MoeinShariatnia?style=social)](https://x.com/MoeinShariatnia)  
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://www.linkedin.com/in/moein-shariatnia)  
+[![Google Scholar](https://img.shields.io/badge/Google%20Scholar-Profile-green)](https://scholar.google.com/citations?user=YLHsTOUAAAAJ&hl=en)  
+[![GitHub](https://img.shields.io/badge/GitHub-Profile-black)](https://github.com/moein-shariatnia)  
+[![Email](https://img.shields.io/badge/Email-Contact-red)](mailto:moein.shariatnia@gmail.com)
 
 ## ❤️ Support LatteReview
 
