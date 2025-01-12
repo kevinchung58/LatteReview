@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
+## [0.7.0] - 2025-1-4
+
+### Added
+
+- Added a `_vesrion.py` file.
+
+### Changed
+
+- Updated the project license to `CC-BY-NC-ND-4.0`.
+- Updated the readme file.
+
+### Deprecated
+
+- NA
+
+### Removed
+
+- Removed the `Field` class in pydantic validations.
+
+### Fixed
+
+- Fixed an issue in the versioning of Pandas package that resulted in a warning when installing on colab.
+
+### Security
+
+- NA
+
 ## [0.6.0] - 2025-1-4
 
 ### Added

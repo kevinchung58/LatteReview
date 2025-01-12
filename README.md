@@ -5,8 +5,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Maintained: yes](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/prouzrokh/lattereview)
-[![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor%20me-GitHub%20Sponsors-pink.svg)](https://github.com/sponsors/PouriaRouzrokh)
-[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me-Ko--fi-orange.svg)](http://ko-fi.com/pouriarouzrokh)
+[![Sponsor us on GitHub](https://img.shields.io/badge/Sponsor%20me-GitHub%20Sponsors-pink.svg)](https://github.com/sponsors/PouriaRouzrokh)
 
 <p><img src="docs/images/robot.png" width="400"></p>
 
@@ -148,14 +147,13 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 - [ ] (for v>2.0.0) Adding a dialogue tool for enabling agents to seek external help (from helper agents or parallel reviewer agents) during review.
 - [ ] (for v>2.0.0) Adding a memory component to the agents for saving their own insights or insightful feedback they receive from the helper agents.
 
-## 👨‍💻 Author
+## 👨‍💻 Authors
 
 **Pouria Rouzrokh, MD, MPH, MHPE**  
 Medical Practitioner and Machine Learning Engineer  
 Incoming Radiology Resident @Yale University  
 Former Data Scientist @Mayo Clinic AI Lab
 
-Find my work:
 [![Twitter Follow](https://img.shields.io/twitter/follow/prouzrokh?style=social)](https://twitter.com/prouzrokh)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://linkedin.com/in/pouria-rouzrokh)
 [![Google Scholar](https://img.shields.io/badge/Google%20Scholar-Profile-green)](https://scholar.google.com/citations?user=Ksv9I0sAAAAJ&hl=en)
@@ -163,19 +161,20 @@ Find my work:
 
 ## ❤️ Support LatteReview
 
-If you find LatteReview helpful in your research or work, consider supporting its continued development. Since we're already sharing a virtual coffee break while reviewing papers, maybe you'd like to treat me to a real one? ☕ 😊
+If you find LatteReview helpful in your research or work, consider supporting its continued development. Since we're already sharing a virtual coffee break while reviewing papers, maybe you'd like to treat us to a real one? ☕ 😊
 
 ### Ways to Support:
 
-- [Become my sponsor](https://github.com/sponsors/PouriaRouzrokh) on GitHub
-- [Treat me to a coffee](http://ko-fi.com/pouriarouzrokh) on Ko-fi ☕
+- [Become our sponsor](https://github.com/sponsors/PouriaRouzrokh) on GitHub
+- [Treat us to to coffee](http://ko-fi.com/pouriarouzrokh) on Ko-fi ☕
 - [Star the repository](https://github.com/PouriaRouzrokh/LatteReview) to help others discover the project
 - Submit bug reports, feature requests, or contribute code
 - Share your experience using LatteReview in your research
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.  
+To view a copy of this license, visit [LICENSE](http://creativecommons.org/licenses/by-nc/4.0/).
 
 ## 🤝 Contributing
 
