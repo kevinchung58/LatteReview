@@ -44,17 +44,61 @@ LatteReview is a Python framework that enables you to create and manage multi-ag
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/PouriaRouzrokh/LatteReview/blob/main/LICENSE) file for details.
 
-## Authors
+## 👨‍💻 Authors
 
-**Pouria Rouzrokh, MD, MPH, MHPE**  
-Medical Practitioner and Machine Learning Engineer  
-Incoming Radiology Resident @Yale University  
-Former Data Scientist @Mayo Clinic AI Lab
+<table border="0">
+<tr>
+<td style="width: 80px;">
+<img src="https://github.com/PouriaRouzrokh.png?size=80" alt="Pouria Rouzrokh" style="border-radius: 50%;" />
+</td>
+<td>
+<strong>Pouria Rouzrokh, MD, MPH, MHPE</strong><br>
+Medical Practitioner and Machine Learning Engineer<br>
+Incoming Radiology Resident @Yale University<br>
+Former Data Scientist @Mayo Clinic AI Lab<br>
+<a href="https://x.com/prouzrokh">
+  <img src="https://img.shields.io/twitter/follow/prouzrokh?style=social" alt="Twitter Follow" />
+</a>
+<a href="https://linkedin.com/in/pouria-rouzrokh">
+  <img src="https://img.shields.io/badge/LinkedIn-Connect-blue" alt="LinkedIn" />
+</a>
+<a href="https://scholar.google.com/citations?user=Ksv9I0sAAAAJ&hl=en">
+  <img src="https://img.shields.io/badge/Google%20Scholar-Profile-green" alt="Google Scholar" />
+</a>
+<a href="https://github.com/PouriaRouzrokh">
+  <img src="https://img.shields.io/badge/GitHub-Profile-black" alt="GitHub" />
+</a>
+<a href="mailto:po.rouzrokh@gmail.com">
+  <img src="https://img.shields.io/badge/Email-Contact-red" alt="Email" />
+</a>
+</td>
+</tr>
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/prouzrokh?style=social)](https://twitter.com/prouzrokh)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://linkedin.com/in/pouria-rouzrokh)
-[![Google Scholar](https://img.shields.io/badge/Google%20Scholar-Profile-green)](https://scholar.google.com/citations?user=Ksv9I0sAAAAJ&hl=en)
-[![Email](https://img.shields.io/badge/Email-Contact-red)](mailto:po.rouzrokh@gmail.com)
+<tr>
+<td style="width: 80px;">
+<img src="https://github.com/moein-shariatnia.png?size=80" alt="Moein Shariatnia" style="border-radius: 50%;" />
+</td>
+<td>
+<strong>Moein Shariatnia, MDE</strong><br>
+Medical Practitioner and Machine Learning Engineer<br>
+<a href="https://x.com/MoeinShariatnia">
+  <img src="https://img.shields.io/twitter/follow/MoeinShariatnia?style=social" alt="Twitter Follow" />
+</a>
+<a href="https://www.linkedin.com/in/moein-shariatnia">
+  <img src="https://img.shields.io/badge/LinkedIn-Connect-blue" alt="LinkedIn" />
+</a>
+<a href="https://scholar.google.com/citations?user=YLHsTOUAAAAJ&hl=en">
+  <img src="https://img.shields.io/badge/Google%20Scholar-Profile-green" alt="Google Scholar" />
+</a>
+<a href="https://github.com/moein-shariatnia">
+  <img src="https://img.shields.io/badge/GitHub-Profile-black" alt="GitHub" />
+</a>
+<a href="mailto:moein.shariatnia@gmail.com">
+  <img src="https://img.shields.io/badge/Email-Contact-red" alt="Email" />
+</a>
+</td>
+</tr>
+</table>
 
 ## Support LatteReview
 
