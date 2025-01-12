@@ -1,12 +1,17 @@
 from setuptools import setup, find_packages
-from lattereview import __version__
+
+def get_version():
+    version = {}
+    with open("lattereview/_version.py", "r") as fh:
+        exec(fh.read(), version)
+    return version["__version__"]
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="lattereview",
-    version=__version__,
+    version=get_version(),
     author="Pouria Rouzrokh",
     author_email="po.rouzrokh@gmail.com",
     description="A framework for multi-agent review workflows using large language models",
@@ -72,8 +77,5 @@ setup(
             "pyvis>=0.3.2",
             "scikit-learn>=1.6.0",
         ],
-    },
-    package_data={
-        "lattereview": ["generic_prompts/*.txt"],
     },
 )
