@@ -9,31 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
-## [0.8.0] - 2025-1-4
-
-### Added
-
-- Added the arXiv citation.
-
-### Changed
-
-- NA
-
-### Deprecated
-
-- NA
-
-### Removed
-
-- NA
+## [1.0.0] - 2025-1-14
 
 ### Fixed
 
 - Fixed some typos.
 
-### Security
+## [0.8.0] - 2025-1-14
 
-- NA
+### Added
+
+- Added the arXiv citation.
+
+### Fixed
+
+- Fixed some typos.
 
 ## [0.7.0] - 2025-1-4
 
@@ -46,10 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated the project license to `CC-BY-NC-ND-4.0`.
 - Updated the readme file.
 
-### Deprecated
-
-- NA
-
 ### Removed
 
 - Removed the `Field` class in pydantic validations.
@@ -57,10 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed an issue in the versioning of Pandas package that resulted in a warning when installing on colab.
-
-### Security
-
-- NA
 
 ## [0.6.0] - 2025-1-4
 
@@ -76,10 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated all the docs to reflect all the above changes.
 - Updated the `README.md` file to reflect all the above changes.
 
-### Deprecated
-
-- NA
-
 ### Removed
 
 - The `ReasoningType` is now removed and `reasoning` in agents receives simple string variables.
@@ -88,35 +66,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The `BasicReviewer` is now directly importable from the agents module.
 
-### Security
-
-- NA
-
 ## [0.5.1] - 2025-1-1
-
-### Added
-
-- NA
-
-### Changed
-
-- NA
-
-### Deprecated
-
-- NA
-
-### Removed
-
-- NA
 
 ### Fixed
 
 - The `BasicReviewer` is now directly importable from the agents module.
-
-### Security
-
-- NA
 
 ## [0.5.0] - 2024-12-31
 
@@ -128,22 +82,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Renamed the `examples` folder to `tutorials`.
 - Updated the `README.md` file to reflect all the above changes.
-
-### Deprecated
-
-- NA
-
-### Removed
-
-- NA
-
-### Fixed
-
-- NA
-
-### Security
-
-- NA
 
 ## [0.4.0] - 2024-12-27
 
@@ -161,21 +99,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated all the docs to reflect all the above changes.
 - Updated the `README.md` file to reflect all the above changes.
 
-### Deprecated
-
-- NA
-
 ### Removed
 
 - The `generic_prompts` folder is removed. Generic prompts are now defined in the body of the script for each custom reviewer class.
-
-### Fixed
-
-- NA
-
-### Security
-
-- NA
 
 ## [0.3.0] - 2024-12-26
 
@@ -191,10 +117,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated all the docs to reflect all the above changes.
 - Updated the `README.md` file to reflect all the above changes.
 
-### Deprecated
-
-- NA
-
 ### Removed
 
 - Removed the hashing validation in the `review_workflow.py`.
@@ -203,10 +125,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Addressed a bug in the `scoring_review_prompt.txt` that caused the reasoning and examples not to be read by the agents.
-
-### Security
-
-- NA
 
 ## [0.2.1] - 2024-12-23
 
@@ -225,21 +143,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated all the docs to reflect all the above changes.
 - Updated the `README.md` file to reflect all the above changes.
 
-### Deprecated
-
-- NA
-
-### Removed
-
-- NA
-
 ### Fixed
 
 - Addressed a bug in the `scoring_review_prompt.txt` that caused the reasoning and examples not to be read by the agents.
-
-### Security
-
-- NA
 
 ## [0.2.0] - 2024-12-21
 
@@ -262,18 +168,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ScoringReviewer` agent now only accepts `brief` and `cot` for reasoning. the `long` reasoning is now deprecated.
 
-### Removed
-
-- NA
-
-### Fixed
-
-- NA
-
-### Security
-
-- NA
-
 ## [0.1.1] - 2024-12-16
 
 ### Added
@@ -290,18 +184,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved the `review_workflow.py` to the `workflows` folder.
 - Passing the `inputs_description` to agents are now optional. The default value is "article title/abstract."
 
-### Deprecated
-
-- NA
-
-### Removed
-
-- NA
-
 ### Fixed
 
 - Bug in `OpenAIProvider.py` making it unable to read the environmental variable for OPENAI_API_KEY.
-
-### Security
-
-- NA

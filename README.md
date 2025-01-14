@@ -136,7 +136,7 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 - [x] Adding a tutorial example and also a section to the docs on how to create custom reviewer agents.
 - [x] Adding a `TitleAbstractReviewer` agent and adding a tutorial for it.
 - [x] Evaluating LatteReview.
-- [ ] Writing the white paper for the package and public launch
+- [x] Writing the white paper for the package and public launch
 - [ ] Development of a no-code web application
 - [ ] (for v>2.0.0) Adding conformal prediction tool for calibrating agents on their certainty scores
 - [ ] (for v>2.0.0) Adding a dialogue tool for enabling agents to seek external help (from helper agents or parallel reviewer agents) during review.
@@ -205,7 +205,7 @@ If you find LatteReview helpful in your research or work, consider supporting it
 ### Ways to Support:
 
 - [Become our sponsor](https://github.com/sponsors/PouriaRouzrokh) on GitHub
-- [Treat us to to coffee](http://ko-fi.com/pouriarouzrokh) on Ko-fi ☕
+- [Treat us to a cup of coffee](http://ko-fi.com/pouriarouzrokh) on Ko-fi ☕
 - [Star the repository](https://github.com/PouriaRouzrokh/LatteReview) to help others discover the project
 - Submit bug reports, feature requests, or contribute code
 - Share your experience using LatteReview in your research
