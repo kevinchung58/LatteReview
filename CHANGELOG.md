@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
+## [0.8.0] - 2025-1-4
+
+### Added
+
+- Added the arXiv citation.
+
+### Changed
+
+- NA
+
+### Deprecated
+
+- NA
+
+### Removed
+
+- NA
+
+### Fixed
+
+- Fixed some typos.
+
+### Security
+
+- NA
+
 ## [0.7.0] - 2025-1-4
 
 ### Added

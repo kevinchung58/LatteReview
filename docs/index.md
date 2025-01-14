@@ -5,8 +5,8 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Maintained: yes](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/prouzrokh/lattereview)
-[![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor%20me-GitHub%20Sponsors-pink.svg)](https://github.com/sponsors/PouriaRouzrokh)
-[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me-Ko--fi-orange.svg)](http://ko-fi.com/pouriarouzrokh)
+[![View on arXiv](https://img.shields.io/badge/arXiv-View%20Paper-orange)](https://arxiv.org/abs/2501.05468)
+[![Sponsor us on GitHub](https://img.shields.io/badge/Sponsor%20us-GitHub%20Sponsors-pink.svg)](https://github.com/sponsors/PouriaRouzrokh)
 
 <p><img src="images/robot.png" width="400"></p>
 
@@ -111,3 +111,18 @@ If you find LatteReview helpful in your research or work, consider supporting it
 - [Star the repository](https://github.com/PouriaRouzrokh/LatteReview) to help others discover the project
 - Submit bug reports, feature requests, or contribute code
 - Share your experience using LatteReview in your research
+
+## 📚 Citation
+
+If you use LatteReview in your research, please cite our paper:
+
+```bibtex
+@misc{rouzrokh2025lattereview,
+    title={LatteReview: A Multi-Agent Framework for Systematic Review Automation Using Large Language Models},
+    author={Pouria Rouzrokh and Moein Shariatnia},
+    year={2025},
+    eprint={2501.05468},
+    archivePrefix={arXiv},
+    primaryClass={cs.CL}
+}
+```

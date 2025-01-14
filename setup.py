@@ -1,10 +1,12 @@
 from setuptools import setup, find_packages
 
+
 def get_version():
     version = {}
     with open("lattereview/_version.py", "r") as fh:
         exec(fh.read(), version)
     return version["__version__"]
+
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()

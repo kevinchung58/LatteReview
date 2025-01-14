@@ -5,17 +5,12 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Maintained: yes](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/prouzrokh/lattereview)
-[![Sponsor us on GitHub](https://img.shields.io/badge/Sponsor%20me-GitHub%20Sponsors-pink.svg)](https://github.com/sponsors/PouriaRouzrokh)
+[![View on arXiv](https://img.shields.io/badge/arXiv-View%20Paper-orange)](https://arxiv.org/abs/2501.05468)
+[![Sponsor us on GitHub](https://img.shields.io/badge/Sponsor%20us-GitHub%20Sponsors-pink.svg)](https://github.com/sponsors/PouriaRouzrokh)
 
 <p><img src="docs/images/robot.png" width="400"></p>
 
 LatteReview is a powerful Python package designed to automate academic literature review processes through AI-powered agents. Just like enjoying a cup of latte ☕, reviewing numerous research articles should be a pleasant, efficient experience that doesn't consume your entire day!
-
-> ---
->
-> 🚨 **This package is in BETA stage: Major changes and breaking updates are expected before v1.0.0!** <br>
->
-> ---
 
 ## 🎯 Key Features
 
@@ -229,5 +224,12 @@ We welcome contributions! Please feel free to submit a Pull Request.
 If you use LatteReview in your research, please cite our paper:
 
 ```bibtex
-# Preprint citation to be added
+@misc{rouzrokh2025lattereview,
+    title={LatteReview: A Multi-Agent Framework for Systematic Review Automation Using Large Language Models},
+    author={Pouria Rouzrokh and Moein Shariatnia},
+    year={2025},
+    eprint={2501.05468},
+    archivePrefix={arXiv},
+    primaryClass={cs.CL}
+}
 ```
