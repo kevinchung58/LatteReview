@@ -103,7 +103,7 @@ Medical Practitioner and Machine Learning Engineer<br>
 
 ## Support LatteReview
 
-If you find LatteReview helpful in your research or work, consider supporting its continued development. Since we're already sharing a virtual coffee break while reviewing papers, maybe you'd like to treat us to a real one? ☕ 😊
+If you find LatteReview helpful in your research or work, consider supporting its continued development. Since we're already sharing a virtual coffee break while reviewing papers, maybe you'd like to treat me to a real one? ☕ 😊
 
 ### Ways to Support:
 
