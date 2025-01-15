@@ -6,11 +6,18 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Maintained: yes](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/prouzrokh/lattereview)
 [![View on arXiv](https://img.shields.io/badge/arXiv-View%20Paper-orange)](https://arxiv.org/abs/2501.05468)
-[![Sponsor us on GitHub](https://img.shields.io/badge/Sponsor%20us-GitHub%20Sponsors-pink.svg)](https://github.com/sponsors/PouriaRouzrokh)
+[![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor%20me-GitHub%20Sponsors-pink.svg)](https://github.com/sponsors/PouriaRouzrokh)
+[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me-Ko--fi-orange.svg?logo=ko-fi&logoColor=white)](http://ko-fi.com/pouriarouzrokh)
 
 <p><img src="docs/images/robot.png" width="400"></p>
 
 LatteReview is a powerful Python package designed to automate academic literature review processes through AI-powered agents. Just like enjoying a cup of latte ☕, reviewing numerous research articles should be a pleasant, efficient experience that doesn't consume your entire day!
+
+> ---
+>
+> 🚨 **To access the package documentations, please visit [here](https://pouriarouzrokh.github.io/LatteReview)** <br>
+>
+> ---
 
 ## 🎯 Key Features
 
@@ -142,7 +149,7 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 - [ ] (for v>2.0.0) Adding a dialogue tool for enabling agents to seek external help (from helper agents or parallel reviewer agents) during review.
 - [ ] (for v>2.0.0) Adding a memory component to the agents for saving their own insights or insightful feedback they receive from the helper agents.
 
-## 👨‍💻 Authors
+## 👨‍💻 Author
 
 <table border="0">
 <tr>
@@ -171,31 +178,6 @@ Former Data Scientist @Mayo Clinic AI Lab<br>
 </a>
 </td>
 </tr>
-
-<tr>
-<td style="width: 80px;">
-<img src="https://github.com/moein-shariatnia.png?size=80" alt="Moein Shariatnia" style="border-radius: 50%;" />
-</td>
-<td>
-<strong>Moein Shariatnia, MD</strong><br>
-Medical Practitioner and Machine Learning Engineer<br>
-<a href="https://x.com/MoeinShariatnia">
-  <img src="https://img.shields.io/twitter/follow/MoeinShariatnia?style=social" alt="Twitter Follow" />
-</a>
-<a href="https://www.linkedin.com/in/moein-shariatnia">
-  <img src="https://img.shields.io/badge/LinkedIn-Connect-blue" alt="LinkedIn" />
-</a>
-<a href="https://scholar.google.com/citations?user=YLHsTOUAAAAJ&hl=en">
-  <img src="https://img.shields.io/badge/Google%20Scholar-Profile-green" alt="Google Scholar" />
-</a>
-<a href="https://github.com/moein-shariatnia">
-  <img src="https://img.shields.io/badge/GitHub-Profile-black" alt="GitHub" />
-</a>
-<a href="mailto:moein.shariatnia@gmail.com">
-  <img src="https://img.shields.io/badge/Email-Contact-red" alt="Email" />
-</a>
-</td>
-</tr>
 </table>
 
 ## ❤️ Support LatteReview
@@ -204,8 +186,8 @@ If you find LatteReview helpful in your research or work, consider supporting it
 
 ### Ways to Support:
 
-- [Become our sponsor](https://github.com/sponsors/PouriaRouzrokh) on GitHub
-- [Treat us to a cup of coffee](http://ko-fi.com/pouriarouzrokh) on Ko-fi ☕
+- [Become my sponsor](https://github.com/sponsors/PouriaRouzrokh) on GitHub
+- [Treat me to a cup of coffee](http://ko-fi.com/pouriarouzrokh) on Ko-fi ☕
 - [Star the repository](https://github.com/PouriaRouzrokh/LatteReview) to help others discover the project
 - Submit bug reports, feature requests, or contribute code
 - Share your experience using LatteReview in your research
@@ -217,7 +199,11 @@ To view a copy of this license, visit [LICENSE](http://creativecommons.org/licen
 
 ## 🤝 Contributing
 
-We welcome contributions! Please feel free to submit a Pull Request.
+I welcome contributions! Please feel free to submit a Pull Request.
+
+## Acknowledgement
+
+I would like to express my heartfelt gratitude to [Moein Shariatnia](https://github.com/moein-shariatnia) for his invaluable support and contributions to this project.
 
 ## 📚 Citation
 
