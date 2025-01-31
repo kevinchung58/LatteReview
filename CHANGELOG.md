@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
+## [1.0.1] - 2025-1-30
+
+### Fixed
+
+- Fixed a bug in base_reviewer that caused the reviewers to fail when model_args were not provided.
+
 ## [1.0.0] - 2025-1-14
 
 ### Fixed
