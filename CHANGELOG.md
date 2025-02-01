@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
+## [1.0.2] - 2025-2-1
+
+### Fixed
+
+- Fixed a bug in base_reviewer that caused the model_args to be printed in every call.
+
+### Changed
+
+- The model_args in base_agent is now an empty dictionary by default.
+
 ## [1.0.1] - 2025-1-30
 
 ### Fixed

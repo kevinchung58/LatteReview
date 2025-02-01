@@ -23,7 +23,7 @@ class BasicReviewer(BaseModel):
     prompt_path: Optional[Union[str, Path]] = None
     response_format: Dict[str, Any] = None
     provider: Optional[Any] = None
-    model_args: Dict[str, Any] = {"max_tokens": 500, "temperature": 0.01}
+    model_args: Dict[str, Any] = {}
     max_concurrent_requests: int = DEFAULT_CONCURRENT_REQUESTS
     name: str = "BasicReviewer"
     backstory: str = "a generic base agent"
@@ -268,7 +268,6 @@ class BasicReviewer(BaseModel):
                 else:
                     raise AgentError("Additional context must be a string or callable")
                 input_prompt = self._process_prompt(input_prompt, {"additional_context": context})
-                print(self.model_args)
                 response, cost = await self.provider.get_json_response(input_prompt, image_path_list, **self.model_args)
                 return response, input_prompt, cost
             except Exception as e:

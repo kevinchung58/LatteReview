@@ -177,7 +177,13 @@ class AbstractionReviewer(BasicReviewer):
 
 ### Overview
 
-The `TitleAbstractReviewer` is a specialized agent for reviewing and evaluating article titles and abstracts. It supports the evaluation of inclusion and exclusion criteria and provides a reasoning-backed evaluation score.
+The `TitleAbstractReviewer` is a specialized agent for reviewing and evaluating article titles and abstracts. It supports the evaluation of inclusion and exclusion criteria and provides a reasoning-backed evaluation score. The returned score is either of the following:
+
+- 1 means absolutely to exclude.
+- 2 means better to exclude.
+- 3 Not sure if to include or exclude.
+- 4 means better to include.
+- 5 means absolutely to include.
 
 ### Class Definition
 
