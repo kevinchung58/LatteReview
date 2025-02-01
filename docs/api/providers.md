@@ -30,6 +30,7 @@ class BaseProvider(pydantic.BaseModel):
     system_prompt: str = "You are a helpful assistant."
     response_format: Optional[Any] = None
     last_response: Optional[Any] = None
+    calculate_cost: bool = True  # Controls whether to calculate token costs
 ```
 
 ### Error Types
@@ -86,11 +87,31 @@ async def get_json_response(
     raise NotImplementedError
 ```
 
+### Cost Calculation
+
+All providers include built-in cost calculation for both input and output tokens (by default using the `tokencost` package, unless the provider offers unique solutions for cost calculation). This can be controlled using the `calculate_cost` parameter:
+
+```python
+# Initialize provider with cost calculation disabled
+provider = BaseProvider(calculate_cost=False)  # All costs will be 0
+
+# Initialize provider with cost calculation enabled (default)
+provider = BaseProvider(calculate_cost=True)   # Costs will be calculated based on token usage
+```
+
+The cost calculation returns a dictionary with three values:
+
+- `input_cost`: Cost of the input tokens
+- `output_cost`: Cost of the output tokens
+- `total_cost`: Sum of input and output costs
+
+When `calculate_cost` is False, all costs will be 0.
+
 ## OpenAIProvider
 
 ### Description
 
-Implementation for OpenAI's API, supporting both OpenAI models and Gemini models through a compatible endpoint. The updated version supports processing text and image inputs.
+Implementation for OpenAI's API, supporting OpenAI models, Gemini models through a compatible endpoint, and OpenRouter's model marketplace. The updated version supports processing text and image inputs.
 
 ### Class Definition
 
@@ -98,7 +119,7 @@ Implementation for OpenAI's API, supporting both OpenAI models and Gemini models
 class OpenAIProvider(BaseProvider):
     provider: str = "OpenAI"
     api_key: str = None
-    client: Optional[openai.AsyncOpenAI] = None
+    base_url: str = None
     model: str = "gpt-4o-mini"
     response_format_class: Optional[Any] = None
 ```
@@ -107,6 +128,8 @@ class OpenAIProvider(BaseProvider):
 
 - Automatic API key handling from environment variables
 - Support for OpenAI and Gemini models
+- Custom base URL support for alternative endpoints
+- OpenRouter integration for access to multiple model providers
 - JSON response validation
 - Image input handling
 - Comprehensive error handling
@@ -122,12 +145,47 @@ provider = OpenAIProvider(model="gpt-4o")
 # Initialize with Gemini model
 provider = OpenAIProvider(model="gemini/gemini-1.5-flash")
 
+# Initialize with OpenRouter
+provider = OpenAIProvider(
+    model="anthropic/claude-3-opus",
+    api_key="your_openrouter_key",
+    base_url="https://openrouter.ai/api/v1"
+)
+
 # Get a response
 response, cost = await provider.get_response("What is the capital of the country shown in this map?", ["path/to/image.jpg"])
 
 # Get JSON response
 provider.set_response_format({"key": str, "value": int})
 response, cost = await provider.get_json_response("Format this as JSON", [])
+```
+
+### Using OpenRouter
+
+OpenRouter provides access to a wide variety of language models through a unified API endpoint. To use OpenRouter with the OpenAIProvider:
+
+1. Sign up at [OpenRouter](https://openrouter.ai/) to get an API key
+2. Set the following configuration:
+   - `base_url`: "https://openrouter.ai/api/v1"
+   - `api_key`: Your OpenRouter API key
+   - `model`: Any model available on OpenRouter (e.g., "anthropic/claude-3-opus", "meta-llama/llama-2-70b", etc.)
+
+This gives you access to models from:
+
+- Anthropic (Claude models)
+- Meta (Llama models)
+- Mistral
+- Google (Gemini models)
+- And many more
+
+Example:
+
+```python
+provider = OpenAIProvider(
+    model="mistral/mistral-large",
+    api_key="your_openrouter_key",
+    base_url="https://openrouter.ai/api/v1"
+)
 ```
 
 ## OllamaProvider

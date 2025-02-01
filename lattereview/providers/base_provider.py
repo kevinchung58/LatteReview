@@ -43,6 +43,7 @@ class BaseProvider(pydantic.BaseModel):
     system_prompt: str = "You are a helpful assistant."
     response_format: Optional[Any] = None
     last_response: Optional[Any] = None
+    calculate_cost: bool = True # if False, the cost will be -1 for both input and output
 
     class Config:
         arbitrary_types_allowed = True
@@ -101,9 +102,13 @@ class BaseProvider(pydantic.BaseModel):
 
     def _get_cost(self, input_messages: List[str], completion_text: str) -> Dict[str, float]:
         """Calculate the cost of a prompt completion."""
-        try:
-            input_cost = calculate_prompt_cost(input_messages, self.model)
-            output_cost = calculate_completion_cost(completion_text, self.model)
+        try:        
+            if self.calculate_cost:
+                input_cost = calculate_prompt_cost(input_messages, self.model)
+                output_cost = calculate_completion_cost(completion_text, self.model)
+            else:
+                input_cost = 0
+                output_cost = 0
             return {
                 "input_cost": float(input_cost),
                 "output_cost": float(output_cost),

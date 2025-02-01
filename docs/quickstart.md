@@ -159,13 +159,13 @@ reviewer2 = TitleAbstractReviewer(
 
 # Expert Reviewer: Resolves disagreements
 expert = TitleAbstractReviewer(
-    provider=LiteLLMProvider(model="gpt-4o"),
+    provider=LiteLLMProvider(model="o3-mini"),
     name="Carol",
     backstory="a professor of AI in medical imaging",
     inclusion_criteria="Must align with at least one of Alice or Bob's recommendations.",
     exclusion_criteria="Exclude only if both Alice and Bob disagreed.",
     reasoning="brief",
-    model_args={"temperature": 0.1}
+    model_args={"reasoning_effort": "high"}  # o3-mini specific parameter
 )
 
 # Define workflow

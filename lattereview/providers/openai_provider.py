@@ -12,7 +12,7 @@ from .base_provider import BaseProvider, ProviderError, ClientCreationError, Res
 class OpenAIProvider(BaseProvider):
     provider: str = "OpenAI"
     api_key: str = None
-    client: Optional[openai.AsyncOpenAI] = None
+    base_url: str = None
     model: str = "gpt-4o-mini"
     response_format_class: Optional[Any] = None
 
@@ -20,7 +20,7 @@ class OpenAIProvider(BaseProvider):
         """Initialize the OpenAI provider with error handling."""
         super().__init__(**data)
         try:
-            self.client = self.create_client()
+            self.client = self.create_client(base_url=self.base_url)
         except Exception as e:
             raise ClientCreationError(f"Failed to create OpenAI client: {str(e)}")
 
@@ -38,22 +38,32 @@ class OpenAIProvider(BaseProvider):
         except Exception as e:
             raise ProviderError(f"Error setting response format: {str(e)}")
 
-    def create_client(self) -> openai.AsyncOpenAI:
+    def create_client(self, base_url: Optional[str] = None) -> openai.AsyncOpenAI:
         """Create and return the OpenAI client."""
         gemini_base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
-        if not self.api_key and "OPENAI_API_KEY" in os.environ:
+        openai_base_url = "https://api.openai.com/v1"
+        if not self.api_key:
             self.api_key = os.getenv("OPENAI_API_KEY")
-        else:
-            raise ClientCreationError(
-                "OPENAI_API_KEY environment variable is not set. Please pass your API key or set this variable."
-            )
-        try:
-            if "gemini" not in self.model.lower():
-                return openai.AsyncOpenAI(api_key=self.api_key)
+            if not self.api_key:
+                self.api_key = os.getenv("GEMINI_API_KEY")
+                if not self.api_key:
+                    raise ClientCreationError(
+                        "OPENAI_API_KEY or GEMINI_API_KEY environment variable is not set. Please pass your API key or set this variable."
+                    )
+
+        if "gemini" in self.model.lower():      
             self.api_key = os.getenv("GEMINI_API_KEY", self.api_key)
-            return openai.AsyncOpenAI(api_key=self.api_key, base_url=gemini_base_url)
-        except Exception as e:
-            raise ClientCreationError(f"Failed to create OpenAI client: {str(e)}")
+            base_url = base_url or gemini_base_url
+            try:
+                return openai.AsyncOpenAI(api_key=self.api_key, base_url=base_url)
+            except Exception as e:
+                raise ClientCreationError(f"Failed to create OpenAI client: {str(e)}")
+        else:
+            base_url = base_url or openai_base_url
+            try:
+                return openai.AsyncOpenAI(api_key=self.api_key, base_url=base_url)
+            except Exception as e:
+                raise ClientCreationError(f"Failed to create OpenAI client: {str(e)}")
 
     async def get_response(
         self,

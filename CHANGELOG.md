@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
+## [1.0.3] - 2025-2-1
+
+### Changed
+
+- The `OpenAIProvider` now accepts a base_url, enabling it to be used with providers like OpenRouter.
+- Providers now accept a calculate_cost argument to control whether or not calculate the chats. Mostly useful for models that are not available in tokencost package.
+- Updated the docs to reflect the above features.
+
 ## [1.0.2] - 2025-2-1
 
 ### Fixed

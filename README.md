@@ -15,7 +15,7 @@ LatteReview is a powerful Python package designed to automate academic literatur
 
 > ---
 >
-> 🚨 **To access the package documentations, please visit [here](https://pouriarouzrokh.github.io/LatteReview)** <br>
+> 🚨 **- LatteReview now supports "o3-mini" family of models from OpenAI. ** <br>
 >
 > ---
 
@@ -43,7 +43,7 @@ pip install lattereview
 
 Please refer to the [installation guide](./docs/installation.md) for detailed instructions.
 
-## 🚀 Quick Start
+## 🚀 Quick Start and Documentation
 
 LatteReview enables you to create custom literature review workflows with multiple AI reviewers. Each reviewer can use different models and providers based on your needs. Below is a working example of how you can use LatteReview for doing a quick title/abstract review with two junior and one senior reviewers (all AI agents)!
 
@@ -82,12 +82,12 @@ reviewer2 = TitleAbstractReviewer(
 
 # Expert Reviewer: Resolves disagreements
 expert = TitleAbstractReviewer(
-    provider=LiteLLMProvider(model="gpt-4o"),
+    provider=LiteLLMProvider(model="o3-mini"),
     name="Carol",
     backstory="a professor of AI in medical imaging",
     inclusion_criteria="The study must focus on applications of artificial intelligence in radiology.",
     exclusion_criteria="Exclude studies that are not peer-reviewed or not written in English.",
-    model_args={"temperature": 0.2},
+    model_args={"reasoning_effort": "high"},
     additional_context="Alice and Bob disagree with each other on whether or not to include this article. You can find their reasonings above.",
 )
 
@@ -144,6 +144,7 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 - [x] Adding a `TitleAbstractReviewer` agent and adding a tutorial for it.
 - [x] Evaluating LatteReview.
 - [x] Writing the white paper for the package and public launch
+- [ ] Adding support for Deepseek R1 models (and models w/o structured output capablity in general).
 - [ ] Development of a no-code web application
 - [ ] (for v>2.0.0) Adding conformal prediction tool for calibrating agents on their certainty scores
 - [ ] (for v>2.0.0) Adding a dialogue tool for enabling agents to seek external help (from helper agents or parallel reviewer agents) during review.
