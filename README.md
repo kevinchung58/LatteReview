@@ -15,7 +15,7 @@ LatteReview is a powerful Python package designed to automate academic literatur
 
 > ---
 >
-> 🚨 ** LatteReview now supports "o3-mini" family of models from OpenAI. ** <br>
+> 🚨 **LatteReview now supports "o3-mini" family of models from OpenAI.** <br>
 >
 > ---
 
