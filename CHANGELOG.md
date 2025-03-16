@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
+## [1.0.5] - 2025-3-16
+
+### Fixed
+
+- Fixed initalization of the `lattereview.utils.data_handler` module.
+
 ## [1.0.4] - 2025-3-16
 
 ### Added
