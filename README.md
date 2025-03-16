@@ -34,8 +34,9 @@ LatteReview is a powerful Python package designed to automate academic literatur
 - Standardized output format featuring detailed scoring metrics and reasoning transparency
 - Robust cost tracking and memory management systems
 - Extensible architecture supporting custom review workflow implementation
+- **NEW**: Support for RIS (Research Information Systems) file format for academic literature review
 
-## 🛠️ Installation
+## ��️ Installation
 
 ```bash
 pip install lattereview
@@ -144,9 +145,10 @@ Full documentation and API reference are available at: [https://pouriarouzrokh.g
 - [x] Adding a `TitleAbstractReviewer` agent and adding a tutorial for it.
 - [x] Evaluating LatteReview.
 - [x] Writing the white paper for the package and public launch
+- [x] Addign support for `RIS` files.
 - [ ] Adding support for Deepseek R1 models (and models w/o structured output capablity in general).
 - [ ] Development of a no-code web application
-- [ ] (for v>2.0.0) Adding conformal prediction tool for calibrating agents on their certainty scores
+- [ ] (for v>) Adding conformal prediction tool for calibrating agents on their certainty scores
 - [ ] (for v>2.0.0) Adding a dialogue tool for enabling agents to seek external help (from helper agents or parallel reviewer agents) during review.
 - [ ] (for v>2.0.0) Adding a memory component to the agents for saving their own insights or insightful feedback they receive from the helper agents.
 

@@ -41,18 +41,20 @@ Note: No API keys are needed if you're exclusively using local models through Ol
 
 ## Step 2: Prepare Your Data
 
-Your input data should be in a CSV or Excel file with columns for the content you want to review. The column names should match the `inputs` specified in your workflow:
+Your input data should be in a CSV, Excel, or RIS file with appropriate content for review. For CSV and Excel files, the column names should match the `inputs` specified in your workflow:
 
 ```python
 # Load your data
-data = pd.read_excel("articles.xlsx")
+data = pd.read_excel("articles.xlsx")  # You can also use .csv or .ris files
 
-# Example data structure:
+# Example data structure for CSV/Excel:
 data = pd.DataFrame({
     'title': ['Paper 1 Title', 'Paper 2 Title'],
     'abstract': ['Paper 1 Abstract', 'Paper 2 Abstract']
 })
 ```
+
+For RIS files, the standard bibliographic tags will be automatically mapped to appropriate columns (e.g., TI for title, AB for abstract).
 
 ## Step 3: Create Reviewers
 
@@ -115,6 +117,8 @@ Execute the workflow and get results:
 ```python
 # Run workflow
 results = asyncio.run(workflow(data))  # Returns DataFrame with all results
+# Or directly pass a file path:
+results = asyncio.run(workflow("articles.xlsx"))  # Can use .csv, .xlsx, or .ris files
 
 # Results include original columns plus new columns for each reviewer:
 # - round-{ROUND}_{REVIEWER_NAME}_output: Full output dictionary
@@ -188,6 +192,9 @@ workflow = ReviewWorkflow(
 # Load and process your data
 data = pd.read_excel("articles.xlsx")  # Must have 'title' and 'abstract' columns
 results = asyncio.run(workflow(data))  # Returns a pandas DataFrame with all original and output columns
+
+# Alternatively, pass the file path directly
+# results = asyncio.run(workflow("articles.xlsx"))  # Can use .csv, .xlsx, or .ris files
 
 # Save results
 results.to_csv("review_results.csv", index=False)

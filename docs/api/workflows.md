@@ -40,8 +40,11 @@ class ReviewWorkflow(pydantic.BaseModel):
 Execute the workflow on provided data.
 
 ```python
-async def __call__(self, data: Union[pd.DataFrame, Dict[str, Any]]) -> pd.DataFrame:
-    """Execute workflow on DataFrame or dictionary input."""
+async def __call__(self, data: Union[pd.DataFrame, Dict[str, Any], str]) -> pd.DataFrame:
+    """
+    Execute workflow on DataFrame, dictionary input, or directly from a file path.
+    Supported file formats: .csv, .xlsx, and .ris
+    """
     # Returns DataFrame with review results
 ```
 
@@ -70,10 +73,21 @@ def get_total_cost(self) -> float:
 - `_format_text_input()`: Format input for reviewers
 - `_format_image_input()`: Validate and format image paths
 - `_log()`: Handle logging based on verbose setting
+- `_load_from_file()`: Load data from supported file formats (.csv, .xlsx, .ris)
 
 ### Image Input Handling
 
 The updated workflow supports image inputs in addition to text inputs. Images are validated for file existence and format before being passed to reviewers.
+
+### File Format Support
+
+The workflow now supports loading data directly from files in the following formats:
+
+- CSV (.csv): Standard comma-separated values files
+- Excel (.xlsx): Microsoft Excel spreadsheets
+- RIS (.ris): Research Information Systems format commonly used for bibliographic citations
+
+When using RIS files, standard bibliographic tags (e.g., TI for title, AB for abstract) are automatically mapped to appropriate columns.
 
 ## Usage Examples
 
@@ -115,7 +129,12 @@ workflow_schema = [
 
 # Create and run workflow
 workflow = ReviewWorkflow(workflow_schema=workflow_schema)
+
+# Option 1: Pass a DataFrame
 results = await workflow(input_data)
+
+# Option 2: Pass a file path directly
+results = await workflow("papers.xlsx")  # Can use .csv, .xlsx, or .ris files
 ```
 
 ### Understanding Workflow Construction
@@ -139,7 +158,11 @@ Optional Arguments:
 # Execute workflow
 workflow = ReviewWorkflow(workflow_schema=workflow_schema)
 try:
+    # Option 1: Pass a DataFrame
     results_df = await workflow(input_df)
+
+    # Option 2: Pass a file path directly
+    results_df = await workflow("references.ris")  # Also supports .csv and .xlsx
 
     # Access costs
     total_cost = workflow.get_total_cost()

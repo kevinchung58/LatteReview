@@ -5,6 +5,7 @@ import pydantic
 from typing import List, Dict, Any, Union
 
 from ..agents.scoring_reviewer import ScoringReviewer
+from ..utils.data_handler import ris_to_dataframe
 
 
 class ReviewWorkflowError(Exception):
@@ -60,15 +61,46 @@ class ReviewWorkflow(pydantic.BaseModel):
         except Exception as e:
             raise ReviewWorkflowError(f"Error initializing Review Workflow: {e}")
 
-    async def __call__(self, data: Union[pd.DataFrame, Dict[str, Any]]) -> pd.DataFrame:
-        """Run the workflow."""
+    async def __call__(self, data: Union[pd.DataFrame, Dict[str, Any], str]) -> pd.DataFrame:
+        """Run the workflow.
+        
+        Parameters:
+            data: Can be a pandas DataFrame, a dictionary, or a path to a RIS file
+        
+        Returns:
+            A pandas DataFrame with review results
+        """
         try:
             if isinstance(data, pd.DataFrame):
                 return await self.run(data)
             elif isinstance(data, dict):
                 return await self.run(pd.DataFrame(data))
+            elif isinstance(data, str):
+                if data.lower().endswith('.ris'):
+                    # Handle RIS file input
+                    self._log(f"Converting RIS file: {data}")
+                    df = await ris_to_dataframe(data)
+                    if df.empty:
+                        raise ReviewWorkflowError(f"No data found in RIS file: {data}")
+                    return await self.run(df)
+                elif data.lower().endswith('.csv'):
+                    # Handle CSV file input
+                    self._log(f"Loading CSV file: {data}")
+                    df = pd.read_csv(data)
+                    if df.empty:
+                        raise ReviewWorkflowError(f"No data found in CSV file: {data}")
+                    return await self.run(df)
+                elif data.lower().endswith(('.xlsx', '.xls')):
+                    # Handle Excel file input, loading first tab by default
+                    self._log(f"Loading Excel file: {data}")
+                    df = pd.read_excel(data)
+                    if df.empty:
+                        raise ReviewWorkflowError(f"No data found in Excel file: {data}")
+                    return await self.run(df)
+                else:
+                    raise ReviewWorkflowError(f"Unsupported file format: {data}. Supported formats are .ris, .csv, .xlsx, and .xls.")
             else:
-                raise ReviewWorkflowError(f"Invalid data type: {type(data)}")
+                raise ReviewWorkflowError(f"Invalid data type: {type(data)}. Must be DataFrame, dict, or file path.")
         except Exception as e:
             raise ReviewWorkflowError(f"Error running workflow: {e}")
 

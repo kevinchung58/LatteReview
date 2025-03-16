@@ -13,7 +13,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="lattereview",
-    version=get_version(),
+    version="1.0.4",
     author="Pouria Rouzrokh",
     author_email="po.rouzrokh@gmail.com",
     description="A framework for multi-agent review workflows using large language models",
@@ -22,7 +22,8 @@ setup(
     url="https://github.com/PouriaRouzrokh/LatteReview",
     packages=find_packages(),
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
@@ -80,4 +81,5 @@ setup(
             "scikit-learn>=1.6.0",
         ],
     },
+    keywords="review, workflow, machine learning, AI, RIS, literature, systematic review, multi-agent, review workflow, review framework, abstract review, title review, review workflow, review framework, abstract review, title review",
 )

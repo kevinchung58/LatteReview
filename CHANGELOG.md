@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Writing the white paper for the package and public launch
 
+## [1.0.4] - 2025-3-16
+
+### Added
+
+- Added support for handling `RIS` input files.
+
+### Changed
+
+- The `review_workflow.py` will now accept string inputs with `.ris`, `.csv`, `.xls`, `.xlsx` formats.
+
 ## [1.0.3] - 2025-2-1
 
 ### Changed
