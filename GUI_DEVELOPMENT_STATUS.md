@@ -1,50 +1,54 @@
 # LatteReview Streamlit GUI - Development Status
 
-This document summarizes the development status of the LatteReview Streamlit GUI () based on the features outlined in .
+This document summarizes the development status of the LatteReview Streamlit GUI (`app.py`) based on the features outlined in `TODO.md`.
 
 ## Overview
 
-The Streamlit GUI provides a user interface for managing literature review projects, configuring multi-round/multi-agent review workflows, executing these workflows (by interfacing with the  Python package), and analyzing the results.
+The Streamlit GUI provides a user interface for managing literature review projects, configuring multi-round/multi-agent review workflows, executing these workflows (by interfacing with the `lattereview` Python package), and analyzing the results.
 
-All features from the initial TODO list (Parts 1 and 2) have been implemented within . The level of integration with a "live" backend varies per feature, as detailed below.
+All features from the initial TODO list (Parts 1 and 2) have been implemented within `app.py`. The level of integration with a "live" backend varies per feature, as detailed below.
 
 ## Feature Status Summary
 
 ### Part 1: GUI Development Plan
 *   **Sections 1.0 - 2.2 (Basic Structure, Project Management, Data Import & Preview):**
-    *   Status:
-    *   Details: UI for project creation (folder-based), RIS file upload, parsing (using ), and data preview is implemented.
+    *   Status: `[DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)]`
+    *   Details: UI for project creation (folder-based), RIS file upload, parsing (using `lattereview.utils.data_handler`), and data preview is implemented.
 *   **Sections 3.0 - 4.4 (Workflow Configuration, Review Execution, Results Presentation & Export):**
-    *   Status:
+    *   Status: `[DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)]`
     *   Details:
         *   Comprehensive UI for defining multi-round workflows with multiple agents per round, including agent types, personas, criteria, and inter-round filtering logic.
-        *   The "Start Actual Review" button now constructs a  object from the  package using the GUI configuration and calls its execution method ().
-        *   The application processes the DataFrame returned by the  backend to derive summary columns (e.g., , ) and a consolidated  for UI display.
-        *   UI includes results overview with filters, a detailed view for selected articles, and CSV export of results.
-        *   LLM calls made by the  backend are dependent on valid API key provision and LiteLLM's configuration (may use fallback/dummy LLMs if not fully configured).
+        *   The "Start Actual Review" button now constructs a `ReviewWorkflow` object from the `lattereview` package using the GUI configuration and calls its execution method (`asyncio.run(workflow_instance(data=...))`).
+        *   The application processes the DataFrame returned by the `lattereview` backend to derive summary columns (e.g., `final_decision`, `final_score`) and a consolidated `detailed_workflow_log` for UI display.
+        *   UI includes results overview with filters, a detailed view for selected articles, and CSV export of results. The RIS export is `[DONE (Full - CSV & RIS export of filtered/selected implemented)]`.
+        *   LLM calls made by the `lattereview` backend are dependent on valid API key provision and LiteLLM's configuration (may use fallback/dummy LLMs if not fully configured).
 
 ### Part 2: New Feature Expansion Plan
 *   **5.1 Theme Concept Extraction & Visualization:**
-    *   Status:
-    *   Details: The Theme Analysis Dashboard processes output columns from  instances (e.g., ) in the results from the  backend. It displays concept frequencies and a word cloud. The network graph remains a placeholder.
+    *   Status: `[DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)]` (Sub-tasks A, B are at this level, C is more specific)
+    *   Details: The Theme Analysis Dashboard processes output columns from `AbstractionReviewer` instances (e.g., `round-X_AgentName_extracted_concepts`) in the results from the `lattereview` backend. It displays concept frequencies and a word cloud. The network graph is `[DONE (Pyvis Basic Network Graph Implemented)]`.
 *   **5.2 Reviewer Debate Workflow:**
-    *   Status:
-    *   Details: The GUI *simulates* a debate round in the  if configured agents in a round show disagreement. This includes simulated peer feedback and re-evaluation. A true backend debate mechanism would require changes to the  package itself.
+    *   Status: `[DONE (Simulated - Detailed Log Integration)]`
+    *   Details: The GUI *simulates* a debate round in the `detailed_workflow_log` if configured agents in a round show disagreement. This includes simulated peer feedback and re-evaluation. A true backend debate mechanism would require changes to the `lattereview` package itself.
+    *   - Simulation implemented in GUI logs; real backend debate requires `lattereview` package changes.
 *   **5.3 RAG-Enhanced Review:**
-    *   Status:
-    *   Details: UI allows uploading PDF/TXT background documents. Text is extracted from these. The  (generated by simulating the  execution trace) includes entries indicating that this RAG context (e.g., keyword-based snippets from uploaded docs) was considered by agents. The actual injection and use of this context by LLMs would occur within the  agents/prompts if they are designed to support it.
+    *   Status: `[DONE (Handles Real Backend DataFrame Structure with Enhanced RAG Simulation; LLMs may be simulated)]`
+    *   Details: UI allows uploading PDF/TXT background documents. Text is extracted from these. The `detailed_workflow_log` (generated by simulating the `lattereview` execution trace) includes entries indicating that this RAG context (e.g., keyword-based snippets from uploaded docs) was considered by agents. The actual injection and use of this context by LLMs would occur within the `lattereview` agents/prompts if they are designed to support it.
 
 ### General Tasks / Documentation
 *   **G1: Internationalize UI and documentation to English:**
-    *   Status:
-    *   Details: , , and user-facing UI text and code comments in  have been translated/written in English.
+    *   Status: `[DONE]`
+    *   Details: `PROJECT_OVERVIEW.md`, `LatteReview_Project_Vision.md`, and user-facing UI text and code comments in `app.py` have been translated/written in English.
+*   **G2: Implement Save/Load/Delete Workflow Functionality.**
+    *   Status: `[DONE]`
+    *   Details: UI for Save/Load/Delete workflow, along with underlying utility functions (`save_workflow_to_file`, `list_saved_workflows`, `load_workflow_from_file`, `delete_workflow_file`) and UI calls, have been implemented.
 
 ## Next Steps / Considerations
 
-*   **True End-to-End LLM Calls:** Thoroughly testing with valid API keys for  (or other models configured in ) to ensure seamless operation with live LLMs.
-*   **Robust Filter Logic for Workflows:** The translation of GUI-defined inter-round filters into the  schema's  parameter (which expects specific string formats or callables) is currently basic. This may need refinement for complex filtering scenarios.
+*   **True End-to-End LLM Calls:** Thoroughly testing with valid API keys for `gemini-2.0-flash` (or other models configured in `LiteLLMProvider`) to ensure seamless operation with live LLMs.
+*   **Robust Filter Logic for Workflows:** The translation of GUI-defined inter-round filters into the `ReviewWorkflow` schema's `filter` parameter (which expects specific string formats or callables) is currently basic. This may need refinement for complex filtering scenarios.
 *   **Error Handling & UX:** Further enhancements to error handling for backend calls and general UX improvements (e.g., persistent workflow saving/loading, more granular progress for actual reviews if possible).
-*   **Completing Placeholders:** Implementing the Concept Network Graph (TODO 5.1 C) and the actual RIS export (TODO 4.4).
-*   **Backend  Enhancements:** Features like a true Reviewer Debate mechanism or deeper RAG integration would require modifications to the core  Python package.
+*   **Completing Placeholders:** All major placeholders from the original TODO list (e.g., RIS export, Concept Network Graph) have been addressed with at least a basic or simulated implementation integrated into the UI.
+*   **Backend `lattereview` Enhancements:** Features like a true Reviewer Debate mechanism (beyond current log simulation) or deeper RAG integration (beyond providing context to agents) would require modifications to the core `lattereview` Python package.
 
-This GUI provides a solid foundation for interacting with the  literature review automation engine.
+This GUI provides a solid foundation for interacting with the `lattereview` literature review automation engine.

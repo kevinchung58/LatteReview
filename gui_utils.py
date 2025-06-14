@@ -57,6 +57,7 @@ def get_existing_projects():
             except Exception: projects.append({"id": item, "name": item, "rag_files": rf})
     return sorted(projects, key=lambda x: x["name"])
 
+@st.cache_data
 def get_project_rag_files_from_config(project_id): # New helper based on app.py logic
     config_path = os.path.join(PROJECTS_ROOT_DIR, project_id, "project_config.json")
     try:
@@ -161,6 +162,7 @@ def build_lattereview_workflow_from_config(gui_workflow_config, api_key, project
     try: return ReviewWorkflow(workflow_schema=workflow_schema)
     except Exception as e: return None # Error handling in app.py
 
+@st.cache_data
 def convert_dataframe_to_ris_text(df):
     if df is None or df.empty: return ""
     ris_records = []
@@ -182,6 +184,7 @@ def is_workflow_runnable(wf):
         if not r.get("agents"): return False
     return True
 
+@st.cache_data
 def post_process_review_results(results_df_raw, gui_workflow_config):
     if results_df_raw is None: return pd.DataFrame()
     processed_df = results_df_raw.copy()

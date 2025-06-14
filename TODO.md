@@ -81,3 +81,9 @@
     *   [DONE] Translate `LatteReview_Project_Vision.md` to English.
     *   [DONE] Review and translate comments in `app.py` to English.
     *   [DONE] Review and translate UI text (button labels, messages, placeholders) in `app.py` to English.
+*   **[DONE] G2: Implement Save/Load/Delete Workflow Functionality.**
+    *   [DONE] Design UI for Save/Load/Delete workflow.
+    *   [DONE] Implement `save_workflow_to_file` utility and UI call.
+    *   [DONE] Implement `list_saved_workflows` utility and UI call.
+    *   [DONE] Implement `load_workflow_from_file` utility and UI call.
+    *   [DONE] Implement `delete_workflow_file` utility and UI call (with confirmation).
