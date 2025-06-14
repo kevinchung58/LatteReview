@@ -93,7 +93,7 @@
         *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] 提供 "匯出結果" 按鈕。
         *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] 使用 `st.download_button` 提供至少兩種格式：
             *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] CSV 格式：包含所有欄位，方便用 Excel 或其他軟體分析。
-            *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] RIS 格式：將審查結果（如 Decision: Included）寫入到每篇文章的 notes 或自訂欄位中，方便匯入回 Zotero 等文獻管理軟體。
+            *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] RIS 格式：將審查結果（如 Decision: Included）寫入到每篇文章的 notes 或自訂欄位中，方便匯入回 Zotero 等文獻管理軟體。 [DONE (Basic)]
 
 ## Part 2: 新功能擴展計畫 (TODO List)
 
