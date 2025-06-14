@@ -114,7 +114,7 @@
         *   任務A: 設計一個新的 Workflow 流程。如果 Round 1 的 Agent 意見不合，自動觸發一個 "辯論回合 (Debate Round)"。
         *   任務B: 在辯論回合中，修改 Agent 的 Prompt。新的 Prompt 應包含："你的同事 Reviewer B 認為應該納入，理由是 '...'。請你根據他的理由，重新評估你的決定，並提出你的最終看法與反駁。"
         *   任務C: 將這個 "辯論過程" 的對話記錄完整地顯示在文章的詳細結果視圖中，讓使用者能看到 AI "思辨" 的過程。
-*   **TODO 5.3: "RAG 強化審查 (RAG-Enhanced Review)" 功能**
+*   [DONE (RAG text extraction, keyword-based snippet retrieval sim & context logging integrated)] **TODO 5.3: "RAG 強化審查 (RAG-Enhanced Review)" 功能**
     *   背景: 現有架構已支援 RAG 概念，現在將其實作成具體功能。
     *   細節:
         *   任務A: 在 Workflow 設定介面，增加一個 "上傳背景資料" 的區域 (`st.file_uploader`)，允許使用者上傳 1-3 篇他們自己的核心論文或研究計畫 (PDF/TXT)。
@@ -125,7 +125,7 @@
 ## General Tasks / Documentation
 
 *   **TODO G1: Internationalize UI and documentation to English.**
-    *   [DONE] Translate  to English.
-    *   [DONE] Translate  to English.
+    *   [DONE] Translate `PROJECT_OVERVIEW.md` to English.
+    *   [DONE] Translate `LatteReview_Project_Vision.md` to English.
     *   [DONE] Review and translate comments in `app.py` to English.
     *   [DONE] Review and translate UI text (button labels, messages, placeholders) in `app.py` to English.
