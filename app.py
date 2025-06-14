@@ -4,14 +4,21 @@ import re # For sanitizing project name
 from datetime import datetime # For timestamping
 import json # For reading project config
 from lattereview.utils import data_handler # For RIS parsing
-# Ensure all agent types are available for selection
 from lattereview.agents import TitleAbstractReviewer, ScoringReviewer, AbstractionReviewer
-
-import pandas as pd # For DataFrame
+import pandas as pd
 
 PROJECTS_ROOT_DIR = "lattereview_projects"
 
+# Agent type definitions
+AGENT_TYPES = {
+    "TitleAbstractReviewer": TitleAbstractReviewer,
+    "ScoringReviewer": ScoringReviewer,
+    "AbstractionReviewer": AbstractionReviewer,
+}
+AGENT_TYPE_NAMES = list(AGENT_TYPES.keys())
+
 # --- Helper Functions (sanitize_project_name, create_project_structure, get_existing_projects, parse_ris_file) ---
+# Assume these are present and correct from previous steps.
 def sanitize_project_name(name):
     name = name.strip()
     name = re.sub(r'[^a-zA-Z0-9_\-\s]', '', name)
@@ -20,24 +27,16 @@ def sanitize_project_name(name):
 
 def create_project_structure(project_name):
     sanitized_name = sanitize_project_name(project_name)
-    if not sanitized_name:
-        return False, "Invalid project name after sanitization. Please use allowed characters."
+    if not sanitized_name: return False, "Invalid project name after sanitization."
     project_path = os.path.join(PROJECTS_ROOT_DIR, sanitized_name)
-    if os.path.exists(project_path):
-        return False, f"Project '{sanitized_name}' already exists."
+    if os.path.exists(project_path): return False, f"Project '{sanitized_name}' already exists."
     try:
-        os.makedirs(project_path)
-        data_path = os.path.join(project_path, "data")
-        os.makedirs(data_path)
-        os.makedirs(os.path.join(project_path, "results"))
+        os.makedirs(project_path); os.makedirs(os.path.join(project_path, "data")); os.makedirs(os.path.join(project_path, "results"))
         current_time_iso = datetime.now().isoformat()
-        with open(os.path.join(project_path, "project_config.json"), 'w') as f:
-            json.dump({"project_name": project_name, "sanitized_name": sanitized_name, "created_at": current_time_iso}, f, indent=2)
-        with open(os.path.join(project_path, "README.md"), 'w') as f:
-            f.write(f"# Project: {project_name}\n\nDirectory: {sanitized_name}\nCreated: {current_time_iso}\n\nThis project was created by LatteReview GUI.")
-        return True, f"Project '{project_name}' (directory: '{sanitized_name}') created successfully!"
-    except OSError as e:
-        return False, f"Error creating project directory: {e}"
+        with open(os.path.join(project_path, "project_config.json"), 'w') as f: json.dump({"project_name": project_name, "sanitized_name": sanitized_name, "created_at": current_time_iso}, f, indent=2)
+        with open(os.path.join(project_path, "README.md"), 'w') as f: f.write(f"# Project: {project_name}\n\nDirectory: {sanitized_name}\nCreated: {current_time_iso}")
+        return True, f"Project '{project_name}' created."
+    except OSError as e: return False, f"Error creating project directory: {e}"
 
 def get_existing_projects():
     if not os.path.exists(PROJECTS_ROOT_DIR): return []
@@ -46,18 +45,15 @@ def get_existing_projects():
         if os.path.isdir(os.path.join(PROJECTS_ROOT_DIR, item)):
             display_name = item
             try:
-                config_path = os.path.join(PROJECTS_ROOT_DIR, item, "project_config.json")
-                if os.path.exists(config_path):
-                    with open(config_path, 'r') as f_cfg: cfg = json.load(f_cfg)
-                    display_name = cfg.get("project_name", item)
+                with open(os.path.join(PROJECTS_ROOT_DIR, item, "project_config.json"), 'r') as f_cfg: cfg = json.load(f_cfg)
+                display_name = cfg.get("project_name", item)
                 projects.append({"id": item, "name": display_name})
-            except Exception: projects.append({"id": item, "name": item})
+            except Exception: projects.append({"id": item, "name": item}) # Fallback
     return sorted(projects, key=lambda x: x["name"])
 
 def parse_ris_file(file_path):
     try:
-        ris_handler = data_handler.RISHandler()
-        df = ris_handler.load_ris_file_to_dataframe(file_path)
+        df = data_handler.RISHandler().load_ris_file_to_dataframe(file_path)
         return df, None
     except Exception as e: return None, f"Error parsing RIS file '{os.path.basename(file_path)}': {e}"
 
@@ -68,28 +64,27 @@ def main():
     # Initialize session state
     if "api_key_entered" not in st.session_state: st.session_state.api_key_entered = False
     if "gemini_api_key" not in st.session_state: st.session_state.gemini_api_key = ""
-    if "show_create_project_modal" not in st.session_state: st.session_state.show_create_project_modal = False
+    # ... other initializations ...
     if "selected_project_id" not in st.session_state: st.session_state.selected_project_id = None
-    if "selected_project_display_name" not in st.session_state: st.session_state.selected_project_display_name = None
+    if "workflow_config" not in st.session_state: st.session_state.workflow_config = {}
     if "ris_dataframes" not in st.session_state: st.session_state.ris_dataframes = {}
     if "active_ris_filename" not in st.session_state: st.session_state.active_ris_filename = None
-    if "workflow_config" not in st.session_state: st.session_state.workflow_config = {}
-
-    AGENT_TYPES = {
-        "TitleAbstractReviewer": TitleAbstractReviewer,
-        "ScoringReviewer": ScoringReviewer,
-        "AbstractionReviewer": AbstractionReviewer,
-        # "CustomReviewer": CustomReviewer, # If you have a base class for custom
-    }
-    AGENT_TYPE_NAMES = list(AGENT_TYPES.keys())
+    if "selected_project_display_name" not in st.session_state: st.session_state.selected_project_display_name = None
+    if "show_create_project_modal" not in st.session_state: st.session_state.show_create_project_modal = False
 
 
     def get_current_project_workflow():
         project_id = st.session_state.selected_project_id
         if not project_id: return None
         if project_id not in st.session_state.workflow_config or not st.session_state.workflow_config[project_id].get("rounds"):
-            st.session_state.workflow_config[project_id] = {"rounds": [{"name": "Round 1", "agents": []}]}
-        return st.session_state.workflow_config[project_id]
+            st.session_state.workflow_config[project_id] = {"rounds": [{"name": "Round 1", "agents": [], "filter_config": {"type": "all_previous"}}]} # Default filter for first round
+
+        # Ensure all rounds have a filter_config, especially for rounds > 0
+        workflow = st.session_state.workflow_config[project_id]
+        for i, round_data in enumerate(workflow["rounds"]):
+            if "filter_config" not in round_data:
+                workflow["rounds"][i]["filter_config"] = {"type": "all_previous"} if i == 0 else {"type": "included_previous"} # Default for subsequent rounds
+        return workflow
 
     # --- Sidebar ---
     # (Sidebar code unchanged)
@@ -107,7 +102,7 @@ def main():
         elif st.session_state.api_key_entered: st.success("API Key is set in session.")
         st.caption("Model: `gemini-2.0-flash` (fixed)")
 
-    # --- Main Page Content ---
+    # --- Main Page ---
     st.title("LatteReview 🤖☕")
     # (API Key warning and Welcome markdown unchanged)
     if not st.session_state.api_key_entered or not st.session_state.gemini_api_key:
@@ -139,9 +134,7 @@ def main():
         if st.session_state.selected_project_id:
             st.success(f"Active project: **{st.session_state.selected_project_display_name}** (`{st.session_state.selected_project_id}`)")
             if st.button("✖️ Close Project", use_container_width=True):
-                st.session_state.selected_project_id = None
-                st.session_state.selected_project_display_name = None
-                st.session_state.active_ris_filename = None
+                st.session_state.selected_project_id = None; st.session_state.selected_project_display_name = None; st.session_state.active_ris_filename = None
                 st.rerun()
 
     if st.session_state.get("show_create_project_modal", False):
@@ -163,7 +156,7 @@ def main():
     if st.session_state.selected_project_id:
         st.subheader(f"Data Management for: {st.session_state.selected_project_display_name}")
         project_data_path = os.path.join(PROJECTS_ROOT_DIR, st.session_state.selected_project_id, "data")
-        with st.expander("Upload New RIS File", expanded=not bool(get_existing_projects())):
+        with st.expander("Upload New RIS File", expanded=not bool(os.listdir(project_data_path) if os.path.exists(project_data_path) else [])):
             uploaded_file = st.file_uploader("Upload .ris File", type=['ris'], accept_multiple_files=False, key=f"ris_uploader_{st.session_state.selected_project_id}")
             if uploaded_file is not None:
                 file_path = os.path.join(project_data_path, uploaded_file.name)
@@ -174,7 +167,7 @@ def main():
                 except Exception as e: st.error(f"Error saving uploaded file: {e}")
 
         st.write("##### Process and View Existing RIS File")
-        ris_files_in_project = [f for f in os.listdir(project_data_path) if f.endswith(".ris")]
+        ris_files_in_project = [f for f in os.listdir(project_data_path) if f.endswith(".ris")] if os.path.exists(project_data_path) else []
         if not ris_files_in_project: st.caption("No RIS files found. Upload one above.")
         else:
             selected_ris_to_view = st.selectbox("Select a RIS file to process/view:", options=[""] + ris_files_in_project, index=0, key=f"select_ris_{st.session_state.selected_project_id}", format_func=lambda x: "Select a file..." if x == "" else x)
@@ -207,7 +200,7 @@ def main():
             final_preview_cols = [col for col in preview_cols_options if col in active_df_to_display.columns]
             if not final_preview_cols and len(active_df_to_display.columns) > 0: final_preview_cols = active_df_to_display.columns.tolist()[:5]
             if final_preview_cols: st.dataframe(active_df_to_display[final_preview_cols])
-            else: st.dataframe(active_df_to_display) # Show all if no specific columns found
+            else: st.dataframe(active_df_to_display)
             if st.button("Clear Preview / Process Another File", key="clear_preview"):
                 st.session_state.active_ris_filename = None; st.rerun()
         elif st.session_state.selected_project_id and ris_files_in_project and selected_ris_to_view :
@@ -221,85 +214,111 @@ def main():
             current_workflow = get_current_project_workflow()
             if not current_workflow: st.error("Workflow not initialized."); return
 
-            # TODO 3.1: Multi-Round Interface (Done)
-            col_add_round, col_remove_round, _ = st.columns([1,1,2]) # Adjust ratio for spacing
+            col_add_round, col_remove_round, _ = st.columns([1,1,2])
             with col_add_round:
                 if st.button("➕ Add Review Round", key="add_round"):
-                    current_workflow["rounds"].append({"name": f"Round {len(current_workflow['rounds']) + 1}", "agents": []})
+                    new_round_name = f"Round {len(current_workflow['rounds']) + 1}"
+                    default_filter = {"type": "included_previous"} # Default for new subsequent rounds
+                    current_workflow["rounds"].append({"name": new_round_name, "agents": [], "filter_config": default_filter})
                     st.rerun()
             with col_remove_round:
                 if len(current_workflow["rounds"]) > 1:
                      if st.button("➖ Remove Last Round", key="remove_round", type="secondary"):
                         current_workflow["rounds"].pop(); st.rerun()
-                else: st.caption(" ") # Keep space consistent
 
             tab_titles = [r.get('name', f'Round {i+1}') for i, r in enumerate(current_workflow["rounds"])]
-            if not tab_titles: # Should be caught by get_current_project_workflow initialization
-                st.session_state.workflow_config[st.session_state.selected_project_id]["rounds"] = [{"name": "Round 1", "agents": []}]
-                current_workflow = get_current_project_workflow()
-                tab_titles = [r.get('name', f'Round {i+1}') for i, r in enumerate(current_workflow["rounds"])]
-
             tabs = st.tabs(tab_titles)
 
             for i, tab_content in enumerate(tabs):
                 with tab_content:
-                    st.markdown(f"#### Settings for: **{current_workflow['rounds'][i].get('name', f'Round {i+1}')}**")
+                    round_data = current_workflow['rounds'][i] # Reference for easier access
+                    st.markdown(f"#### Settings for: **{round_data.get('name', f'Round {i+1}')}**")
 
-                    # Allow renaming the round
-                    new_round_name = st.text_input("Round Name", value=current_workflow['rounds'][i].get('name', f'Round {i+1}'), key=f"round_name_{i}_{st.session_state.selected_project_id}")
-                    if new_round_name != current_workflow['rounds'][i].get('name', f'Round {i+1}'):
-                        current_workflow['rounds'][i]['name'] = new_round_name
-                        # Consider a "Save Round Name" button or auto-save on blur if possible, for now direct update
-                        st.rerun() # Rerun to update tab titles immediately
+                    new_round_name = st.text_input("Round Name", value=round_data.get('name', f'Round {i+1}'), key=f"round_name_{i}_{st.session_state.selected_project_id}")
+                    if new_round_name != round_data.get('name', f'Round {i+1}'):
+                        round_data['name'] = new_round_name; st.rerun()
 
-                    st.markdown("---")
-                    # TODO 3.2: 設計 Agent 設定器
-                    # - 在每個回合的 Tab 內，允許使用者 "新增 Agent"。
-                    # - 每個 Agent 都是一個卡片或 st.expander
+                    # TODO 3.3: 設定回合間的過濾邏輯
+                    if i > 0: # Filtering logic only for rounds > 0
+                        st.markdown("##### Article Source & Filtering for this Round")
 
-                    num_agents_in_round = len(current_workflow["rounds"][i]["agents"])
-                    st.write(f"**Configured Agents in this Round: {num_agents_in_round}**")
+                        # Check if previous round had a scoring reviewer
+                        previous_round_has_scorer = False
+                        if i > 0: # This check is redundant with the outer if, but good for clarity
+                            for agent_cfg in current_workflow["rounds"][i-1].get("agents", []):
+                                if agent_cfg.get("type") == "ScoringReviewer":
+                                    previous_round_has_scorer = True
+                                    break
 
-                    if st.button(f"➕ Add Agent to {current_workflow['rounds'][i]['name']}", key=f"add_agent_round_{i}"):
-                        # Add a new default agent dictionary to this round's agent list
-                        new_agent_default_name = f"Agent {len(current_workflow['rounds'][i]['agents']) + 1}"
-                        current_workflow["rounds"][i]["agents"].append({
-                            "name": new_agent_default_name,
-                            "type": AGENT_TYPE_NAMES[0], # Default to first agent type
-                            "backstory": "A diligent AI assistant specializing in initial review of titles and abstracts.", # More specific default
-                            "inclusion_criteria": "- Relevant to [Specific Topic]\n- Published after [Year]\n- Study type: [e.g., RCT, Review, Case Study]", # Example placeholder
-                            "exclusion_criteria": "- Not in English\n- Focus on [Irrelevant Subtopic]\n- Lacks empirical data" # Example placeholder
+                        filter_options = {
+                            "all_previous": "All articles from previous round", # This is not in TODO, but can be useful.
+                            "included_previous": "Only 'Included' articles from previous round",
+                            "excluded_previous": "Only 'Excluded' articles from previous round",
+                            "disagreement_previous": "Articles with disagreement from previous round",
+                        }
+                        if previous_round_has_scorer:
+                            filter_options["score_above_threshold"] = "Articles with average score above X from previous round"
+
+                        # Ensure current_filter_type is valid, fallback if not
+                        current_filter_type = round_data.get("filter_config", {}).get("type", "included_previous") # Default for round > 0
+                        if current_filter_type not in filter_options:
+                             current_filter_type = "included_previous" # Fallback if previous option (e.g. scorer) removed
+                             round_data["filter_config"] = {"type": current_filter_type}
+
+
+                        selected_filter_key = st.selectbox(
+                            "Source of Articles:",
+                            options=list(filter_options.keys()),
+                            format_func=lambda x: filter_options[x],
+                            index=list(filter_options.keys()).index(current_filter_type),
+                            key=f"filter_type_round_{i}_{st.session_state.selected_project_id}"
+                        )
+
+                        # Update filter type in session state
+                        if round_data.get("filter_config",{}).get("type") != selected_filter_key:
+                            round_data["filter_config"]["type"] = selected_filter_key
+                            # No rerun, allow configuring threshold if needed before rerun
+
+                        if selected_filter_key == "score_above_threshold":
+                            current_threshold = round_data.get("filter_config", {}).get("threshold", 3.0) # Default threshold
+                            score_threshold = st.number_input(
+                                "Score Threshold (e.g., 0.0-5.0 or 0-100 depending on scorer's scale)",
+                                value=current_threshold, step=0.1,
+                                key=f"filter_score_round_{i}_{st.session_state.selected_project_id}"
+                            )
+                            if round_data.get("filter_config",{}).get("threshold") != score_threshold:
+                                round_data["filter_config"]["threshold"] = score_threshold
+                        # Clean up threshold if filter type changes away from score-based
+                        elif "threshold" in round_data.get("filter_config", {}):
+                            del round_data["filter_config"]["threshold"]
+
+                    st.markdown("---") # Separator before agent configurations
+                    st.write(f"**Configured Agents in this Round:** {len(round_data.get('agents', []))}")
+                    if st.button(f"➕ Add Agent to {round_data['name']}", key=f"add_agent_round_{i}_{st.session_state.selected_project_id}"):
+                        new_agent_name = f"Agent {len(round_data.get('agents', [])) + 1}"
+                        round_data.setdefault("agents", []).append({
+                            "name": new_agent_name, "type": AGENT_TYPE_NAMES[0],
+                            "backstory": "A diligent AI assistant.",
+                            "inclusion_criteria": "- Criterion 1", "exclusion_criteria": "- Criterion A"
                         })
                         st.rerun()
 
-                    # Display existing agents for this round
-                    for agent_idx, agent_config in enumerate(current_workflow["rounds"][i]["agents"]):
+                    for agent_idx, agent_config in enumerate(round_data.get("agents", [])):
                         with st.expander(f"Configure: {agent_config.get('name', f'Agent {agent_idx+1}')} ({agent_config.get('type', 'N/A')})", expanded=True):
+                            # (Agent config UI - unchanged from previous step)
                             agent_name = st.text_input("Agent Name", value=agent_config["name"], key=f"agent_name_{i}_{agent_idx}_{st.session_state.selected_project_id}")
                             agent_type = st.selectbox("Agent Type", options=AGENT_TYPE_NAMES, index=AGENT_TYPE_NAMES.index(agent_config["type"]) if agent_config["type"] in AGENT_TYPE_NAMES else 0, key=f"agent_type_{i}_{agent_idx}_{st.session_state.selected_project_id}")
-                            agent_backstory = st.text_area("Agent Backstory/Persona", value=agent_config["backstory"], key=f"agent_backstory_{i}_{agent_idx}_{st.session_state.selected_project_id}", height=100, help="Describe the agent's expertise and perspective.")
-                            agent_inclusion = st.text_area("Inclusion Criteria (one per line)", value=agent_config["inclusion_criteria"], key=f"agent_inclusion_{i}_{agent_idx}_{st.session_state.selected_project_id}", height=100, help="Specific criteria for including a paper.")
-                            agent_exclusion = st.text_area("Exclusion Criteria (one per line)", value=agent_config["exclusion_criteria"], key=f"agent_exclusion_{i}_{agent_idx}_{st.session_state.selected_project_id}", height=100, help="Specific criteria for excluding a paper.")
+                            agent_backstory = st.text_area("Agent Backstory/Persona", value=agent_config["backstory"], key=f"agent_backstory_{i}_{agent_idx}_{st.session_state.selected_project_id}", height=100)
+                            agent_inclusion = st.text_area("Inclusion Criteria (one per line)", value=agent_config["inclusion_criteria"], key=f"agent_inclusion_{i}_{agent_idx}_{st.session_state.selected_project_id}", height=100)
+                            agent_exclusion = st.text_area("Exclusion Criteria (one per line)", value=agent_config["exclusion_criteria"], key=f"agent_exclusion_{i}_{agent_idx}_{st.session_state.selected_project_id}", height=100)
 
-                            # Update session state directly (basic implementation)
-                            current_workflow["rounds"][i]["agents"][agent_idx]["name"] = agent_name
-                            current_workflow["rounds"][i]["agents"][agent_idx]["type"] = agent_type
-                            current_workflow["rounds"][i]["agents"][agent_idx]["backstory"] = agent_backstory
-                            current_workflow["rounds"][i]["agents"][agent_idx]["inclusion_criteria"] = agent_inclusion
-                            current_workflow["rounds"][i]["agents"][agent_idx]["exclusion_criteria"] = agent_exclusion
+                            agent_config["name"] = agent_name; agent_config["type"] = agent_type
+                            agent_config["backstory"] = agent_backstory; agent_config["inclusion_criteria"] = agent_inclusion
+                            agent_config["exclusion_criteria"] = agent_exclusion
 
                             if st.button(f"➖ Remove {agent_name}", key=f"remove_agent_{i}_{agent_idx}_{st.session_state.selected_project_id}", type="secondary"):
-                                current_workflow["rounds"][i]["agents"].pop(agent_idx)
-                                st.rerun()
+                                round_data["agents"].pop(agent_idx); st.rerun()
                             st.markdown("---")
-
-
-                    # Placeholder for TODO 3.3 (Filtering)
-                    if i > 0: # Filtering logic only for rounds > 0
-                        st.markdown("##### Inter-Round Article Filtering")
-                        st.info(f"Filtering logic for articles entering {current_workflow['rounds'][i]['name']} (TODO 3.3) will appear here.")
-
-
         elif st.session_state.selected_project_id :
             st.info("Please select and process a RIS file above to configure the workflow.")
 
