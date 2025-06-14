@@ -3,7 +3,7 @@
 ## 專案前提與設定
 
 *   **技術棧建議：** 使用 Python 的 Web 框架，如 Streamlit 或 Gradio。對於快速開發和資料科學應用，Streamlit 特別合適，因為它能讓您用純 Python 快速建立互動式介面。以下 TODO 會以 Streamlit 的概念來發想。
-*   **LLM 固定模型：** 所有與 LLM 互動的部分，將預設使用 `gemini-1.5-flash`。這會簡化介面，使用者不需要在介面上選擇模型，只需要在設定中輸入自己的 Google AI/Vertex AI API Key 即可。
+*   **LLM 固定模型：** 所有與 LLM 互動的部分，將預設使用 `gemini-2.0-flash`。這會簡化介面，使用者不需要在介面上選擇模型，只需要在設定中輸入自己的 Google AI/Vertex AI API Key 即可。
 
 ---
 
@@ -27,7 +27,7 @@
     *   細節:
         *   在側邊欄 `st.sidebar` 中，新增一個 `st.text_input` 欄位，類型為 `password`，讓使用者輸入他們的 Gemini API Key。
         *   使用 `st.session_state` 來安全地儲存該 Key，避免每次頁面刷新都要重新輸入。
-        *   提示使用者模型將固定使用 `gemini-1.5-flash`。
+        *   提示使用者模型將固定使用 `gemini-2.0-flash`。
 
 ### 2.0 【資料匯入與預覽介面】
 
