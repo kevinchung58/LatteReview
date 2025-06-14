@@ -152,6 +152,37 @@ def generate_simulated_results(ris_data_df, project_workflow, rag_files):
     return pd.DataFrame(results_list)
 
 
+# --- RAG Helper Function (NEW for TODO 5.3) ---
+def extract_text_from_rag_document(file_path):
+    """Extracts text from PDF or TXT files for RAG context."""
+    _, file_extension = os.path.splitext(file_path)
+    text = ""
+    try:
+        if file_extension.lower() == .txt:
+            with open(file_path, r, encoding=utf-8, errors=ignore) as f:
+                text = f.read()
+        elif file_extension.lower() == .pdf:
+            try:
+                import PyPDF2 # Local import
+                reader = PyPDF2.PdfReader(file_path)
+                for page_num in range(len(reader.pages)):
+                    page = reader.pages[page_num]
+                    text += page.extract_text() or ""
+            except ImportError:
+                st.error("PyPDF2 library is required for PDF processing but not found. Please install it.")
+                return None
+            except Exception as e: # Catch other PyPDF2 errors
+                st.warning(f"Could not extract text from PDF {os.path.basename(file_path)}: {e}")
+                return None
+        else:
+            st.warning(f"Unsupported RAG file type: {file_extension} for {os.path.basename(file_path)}")
+            return None
+        return text.strip() if text else None
+    except Exception as e:
+        st.error(f"Error reading RAG file {os.path.basename(file_path)}: {e}")
+        return None
+
+
 # --- Main Application UI ---
 def main():
     st.set_page_config(page_title="LatteReview 🤖☕", layout="wide")
