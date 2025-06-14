@@ -127,5 +127,5 @@
 *   **TODO G1: Internationalize UI and documentation to English.**
     *   [DONE] Translate  to English.
     *   [DONE] Translate  to English.
-    *   [PENDING] Review and translate comments in  to English.
-    *   [PENDING] Review and translate UI text (button labels, messages, placeholders) in  to English.
+    *   [DONE] Review and translate comments in `app.py` to English.
+    *   [DONE] Review and translate UI text (button labels, messages, placeholders) in `app.py` to English.

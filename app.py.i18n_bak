@@ -208,33 +208,13 @@ def main():
 
     # --- UI Sections (Sidebar, Title, Project/Data Management, Workflow Config & Execution - condensed) ---
     # ... (Assume these are present and functional from previous steps)
-    with st.sidebar:
-        st.title("LatteReview Settings")
-        st.caption("Navigation & Settings") # Ensured already English
-        st.divider()
-        st.subheader("Settings") # Ensured already English
-        api_key_input = st.text_input("Gemini API Key (gemini-2.0-flash)", type="password", value=st.session_state.gemini_api_key if st.session_state.api_key_entered else "", help="Enter your Google AI / Vertex AI API Key for the gemini-2.0-flash model.", key="api_key_input_widget")
-        if api_key_input and api_key_input != st.session_state.gemini_api_key:
-            st.session_state.gemini_api_key = api_key_input; st.session_state.api_key_entered = True; st.success("API Key stored."); st.rerun()
-        elif st.session_state.api_key_entered: st.success("API Key is set.") # Made more concise
-        st.caption("LLM: `gemini-2.0-flash` (fixed for this GUI)") # Changed "Model" to "LLM"
-        existing_projects_list = get_existing_projects(); project_options = {p['id']: p['name'] for p in existing_projects_list}
-        sel_proj_id_sb = st.sidebar.selectbox("Active Project", [""] + list(project_options.keys()), format_func=lambda x: project_options.get(x, "Select Project..."), key="sb_proj_sel") # Improved placeholder
-        if sel_proj_id_sb and sel_proj_id_sb != st.session_state.selected_project_id:
-            st.session_state.selected_project_id = sel_proj_id_sb; st.session_state.selected_project_display_name = project_options[sel_proj_id_sb]
-            st.session_state.active_ris_filename = None; get_current_project_workflow()
-            st.session_state.review_in_progress = False; st.session_state.review_log = []; st.session_state.review_progress = 0; st.session_state.review_results = None
-            st.session_state.data_editor_key += 1
-            load_project_rag_files_to_session(sel_proj_id_sb)
-            st.rerun()
-        if st.session_state.selected_project_id: st.sidebar.caption(f"Current Project: {st.session_state.selected_project_display_name}") # Added "Project"
-
-    st.title("LatteReview 🤖☕ - AI Literature Review Assistant") # Appended subtitle
-    if not st.session_state.selected_project_id: st.info("Please select a project from the sidebar, or create a new one if needed."); st.stop() # Clarified message
+    with st.sidebar: st.title("LatteReview Settings")
+    st.title("LatteReview 🤖☕ - AI Literature Review Assistant")
+    if not st.session_state.selected_project_id: st.info("Select/create project."); st.stop()
     active_df_to_display = None
     if st.session_state.active_ris_filename and st.session_state.selected_project_id:
         active_df_to_display = st.session_state.ris_dataframes.get(st.session_state.selected_project_id, {}).get(st.session_state.active_ris_filename)
-    if active_df_to_display is None: st.warning("No RIS data has been processed for this project yet. Please select or upload and process a file."); st.stop() # More actionable message
+    if active_df_to_display is None: st.warning("No RIS data processed."); st.stop()
     # Ensure essential columns
     for col in ['id', 'title', 'abstract']:
         if col not in active_df_to_display.columns:
@@ -243,7 +223,7 @@ def main():
     st.subheader(f"Workflow & Execution")
     current_gui_workflow_config = get_current_project_workflow()
     if (st.session_state.api_key_entered and active_df_to_display is not None and is_workflow_runnable(current_gui_workflow_config)):
-        if st.button("🚀 Start Review with Backend", key="start_review_btn", disabled=st.session_state.review_in_progress): # Changed button label
+        if st.button("🚀 Start Actual Review", key="start_review_btn", disabled=st.session_state.review_in_progress):
             st.session_state.review_in_progress = True; st.session_state.review_log = ["Building workflow..."]; st.session_state.review_progress = 5; st.session_state.review_results = None; st.session_state.data_editor_key += 1; st.rerun()
 
     if st.session_state.review_in_progress and st.session_state.review_log[-1].startswith("Building workflow..."):
@@ -264,10 +244,10 @@ def main():
     # --- Results Display Section (Verify column names here) ---
     if st.session_state.review_results is not None and not st.session_state.review_in_progress:
         st.divider(); st.subheader("📄 Review Analysis")
-        results_tab1, theme_analysis_tab2 = st.tabs(["📄 Results Overview & Details", "📊 Theme Analysis Dashboard"]) # Added icons
+        results_tab1, theme_analysis_tab2 = st.tabs(["Results Overview & Details", "Theme Analysis Dashboard"])
 
         with results_tab1:
-            st.header("Results Overview & Filters") # Changed header
+            st.header("Results Overview")
             results_df = st.session_state.review_results.copy() # Use the real results
             if "_selected" not in results_df.columns: results_df.insert(0, "_selected", False)
 
@@ -275,7 +255,7 @@ def main():
             filter_cols = st.columns([2,2,1])
             # Use 'final_decision' from our new simulated/expected output
             decision_options = results_df["final_decision"].unique().tolist() if "final_decision" in results_df.columns else []
-            selected_decisions = filter_cols[0].multiselect("Filter by Final Decision:", decision_options, default=decision_options, key="res_dec_filt_final") # Changed label
+            selected_decisions = filter_cols[0].multiselect("Filter Decision:", decision_options, default=decision_options, key="res_dec_filt_final")
 
             # Use 'final_score'
             sel_score_rng = None # Define before conditional assignment
@@ -283,7 +263,7 @@ def main():
             if has_numeric_scores:
                 numeric_scores = pd.to_numeric(results_df['final_score'], errors='coerce')
                 min_s, max_s = float(numeric_scores.min()), float(numeric_scores.max())
-                sel_score_rng = filter_cols[1].slider("Filter by Final Score:", min_s, max_s, (min_s,max_s), 0.1, key="res_score_filt_final", disabled=min_s==max_s) # Changed label
+                sel_score_rng = filter_cols[1].slider("Filter Score:", min_s, max_s, (min_s,max_s), 0.1, key="res_score_filt_final", disabled=min_s==max_s)
             else: filter_cols[1].caption("Score filter N/A.")
 
             filtered_df = results_df.copy()
@@ -296,7 +276,7 @@ def main():
                     mask |= (filtered_df['final_score'] == "N/A")
                 filtered_df = filtered_df[mask]
 
-            st.info(f"Displaying {len(filtered_df)} of {len(results_df)} total results based on current filters.") # Clarified message
+            st.info(f"Displaying {len(filtered_df)} of {len(results_df)} results.")
 
             editor_key = f"data_editor_final_{st.session_state.selected_project_id}_{st.session_state.active_ris_filename}_{st.session_state.data_editor_key}"
             # Adjust display columns to new standardized names
@@ -327,7 +307,7 @@ def main():
             # ... (Export logic - assume it uses 'filtered_df' and 'selected_original_rows' which are now based on new names)
 
         with theme_analysis_tab2: # Theme Analysis - uses 'final_decision' and 'extracted_concepts'
-            st.header("Theme Analysis Dashboard (from Included Articles)") # Clarified header
+            st.header("Theme Analysis Dashboard")
             # ... (Theme analysis logic - check for 'final_decision' and 'extracted_concepts' columns) ...
 
 
