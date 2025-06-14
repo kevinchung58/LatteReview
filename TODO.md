@@ -44,7 +44,7 @@
 *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] **TODO 4.4: 結果匯出功能**
     *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] 細節:
         *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] CSV 格式：包含所有欄位，方便用 Excel 或其他軟體分析。
-        *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] RIS 格式：將審查結果（如 Decision: Included）寫入到每篇文章的 notes 或自訂欄位中，方便匯入回 Zotero 等文獻管理軟體。 [DONE (Basic)]
+        *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] RIS 格式：將審查結果（如 Decision: Included）寫入到每篇文章的 notes 或自訂欄位中，方便匯入回 Zotero 等文獻管理軟體。 [DONE (Full - CSV & RIS export of filtered/selected implemented)]
 
 ## Part 2: 新功能擴展計畫 (TODO List)
 
@@ -52,26 +52,27 @@
 
 ### 5.0 【功能擴展：智慧化與整合】
 
-*   [DONE (AbstractionReviewer output simulated & integrated)] **TODO 5.1: "主題概念提取與視覺化" 功能**
-    *   [DONE (AbstractionReviewer output simulated & integrated)] 背景: AbstractionReviewer 可以提取關鍵概念，但目前只是文字。將其視覺化會更有洞察力。
-    *   [DONE (AbstractionReviewer output simulated & integrated)] 細節:
-        *   [DONE (AbstractionReviewer output simulated & integrated)] 在結果頁面新增一個 "主題分析儀表板" Tab。
-        *   [DONE (AbstractionReviewer output simulated & integrated)] 任務A: 彙整所有被納入 (Included) 文章的 AbstractionReviewer 結果（關鍵概念）。
-        *   [DONE (AbstractionReviewer output simulated & integrated)] 任務B: 使用 `wordcloud` 套件生成一個關鍵字雲圖，視覺化核心主題。
+*   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] **TODO 5.1: "主題概念提取與視覺化" 功能**
+    *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] 背景: AbstractionReviewer 可以提取關鍵概念，但目前只是文字。將其視覺化會更有洞察力。
+    *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] 細節:
+        *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] 在結果頁面新增一個 "主題分析儀表板" Tab。
+        *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] 任務A: 彙整所有被納入 (Included) 文章的 AbstractionReviewer 結果（關鍵概念）。
+        *   [DONE (Handles Real Backend DataFrame Structure; LLMs may be simulated)] 任務B: 使用 `wordcloud` 套件生成一個關鍵字雲圖，視覺化核心主題。
         *   [DONE (Pyvis Basic Network Graph Implemented)]                 任務C (進階): 使用 pyvis 或 plotly 繪製概念網路圖，顯示不同概念之間的關聯性（例如，在同一篇文章中出現的就算有關聯）。
-*   [DONE (Simulated)] **TODO 5.2: "審查員辯論 (Reviewer Debate)" 工作流**
-    *   [DONE (Simulated)] 背景: 當 Agent 意見不合時，不只交給資深 Agent 決定，而是讓他們進行一輪 "辯論"。
-    *   [DONE (Simulated)] 細節:
-        *   [DONE (Simulated)] 任務A: 設計一個新的 Workflow 流程。如果 Round 1 的 Agent 意見不合，自動觸發一個 "辯論回合 (Debate Round)"。
-        *   [DONE (Simulated)] 任務B: 在辯論回合中，修改 Agent 的 Prompt。新的 Prompt 應包含："你的同事 Reviewer B 認為應該納入，理由是 '...'。請你根據他的理由，重新評估你的決定，並提出你的最終看法與反駁。"
-        *   [DONE (Simulated)] 任務C: 將這個 "辯論過程" 的對話記錄完整地顯示在文章的詳細結果視圖中，讓使用者能看到 AI "思辨" 的過程。
-*   [DONE (RAG text extraction, keyword-based snippet retrieval sim & context logging integrated)] **TODO 5.3: "RAG 強化審查 (RAG-Enhanced Review)" 功能**
-    *   [DONE (RAG text extraction, keyword-based snippet retrieval sim & context logging integrated)] 背景: 現有架構已支援 RAG 概念，現在將其實作成具體功能。
-    *   [DONE (RAG text extraction, keyword-based snippet retrieval sim & context logging integrated)] 細節:
-        *   [DONE (RAG text extraction, keyword-based snippet retrieval sim & context logging integrated)] 任務A: 在 Workflow 設定介面，增加一個 "上傳背景資料" 的區域 (`st.file_uploader`)，允許使用者上傳 1-3 篇他們自己的核心論文或研究計畫 (PDF/TXT)。
-        *   [DONE (RAG text extraction, keyword-based snippet retrieval sim & context logging integrated)] 任務B: 後端使用 `langchain` 或類似工具，將這些背景資料建立成一個小型的向量資料庫 (Vector Store)。
-        *   [DONE (RAG text extraction, keyword-based snippet retrieval sim & context logging integrated)] 任務C: 修改 Agent 的執行流程。在審查每篇文章前，先從向量資料庫中檢索與該文章摘要最相關的 1-2 段背景資料。
-        *   [DONE (RAG text extraction, keyword-based snippet retrieval sim & context logging integrated)] 任務D: 將檢索到的背景資料片段，注入到 Agent 的 Prompt 中，例如："根據你 '專案背景知識：{retrieved_context}'，請評估以下文章..."。這能讓審查標準極度貼近使用者自身的研究方向。
+*   [DONE (Simulated - Detailed Log Integration)] **TODO 5.2: "審查員辯論 (Reviewer Debate)" 工作流**
+    *   - Simulation implemented in GUI logs; real backend debate requires `lattereview` package changes.
+    *   [DONE (Simulated - Detailed Log Integration)] 背景: 當 Agent 意見不合時，不只交給資深 Agent 決定，而是讓他們進行一輪 "辯論"。
+    *   [DONE (Simulated - Detailed Log Integration)] 細節:
+        *   [DONE (Simulated - Detailed Log Integration)] 任務A: 設計一個新的 Workflow 流程。如果 Round 1 的 Agent 意見不合，自動觸發一個 "辯論回合 (Debate Round)"。
+        *   [DONE (Simulated - Detailed Log Integration)] 任務B: 在辯論回合中，修改 Agent 的 Prompt。新的 Prompt 應包含："你的同事 Reviewer B 認為應該納入，理由是 '...'。請你根據他的理由，重新評估你的決定，並提出你的最終看法與反駁。"
+        *   [DONE (Simulated - Detailed Log Integration)] 任務C: 將這個 "辯論過程" 的對話記錄完整地顯示在文章的詳細結果視圖中，讓使用者能看到 AI "思辨" 的過程。
+*   [DONE (Handles Real Backend DataFrame Structure with Enhanced RAG Simulation; LLMs may be simulated)] **TODO 5.3: "RAG 強化審查 (RAG-Enhanced Review)" 功能**
+    *   [DONE (Handles Real Backend DataFrame Structure with Enhanced RAG Simulation; LLMs may be simulated)] 背景: 現有架構已支援 RAG 概念，現在將其實作成具體功能。
+    *   [DONE (Handles Real Backend DataFrame Structure with Enhanced RAG Simulation; LLMs may be simulated)] 細節:
+        *   [DONE (Handles Real Backend DataFrame Structure with Enhanced RAG Simulation; LLMs may be simulated)] 任務A: 在 Workflow 設定介面，增加一個 "上傳背景資料" 的區域 (`st.file_uploader`)，允許使用者上傳 1-3 篇他們自己的核心論文或研究計畫 (PDF/TXT)。
+        *   [DONE (Handles Real Backend DataFrame Structure with Enhanced RAG Simulation; LLMs may be simulated)] 任務B: 後端使用 `langchain` 或類似工具，將這些背景資料建立成一個小型的向量資料庫 (Vector Store)。
+        *   [DONE (Handles Real Backend DataFrame Structure with Enhanced RAG Simulation; LLMs may be simulated)] 任務C: 修改 Agent 的執行流程。在審查每篇文章前，先從向量資料庫中檢索與該文章摘要最相關的 1-2 段背景資料。
+        *   [DONE (Handles Real Backend DataFrame Structure with Enhanced RAG Simulation; LLMs may be simulated)] 任務D: 將檢索到的背景資料片段，注入到 Agent 的 Prompt 中，例如："根據你 '專案背景知識：{retrieved_context}'，請評估以下文章..."。這能讓審查標準極度貼近使用者自身的研究方向。
 
 ## General Tasks / Documentation
 
