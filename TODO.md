@@ -121,3 +121,11 @@
         *   任務B: 後端使用 `langchain` 或類似工具，將這些背景資料建立成一個小型的向量資料庫 (Vector Store)。
         *   任務C: 修改 Agent 的執行流程。在審查每篇文章前，先從向量資料庫中檢索與該文章摘要最相關的 1-2 段背景資料。
         *   任務D: 將檢索到的背景資料片段，注入到 Agent 的 Prompt 中，例如："根據你 '專案背景知識：{retrieved_context}'，請評估以下文章..."。這能讓審查標準極度貼近使用者自身的研究方向。
+
+## General Tasks / Documentation
+
+*   **TODO G1: Internationalize UI and documentation to English.**
+    *   [DONE] Translate  to English.
+    *   [DONE] Translate  to English.
+    *   [PENDING] Review and translate comments in  to English.
+    *   [PENDING] Review and translate UI text (button labels, messages, placeholders) in  to English.

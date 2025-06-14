@@ -1,118 +1,117 @@
-# 專案完整發展計畫書：LatteReview 🤖☕
+# Comprehensive Project Development Plan: LatteReview 🤖☕
 
-**標語：一杯拿鐵的時間，完成一週的文獻回顧。**
+**Slogan: A week's literature review in the time it takes to drink a latte.**
 
-## 一、 專案願景 (Project Vision)
+## I. Project Vision
 
-在資訊爆炸的時代，學術研究人員、學生和知識工作者面臨著海量的文獻、報告與數據。傳統的文獻回顧過程耗時、繁瑣且容易出錯。LatteReview 的願景是徹底改變知識篩選與整合的方式，將繁重的重複性勞動交給 AI，讓人類的智慧專注於最高價值的創新、思辨與洞見。
+In an era of information overload, academic researchers, students, and knowledge workers face a deluge of literature, reports, and data. Traditional literature review processes are time-consuming, tedious, and prone to error. LatteReview's vision is to revolutionize the way knowledge is sifted and synthesized, delegating repetitive, laborious tasks to AI, allowing human intellect to focus on high-value innovation, critical thinking, and insight generation.
 
-我們不僅僅是創造一個工具，而是打造一個可信賴的 AI 研究助理團隊。這個團隊能夠 7x24 小時不知疲倦地工作，根據您設定的專業背景和標準，高效、透明地完成文獻的篩選、評分、總結與分析任務。
+We are not just creating a tool, but building a trusted team of AI research assistants. This team can work tirelessly 24/7, efficiently and transparently completing literature screening, scoring, summarization, and analysis tasks according to your defined professional backgrounds and criteria.
 
-## 二、 核心概念詳解 (Core Concepts Explained)
+## II. Core Concepts Explained
 
-LatteReview 的強大之處在於其三大核心組件的模組化與協同工作能力：
+LatteReview's power lies in the modularity and synergy of its three core components:
 
-### 1. 智能代理 (Agents): 您的數位化專家審查團隊
+### 1. Intelligent Agents: Your Digital Expert Review Team
 
-代理是 LatteReview 的靈魂。它們不僅僅是 API 的封裝，而是被賦予了角色和任務的 AI 實體。
+Agents are the soul of LatteReview. They are not mere API wrappers but AI entities endowed with roles and tasks.
 
-*   **角色定義 (Persona):** 您可以為每個代理設定獨特的「人設」(Backstory)，例如：
-    *   "一位擁有 10 年經驗的臨床免疫學家，對隨機對照試驗 (RCT) 特別感興趣。"
-    *   "一位專注於機器學習可解釋性 (XAI) 的博士後研究員，批判性地看待模型評估方法。"
-    *   "一位初級研究助理，負責快速篩選掉不相關的文獻。"
-*   **專業能力:**
-    *   **TitleAbstractReviewer:** 負責快速初篩，判斷標題和摘要是否符合納入標準。
-    *   **ScoringReviewer:** 根據您定義的多維度標準（如：創新性、方法論嚴謹性、相關性）進行量化評分。
-    *   **AbstractionReviewer:** 負責深度閱讀和資訊提取，從合格的文獻中總結出關鍵發現、方法、樣本大小等結構化數據。
-    *   **CustomReviewer:** 終極的靈活性。您可以通過簡單的提示工程 (Prompt Engineering) 或繼承基礎類來創建任何您需要的代理，例如「偏見檢測代理」或「技術可行性評估代理」。
+*   **Persona Definition (Backstory):** You can assign unique "personas" to each agent, for example:
+    *   "A clinical immunologist with 10 years of experience, particularly interested in Randomized Controlled Trials (RCTs)."
+    *   "A postdoctoral researcher specializing in eXplainable AI (XAI), critically evaluating model assessment methodologies."
+    *   "A junior research assistant responsible for rapidly screening out irrelevant literature."
+*   **Professional Capabilities:**
+    *   **:** Handles rapid initial screening, determining if titles and abstracts meet inclusion criteria.
+    *   **:** Performs quantitative scoring based on multi-dimensional criteria you define (e.g., innovativeness, methodological rigor, relevance).
+    *   **:** Conducts in-depth reading and information extraction, summarizing key findings, methods, sample sizes, etc., from qualified literature into structured data.
+    *   **:** Offers ultimate flexibility. Through simple prompt engineering or by inheriting base classes, you can create any agent you need, such as a "Bias Detection Agent" or a "Technical Feasibility Assessment Agent."
 
-### 2. 模型供應商 (Providers): 連接全球頂尖 AI 大腦的橋樑
+### 2. Model Providers: Bridging to the World's Leading AI Brains
 
-LatteReview 的設計理念是「模型無關性」(Model-Agnostic)，確保您永遠可以使用最適合任務、最具成本效益的模型。
+LatteReview is designed to be "Model-Agnostic," ensuring you can always use the most suitable and cost-effective model for the task.
 
-*   **LiteLLMProvider (推薦):** 這是我們的瑞士軍刀。通過單一接口，您可以無縫切換使用：
-    *   頂級商業模型: OpenAI (GPT-4o, GPT-3.5), Anthropic (Claude 3 Opus/Sonnet/Haiku), Google (Gemini 1.5 Pro, gemini-2.0-flash)。
-    *   高效能開源模型: Groq (Llama3, Mixtral)。
-    *   本地化模型: 通過 Ollama 在您自己的機器上運行 Llama3, Phi-3 等模型，確保數據隱私與零 API 成本。
-*   **靈活配置:** 您可以為不同的代理甚至不同的審查輪次指定不同的模型。例如，用快速廉價的 Groq 或本地模型進行初篩，用最強大的 GPT-4o 或 Claude 3 Opus 進行深度分析和決策。 (預設使用 `gemini-2.0-flash` 於GUI中)
+*   ** (Recommended):** Our Swiss Army knife. Through a single interface, seamlessly switch between:
+    *   Top-tier commercial models: OpenAI (GPT-4o, GPT-3.5), Anthropic (Claude 3 Opus/Sonnet/Haiku), Google (Gemini 1.5 Pro, and the default  for the GUI).
+    *   High-performance open-source models: Groq (Llama3, Mixtral).
+    *   Localized models: Run Llama3, Phi-3, etc., on your own machine via Ollama, ensuring data privacy and zero API costs.
+*   **Flexible Configuration:** Assign different models to different agents or even different review rounds. For example, use fast, inexpensive models (Groq, local models) for initial screening, and the most powerful ones (GPT-4o, Claude 3 Opus) for in-depth analysis and decision-making.
 
-### 3. 工作流程 (Workflows): 設計您的自動化審查流水線
+### 3. Workflows (): Designing Your Automated Review Pipeline
 
-工作流程是這一切的總指揮。它將代理、數據和審查規則串聯起來，形成一個自動化、可重複的科學流程。
+Workflows are the conductors of this orchestra, stringing together agents, data, and review rules into an automated, repeatable scientific process.
 
-*   **基於藍圖 (Schema-based):** 您通過一個清晰的 YAML 或 JSON 文件來定義整個審查流程，就像編寫一份劇本。這份藍圖詳細說明了：
-    *   審查輪次 (Rounds): 定義審查分為幾個階段。
-    *   代理分配 (Agents): 每一輪由哪些代理參與。
-    *   數據流 (Filters): 什麼樣的文獻可以進入下一輪（例如，"只有被至少兩位初級代理評為『納入』的文章才能進入資深代理審查輪"）。
-*   **並行與串行:** 您可以讓多個代理並行審查同一批文章（模擬同行評議），也可以讓審查過程串行進行（初篩 -> 複審 -> 數據提取）。
-*   **異步執行引擎:** 底層採用異步處理，即使面對數千篇文獻，也能最大化利用計算資源和 API 並發能力，極大地縮短等待時間。
+*   **Schema-based:** Define the entire review process using a clear YAML or JSON file, like writing a script. This blueprint details:
+    *   **Review Rounds:** Defines the stages of the review.
+    *   **Agent Assignment:** Specifies which agents participate in each round.
+    *   **Data Flow (Filters):** Determines which literature proceeds to the next round (e.g., "Only articles rated 'Include' by at least two junior agents proceed to senior agent review").
+*   **Parallel & Sequential Processing:** Configure multiple agents to review the same batch of articles in parallel (simulating peer review) or have the review process occur serially (initial screen -> full review -> data extraction).
+*   **Asynchronous Execution Engine:** The underlying asynchronous processing maximizes resource utilization and API concurrency, significantly reducing wait times, even with thousands of articles.
 
-## 三、 典型工作流程範例：系統性文獻回顧 (Systematic Review)
+## III. Typical Workflow Example: Systematic Literature Review
 
-假設一位醫學研究員需要就「AI 在早期肺癌診斷中的應用」進行系統性文獻回顧。
+Imagine a medical researcher needing to conduct a systematic review on "AI applications in early lung cancer diagnosis."
 
-**場景:** 從 PubMed 導出 2000 篇相關文獻的 RIS 文件。
+**Scenario:** 2000 relevant articles exported from PubMed as a RIS file.
 
-**LatteReview 工作流程設計如下:**
+**LatteReview Workflow Design:**
 
-*   **第 0 輪：數據導入**
-    *   動作: `ReviewWorkflow` 載入 `literature.ris` 文件。
-*   **第 1 輪：大規模快速初篩 (Triage & Screening)**
-    *   代理: 3 個 `TitleAbstractReviewer` 代理（人設為「初級放射科實習生」），使用高速模型（如 Groq 或本地 Llama3, GUI預設 `gemini-2.0-flash`）。
-    *   任務: 僅根據標題和摘要，判斷文章是否與「AI」和「肺癌診斷」直接相關。輸出「納入 (Include)」、「排除 (Exclude)」或「不確定 (Unsure)」。
-    *   過濾規則: 只有至少 2 個代理投票「納入」，或存在意見分歧（例如，1 個納入，1 個排除）的文章，才能進入下一輪。
-    *   預期結果: 從 2000 篇篩選至約 400 篇。
-*   **第 2 輪：資深專家複審與衝突解決 (Expert Review & Conflict Resolution)**
-    *   代理: 1 個 `ScoringReviewer` 代理（人設為「資深腫瘤學家」），使用高質量模型（如 GPT-4o, GUI預設 `gemini-2.0-flash`）。
-    *   任務: 審查上一輪通過的 400 篇文章。
-        *   對於意見分歧的文章，代理會被提供上一輪代理的投票和理由作為額外上下文。
-        *   根據「研究設計」、「樣本量」、「創新性」等多個維度進行 1-5 分的評分，並給出最終的「納入/排除」決定和詳細理由。
-    *   過濾規則: 只有總分高於 3.5 分且被最終決定為「納入」的文章才能進入下一輪。
-    *   預期結果: 從 400 篇篩選至約 80 篇核心文獻。
-*   **第 3 輪：結構化數據提取 (Data Abstraction)**
-    *   代理: 1 個 `AbstractionReviewer` 代理，使用能夠處理長上下文的模型（如 Claude 3 Sonnet, GUI預設 `gemini-2.0-flash`）。
-    *   任務: 對最終入選的 80 篇文獻，提取以下結構化信息：
-        *   AI 模型類型 (e.g., CNN, Transformer)
-        *   數據集來源與大小
-        *   報告的準確率 (Accuracy)
-        *   報告的敏感性 (Sensitivity)
-        *   主要結論
-    *   上下文增強 (RAG): 此時可以提供一份包含研究方案核心問題的文檔作為上下文，讓提取的數據更有針對性。
+*   **Round 0: Data Import**
+    *   Action:  loads .
+*   **Round 1: Large-Scale Rapid Initial Screening (Triage)**
+    *   Agents: 3  agents (persona: "Junior Radiology Intern"), using high-speed models (e.g., Groq, local Llama3; GUI defaults to ).
+    *   Task: Based only on title and abstract, determine if articles are directly relevant to "AI" and "lung cancer diagnosis." Output: "Include," "Exclude," or "Unsure."
+    *   Filter Rule: Articles proceed if at least 2 agents vote "Include," or if there's disagreement (e.g., 1 include, 1 exclude).
+    *   Expected Outcome: Reduction from 2000 to ~400 articles.
+*   **Round 2: Senior Expert Review & Conflict Resolution**
+    *   Agent: 1  agent (persona: "Senior Oncologist"), using a high-quality model (e.g., GPT-4o; GUI defaults to ).
+    *   Task: Review the ~400 articles from Round 1.
+        *   For articles with disagreement, the agent receives votes and reasoning from Round 1 agents as additional context.
+        *   Scores articles on dimensions like "Study Design," "Sample Size," "Innovativeness" (1-5 points), providing a final "Include/Exclude" decision and detailed reasoning.
+    *   Filter Rule: Only articles with a total score > 3.5 and a final decision of "Include" proceed.
+    *   Expected Outcome: Reduction from 400 to ~80 core articles.
+*   **Round 3: Structured Data Extraction**
+    *   Agent: 1  agent, using a model capable of long-context processing (e.g., Claude 3 Sonnet; GUI defaults to ).
+    *   Task: For the final 80 articles, extract structured information:
+        *   AI Model Type (e.g., CNN, Transformer)
+        *   Dataset Source & Size
+        *   Reported Accuracy/Sensitivity
+        *   Key Conclusions
+    *   Context Enhancement (RAG): Optionally provide a document with core research questions as context to make data extraction more targeted.
 
-**最終輸出 (Final Output)**
+**Final Output:**
 
-一個結構化的 JSON 或 CSV 文件，包含 80 篇文獻的完整審查歷史、每一輪的代理決策、評分、理由，以及最後提取的結構化數據。研究員可以直接基於此文件進行統計分析和論文撰寫。
+A structured JSON or CSV file containing the complete review history for the 80 articles, including per-round agent decisions, scores, reasoning, and the final extracted structured data. Researchers can directly use this for statistical analysis and manuscript writing.
 
-## 四、 技術架構與優勢
+## IV. Technical Architecture & Advantages
 
-*   **異步核心 (Async Core):** 基於 Python 的 `asyncio`，實現了真正的非阻塞 I/O，無論是調用遠程 LLM API 還是讀寫本地文件，都能高效並發。
-*   **標準化數據模型 (Standardized Data Models):** 所有輸入、輸出和中間結果都使用 Pydantic 進行嚴格的類型定義和驗證，確保數據在工作流中流轉的一致性和可靠性。輸出結果包含詳細的元數據，具備完全的可追溯性。
-*   **資源管理 (Resource Management):**
-    *   **成本追蹤:** 與 LiteLLM 深度集成，可以精確追蹤每一次 LLM API 調用的成本，讓用戶對開銷一目了然。
-    *   **內存管理:** 針對大規模數據處理進行了優化，避免一次性將所有數據載入內存。
-*   **高度可擴展性 (Extreme Extensibility):** 專案的每一個核心組件（Agent, Provider, Workflow）都是圍繞抽象基類設計的。高級用戶可以輕鬆繼承這些類，實現自己的獨特邏輯，而無需修改核心代碼庫。
+*   **Async Core:** Built on Python's  for true non-blocking I/O, ensuring efficient concurrency for remote LLM API calls and local file operations.
+*   **Standardized Data Models:** All inputs, outputs, and intermediate results use Pydantic for strict type definition and validation, ensuring data consistency and reliability throughout the workflow. Outputs include detailed metadata for full traceability.
+*   **Resource Management:**
+    *   **Cost Tracking:** Deep integration with LiteLLM allows precise tracking of LLM API call costs, providing users with clear expense visibility.
+    *   **Memory Management:** Optimized for large-scale data processing, avoiding loading all data into memory at once.
+*   **Extreme Extensibility:** Each core component (Agent, Provider, Workflow) is designed around abstract base classes. Advanced users can easily inherit these classes to implement custom logic without modifying the core codebase.
 
-## 五、 目標用戶與應用場景
+## V. Target Users & Application Scenarios
 
-*   學術研究者/博士生: 進行系統性文獻回顧、元分析 (Meta-Analysis)，快速跟蹤領域最新進展。
-*   企業研發團隊: 專利分析、競品技術調研、新技術趨勢跟蹤。
-*   市場分析師/顧問: 從大量行業報告、新聞、財報中提取關鍵洞見和數據。
-*   法律專業人士: 案例法研究、合同審查。
-*   內容策展人: 自動化篩選、標籤化和總結海量內容，用於知識庫或新聞通訊。
+*   **Academic Researchers/PhD Students:** Systematic literature reviews, meta-analyses, tracking latest field advancements.
+*   **Corporate R&D Teams:** Patent analysis, competitive technology intelligence, new tech trend monitoring.
+*   **Market Analysts/Consultants:** Extracting key insights and data from numerous industry reports, news, and financial statements.
+*   **Legal Professionals:** Case law research, contract review.
+*   **Content Curators:** Automating screening, tagging, and summarization of vast content for knowledge bases or newsletters.
 
-## 六、 未來展望與路線圖 (Future Vision & Roadmap)
+## VI. Future Vision & Roadmap
 
-*   **Q3 2024: 圖形化界面 (GUI)**
-    *   開發一個基於 Web 的拖放式界面，讓非開發者用戶也能輕鬆設計和運行自己的審查工作流。
-*   **Q4 2024: 增強型代理與全文檔支持**
-    *   **主動式代理 (Proactive Agents):** 能根據一個高層次的研究問題，自動生成初步的納入/排除標準。
-    *   **原生 PDF/DOCX 解析:** 直接處理全文檔，而不僅僅是標題和摘要。
-*   **2025 H1: 交互式儀表板與協作平台**
-    *   開發一個交互式儀表板，可視化審查進度、代理決策分佈，並允許用戶手動覆蓋或修正 AI 的決定。
-    *   引入多用戶協作功能，支持團隊共同管理和執行審查項目。
-*   **長期願景: 開源生態系統**
-    *   建立一個開放的社區，鼓勵用戶貢獻和分享他們創建的特定領域代理 (Domain-Specific Agents) 和 工作流模板 (Workflow Templates)，例如「臨床試驗審查模板」或「社會科學質性研究模板」。
+*   **Q3 2024: Graphical User Interface (GUI)**
+    *   Develop a web-based, drag-and-drop interface allowing non-developers to easily design and run review workflows. (This is what we've been building!)
+*   **Q4 2024: Enhanced Agents & Full-Text Document Support**
+    *   **Proactive Agents:** Agents that can auto-generate initial inclusion/exclusion criteria based on a high-level research question.
+    *   **Native PDF/DOCX Parsing:** Directly process full-text documents, not just titles/abstracts.
+*   **2025 H1: Interactive Dashboard & Collaboration Platform**
+    *   Develop an interactive dashboard to visualize review progress, agent decision distributions, and allow users to manually override/correct AI decisions.
+    *   Introduce multi-user collaboration features for team-based review project management.
+*   **Long-Term Vision: Open Source Ecosystem**
+    *   Foster an open community encouraging users to contribute and share domain-specific agents and workflow templates (e.g., "Clinical Trial Review Template," "Social Science Qualitative Research Template").
 
-## 總結 (Conclusion)
+## VII. Conclusion
 
-LatteReview 不僅僅是一個代碼包，它是一個強大的認知增強框架。它將大型語言模型的強大能力與嚴謹的學術審查流程相結合，旨在將研究人員從繁瑣的勞動中解放出來，讓他們有更多的時間——或許正是一杯拿鐵的時間——去從事真正具有創造性的工作。這是一個為效率、透明度和深度洞見而生的專案。
+LatteReview is more than a code package; it's a powerful cognitive augmentation framework. It combines the capabilities of large language models with rigorous academic review processes, aiming to free researchers from tedious labor, allowing them more time—perhaps precisely the time for a latte—for genuinely creative work. This project is born for efficiency, transparency, and deep insight.

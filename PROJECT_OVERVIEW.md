@@ -10,13 +10,16 @@ Key features of LatteReview include:
 *   **Multiple review rounds:** Supports hierarchical decision-making workflows with several stages of review.
 *   **Diverse content type review:** Capable of reviewing article titles, abstracts, custom texts, and even images using LLM-powered agents.
 *   **Specialized reviewer agents:** Users can define agents with specific backgrounds and evaluation capabilities (e.g., scoring, concept abstraction, or custom-defined reviewers).
+    *   : Focuses on reviewing titles and abstracts.
+    *   : Assigns scores based on defined criteria.
+    *   : Summarizes and abstracts key information from papers.
 *   **Flexible review workflows:** Enables the creation of workflows where multiple agents operate in parallel or sequentially.
-*   **Peer feedback analysis:** Reviewer agents can analyze feedback from other agents, cast votes, and suggest corrections.
+*   **Peer feedback analysis:** Reviewer agents can analyze feedback from other agents, cast votes, and suggest corrections (conceptual, depending on workflow design).
 *   **Context integration:** Enhances reviews with item-specific context, supporting use cases like Retrieval Augmented Generation (RAG).
 *   **Broad LLM provider compatibility:** Integrates with various LLM providers through LiteLLM, including OpenAI and Ollama. This allows for model-agnostic integration with models like OpenAI, Gemini, Claude, Groq, and local models via Ollama.
 *   **High-performance processing:** Utilizes asynchronous processing for efficient batch reviews.
 *   **Standardized output:** Provides results in a standardized format with detailed scoring metrics and reasoning for transparency.
-*   **Resource management:** Includes robust cost tracking and memory management systems.
+*   **Resource management:** Includes robust cost tracking and memory management systems (features of the underlying LatteReview package).
 *   **Extensible architecture:** Allows for the implementation of custom review workflows.
 *   **RIS file support:** Supports RIS (Research Information Systems) file format for academic literature review.
 
@@ -24,23 +27,18 @@ Key features of LatteReview include:
 
 LatteReview is structured around three main components: Agents, Providers, and Workflows.
 
-*   **Agents:** These are the AI-powered reviewers responsible for evaluating the literature. LatteReview provides different types of agents:
-    *   `TitleAbstractReviewer`: Focuses on reviewing titles and abstracts.
-    *   `ScoringReviewer`: Assigns scores based on defined criteria.
-    *   `AbstractionReviewer`: Summarizes and abstracts key information from papers.
-    *   Users can also create custom reviewer agents to suit specific needs.
-    Each agent can be configured with a specific LLM, a "backstory" or persona, inclusion/exclusion criteria, and other parameters.
+*   **Agents:** These are the AI-powered reviewers responsible for evaluating the literature. LatteReview provides different types of agents, each configurable with a specific LLM, a "backstory" or persona, and task-specific criteria (like inclusion/exclusion criteria).
+    *   : For initial screening based on titles and abstracts.
+    *   : For quantitative evaluation against defined rubrics.
+    *   : For extracting key information or concepts.
+    *   Custom agents can also be developed by users.
 
-*   **Providers:** These components handle the communication with the Large Language Models (LLMs). LatteReview supports various providers:
-    *   `LiteLLMProvider`: A versatile provider that supports a wide range of LLMs including OpenAI, Anthropic (Claude), Gemini, Groq, and more. This is the recommended provider.
-    *   `OpenAIProvider`: For direct integration with OpenAI and Gemini APIs.
-    *   `OllamaProvider`: Optimized for running local models via Ollama.
-    This flexible provider system allows users to choose the most suitable LLM for each agent and task.
+*   **Providers:** These components handle the communication with the Large Language Models (LLMs). LatteReview's flexible provider system (primarily via ) allows use of models from OpenAI, Anthropic (Claude), Google (Gemini), Cohere, local models via Ollama, and many others. This enables users to choose the most suitable LLM for each agent and task based on capability, cost, or privacy requirements.
 
-*   **Workflows:** Workflows define the structure and sequence of the review process.
-    *   `ReviewWorkflow`: This class allows users to define multi-stage review processes.
-    *   A workflow is defined by a schema that specifies rounds of review, the agents involved in each round, the text inputs for the agents, and filters to determine which items proceed to subsequent rounds.
-    *   For example, a workflow can have an initial round with multiple junior agents reviewing titles and abstracts, followed by a second round where a senior agent reviews items where the junior agents disagreed.
-    *   Workflows handle the flow of data, manage the execution of agent reviews (asynchronously for efficiency), and aggregate the results.
+*   **Workflows ():** Workflows define the structure and sequence of the review process.
+    *   They are defined by a schema that specifies multiple rounds of review.
+    *   Each round can have one or more agents operating in parallel or sequentially.
+    *   Workflows manage the flow of data (e.g., articles), direct agents to perform reviews, and can incorporate logic to filter articles between rounds (e.g., only "Included" articles proceed, or articles where previous agents disagreed go to an expert review).
+    *   The system uses asynchronous operations for efficient processing of large batches of articles.
 
-These components interact to create a flexible and powerful system for automated literature reviews. Data (e.g., a list of articles) is fed into a Workflow. The Workflow then directs specified Agents to review the data according to the defined stages. Agents, in turn, utilize Providers to interact with LLMs to perform their review tasks. The results, including decisions, scores, and reasoning, are then collected and returned by the Workflow.
+These components interact to create a versatile system for automating literature reviews. Data (e.g., a list of articles from a RIS file) is loaded and passed to a . The workflow then orchestrates the review process according to its defined schema, with  performing their tasks by leveraging  to communicate with LLMs. The results, including decisions, scores, extracted data, and reasoning, are collected and returned by the workflow, typically as a structured dataset (e.g., a pandas DataFrame).
