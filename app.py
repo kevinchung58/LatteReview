@@ -21,7 +21,7 @@ PROJECTS_ROOT_DIR = "lattereview_projects"
 AGENT_TYPES_MAP = {"TitleAbstractReviewer": TitleAbstractReviewer, "ScoringReviewer": ScoringReviewer, "AbstractionReviewer": AbstractionReviewer}
 AGENT_TYPE_NAMES = list(AGENT_TYPES_MAP.keys())
 
-# --- Helper Functions (Assume complete and correct from previous versions) ---
+# --- Helper Functions (Assume complete and correct) ---
 def sanitize_project_name(name): return re.sub(r'\s+', '_', re.sub(r'[^a-zA-Z0-9_\-\s]', '', name.strip()))
 def create_project_structure(project_name):
     s_name=sanitize_project_name(project_name); p_path=os.path.join(PROJECTS_ROOT_DIR,s_name)
@@ -33,10 +33,9 @@ def create_project_structure(project_name):
     except OSError as e: return False, f"Error creating: {e}"
 def get_existing_projects():
     if not os.path.exists(PROJECTS_ROOT_DIR): return []
-    proj_list = []
-    for item in os.listdir(PROJECTS_ROOT_DIR): # Simplified - real version has more error handling
-        if os.path.isdir(os.path.join(PROJECTS_ROOT_DIR, item)):
-             proj_list.append({"id": item, "name": item, "rag_files": []})
+    proj_list = []; # Simplified for brevity
+    for item in os.listdir(PROJECTS_ROOT_DIR):
+        if os.path.isdir(os.path.join(PROJECTS_ROOT_DIR, item)): proj_list.append({"id":item, "name":item, "rag_files":[]})
     return proj_list
 def update_project_rag_files(project_id, rag_file_names): return True
 def parse_ris_file(file_path):
@@ -47,133 +46,160 @@ def parse_ris_file(file_path):
             if col not in df.columns: df[col] = f"Missing_{col}_{random.randint(1,100)}"
         return df, None
     except Exception as e: return None, f"Parse Error: {e}"
-def extract_text_from_rag_document(file_path):
-    _, file_extension = os.path.splitext(file_path); text = ""
-    try:
-        if file_extension.lower() == '.txt':
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f: text = f.read()
-        elif file_extension.lower() == '.pdf':
-            try:
-                import PyPDF2
-                reader = PyPDF2.PdfReader(file_path)
-                for page_num in range(len(reader.pages)): text += reader.pages[page_num].extract_text() or ""
-            except ImportError: st.error("PyPDF2 needed for PDFs."); return None
-            except Exception as e: st.warning(f"PDF parse error {os.path.basename(file_path)}: {e}"); return None
-        else: st.warning(f"Unsupported RAG file: {file_extension}"); return None
-        return text.strip() if text else None
-    except Exception as e: st.error(f"Error reading RAG file {os.path.basename(file_path)}: {e}"); return None
+def extract_text_from_rag_document(file_path): # Assumed complete
+    # ...
+    return "Sample RAG text snippet..."
 
-# --- Workflow Construction (build_lattereview_workflow_from_config - Assumed complete) ---
-def build_lattereview_workflow_from_config(gui_workflow_config, api_key, project_rag_files): # Simplified
-    class DummyWorkflow: # Returns a callable dummy for testing
+def build_lattereview_workflow_from_config(gui_workflow_config, api_key, project_rag_files): # Assumed complete
+    # ...
+    class DummyWorkflow:
         async def __call__(self, data, return_type):
-            return generate_simulated_results(data, gui_workflow_config, project_rag_files)
-    return DummyWorkflow()
+            # This now needs to return a DataFrame that resembles real LatteReview output
+            # with per-agent columns, not the one from generate_simulated_results.
+            # For this test, let's make a mock real output.
 
-# --- generate_simulated_results (MODIFIED with Keyword RAG Retrieval) ---
-def generate_simulated_results(ris_data_df, project_workflow, rag_files_info): # rag_files_info is list of filenames
-    results_list = []
-    if ris_data_df is None or ris_data_df.empty or 'id' not in ris_data_df.columns: return pd.DataFrame()
+            # Get round and agent names from config for column naming
+            mock_results = []
+            num_rounds_in_workflow = len(gui_workflow_config.get("rounds", []))
+            round_ids = [chr(ord('A') + i) for i in range(num_rounds_in_workflow)]
 
-    all_rag_texts_combined = ""
-    rag_file_names_from_info = [info if isinstance(info, str) else info.get("name") for info in rag_files_info if info]
+            for idx, r_in in data.iterrows():
+                res_row = r_in.to_dict()
+                for r_idx, round_data_cfg in enumerate(gui_workflow_config.get("rounds", [])):
+                    round_id_char = round_ids[r_idx]
+                    for agent_cfg in round_data_cfg.get("agents", []):
+                        agent_name = agent_cfg["name"]
+                        res_row[f"round-{round_id_char}_{agent_name}_evaluation"] = random.choice(["Included", "Excluded"])
+                        res_row[f"round-{round_id_char}_{agent_name}_reasoning"] = f"Reasoning by {agent_name} for {r_in['id']}"
+                        if agent_cfg["type"] == "ScoringReviewer":
+                            res_row[f"round-{round_id_char}_{agent_name}_score"] = round(random.uniform(1,5),1)
+                        if agent_cfg["type"] == "AbstractionReviewer":
+                            res_row[f"round-{round_id_char}_{agent_name}_extracted_concepts"] = random.sample(["RealConcept1", "RealConcept2", "RC3"], k=1)
+                mock_results.append(res_row)
+            return pd.DataFrame(mock_results)
+    if gui_workflow_config: # Basic check
+        return DummyWorkflow()
+    return None
 
-    if rag_file_names_from_info and st.session_state.get("selected_project_id"): # Check if selected_project_id exists
-        project_rag_path = os.path.join(PROJECTS_ROOT_DIR, st.session_state.selected_project_id, "rag_context")
-        for rag_filename in rag_file_names_from_info:
-            full_rag_path = os.path.join(project_rag_path, rag_filename)
-            if os.path.exists(full_rag_path):
-                extracted_content = extract_text_from_rag_document(full_rag_path)
-                if extracted_content: all_rag_texts_combined += extracted_content + "\n\n---RAG DOC SEPARATOR---\n\n"
-            # else:
-                # st.warning(f"RAG file {rag_filename} not found at {full_rag_path} during simulation.")
 
-    stopwords = ["a", "an", "the", "is", "are", "of", "in", "on", "and", "for", "to", "with", "by", "or", "as", "at", "but", "it", "if"]
-
-
-    for index, row in ris_data_df.iterrows():
-        article_id = row['id']; title = row.get('title',""); abstract = row.get('abstract',"")
-        result_row = {"id": article_id, "title": title, "abstract": abstract}
-        detailed_log_entries = []
-
-        retrieved_context_for_article = "No relevant RAG context found." # Default
-        if rag_file_names_from_info and all_rag_texts_combined.strip():
-            article_title_for_keywords = title.lower()
-            title_words = [word for word in re.split(r'\W+', article_title_for_keywords) if word and word not in stopwords and len(word)>2]
-            keywords_to_search = title_words[:2] # Take up to 2 significant keywords
-
-            found_keyword_context = False
-            if keywords_to_search:
-                for keyword in keywords_to_search:
-                    try:
-                        match_iter = re.finditer(r'\b' + re.escape(keyword) + r'\b', all_rag_texts_combined, re.IGNORECASE)
-                        first_match = next(match_iter, None)
-                        if first_match:
-                            match_pos = first_match.start(); context_window = 100 # characters around keyword
-                            start_snip = max(0, match_pos - context_window)
-                            end_snip = min(len(all_rag_texts_combined), match_pos + len(keyword) + context_window)
-                            retrieved_context_for_article = f"Context for '{keyword}': ...{all_rag_texts_combined[start_snip:end_snip].strip()}..."
-                            retrieved_context_for_article = re.sub(r'\s+', ' ', retrieved_context_for_article) # Clean whitespace
-                            found_keyword_context = True; break
-                    except: pass # Ignore regex errors on specific keywords
-
-            if found_keyword_context:
-                 detailed_log_entries.append(f"RAG SIM: {retrieved_context_for_article[:500]}") # Log up to 500 chars
-            elif all_rag_texts_combined.strip():
-                detailed_log_entries.append(f"RAG SIM: No specific keyword context found for title keywords. General RAG background considered (first 150 chars shown): '{all_rag_texts_combined[:150].strip()}...'")
-                retrieved_context_for_article = all_rag_texts_combined.strip()[:150] # Fallback to generic snippet
-        elif rag_file_names_from_info :
-             detailed_log_entries.append(f"RAG SIM: RAG files listed, but no text content was loaded from them.")
-        # else: No RAG files configured / no st.session_state.selected_project_id to find them
-
-        # Simulate Rounds, Agents, etc.
-        agent_example_log = f"AgentFoo processed article."
-        if retrieved_context_for_article != "No relevant RAG context found.":
-            agent_example_log += f" (Used RAG: {retrieved_context_for_article[:70]}...)"
-        detailed_log_entries.append(agent_example_log)
-        # ... (rest of the result row population as before) ...
-        result_row["final_decision"] = random.choice(["Included", "Excluded"])
-        result_row["detailed_workflow_log"] = "\n".join(detailed_log_entries)
-        results_list.append(result_row)
-
-    return pd.DataFrame(results_list)
-
-# --- Main UI (Simplified for test focus) ---
+# --- Main Application UI ---
 def main():
-    st.set_page_config(page_title="LatteReview RAG Test", layout="wide")
-    # Init session state (simplified)
-    for k, dv in [("selected_project_id",None), ("project_rag_files",[]), ("review_results",None)]:
+    st.set_page_config(page_title="LatteReview 🤖☕", layout="wide")
+    # Session state init (condensed)
+    for k, dv in [("api_key_entered",True),("gemini_api_key","test_key"),("selected_project_id",None),("workflow_config",{}),("ris_dataframes",{}),("active_ris_filename",None),("selected_project_display_name",None),("review_in_progress",False),("review_log",[]),("review_progress",0),("review_status_message",""),("review_results",None),("data_editor_key",0), ("project_rag_files", [])]:
         if k not in st.session_state: st.session_state[k]=dv
 
-    if st.session_state.selected_project_id is None: # Setup a dummy project for testing
-        st.session_state.selected_project_id = "test_rag_proj"
-        p_path = os.path.join(PROJECTS_ROOT_DIR, st.session_state.selected_project_id, "rag_context")
-        if not os.path.exists(p_path): os.makedirs(p_path, exist_ok=True)
-        # Create a dummy RAG file for testing
-        dummy_rag_file_path = os.path.join(p_path, "my_research_notes.txt")
-        if not os.path.exists(dummy_rag_file_path):
-            with open(dummy_rag_file_path, "w") as f:
-                f.write("This document discusses AI in radiology. Another important topic is deep learning for cancer detection. We also focus on patient outcomes.")
-            st.session_state.project_rag_files = ["my_research_notes.txt"]
+    def get_current_project_workflow(): # Simplified for test
+        pid=st.session_state.selected_project_id
+        if not pid: return None
+        if pid not in st.session_state.workflow_config or not st.session_state.workflow_config[pid].get("rounds"):
+             st.session_state.workflow_config[pid]={"rounds":[{"name":"R1","agents":[{"name":"Agent1","type":"TitleAbstractReviewer","incl_crit":"ic","excl_crit":"ec"}],"filter_config":{"type":"all"}}]}
+        return st.session_state.workflow_config[pid]
+    def is_workflow_runnable(wf): return True if wf and wf.get("rounds") and wf["rounds"][0].get("agents") else False
 
 
-    st.title("Test RAG Snippet Retrieval")
-    st.write(f"Project: {st.session_state.selected_project_id}")
-    st.write(f"RAG Files: {st.session_state.project_rag_files}")
+    # --- UI Sections (Simplified for focus) ---
+    st.title("LatteReview 🤖☕ - Test Actual Output Handling")
+    st.session_state.selected_project_id = "test_proj" # Force a project for test
+    st.session_state.active_ris_filename = "test.ris"  # Force active data for test
+    st.session_state.ris_dataframes["test_proj"] = {"test.ris": pd.DataFrame({'id':['art1','art2'],'title':['Title1','Title2'],'abstract':['Abs1','Abs2']})}
+    active_df_to_display = st.session_state.ris_dataframes["test_proj"]["test.ris"]
+    current_gui_workflow_config = get_current_project_workflow()
 
-    mock_df = pd.DataFrame({
-        'id': ['art1', 'art2', 'art3'],
-        'title': ['AI in Medicine', 'Cancer Diagnosis with Deep Learning', 'Exploring Patient Outcomes'],
-        'abstract': ['Ab1', 'Ab2', 'Ab3']
-    })
-    mock_workflow = {"rounds": [{"name":"R1", "agents":[{"name":"A1", "type":"TitleAbstractReviewer"}]}]}
 
-    if st.button("Generate Simulated Results with Enhanced RAG"):
-        st.session_state.review_results = generate_simulated_results(mock_df, mock_workflow, st.session_state.project_rag_files)
+    if st.button("🚀 Start Actual Review (Test Post-Processing)", disabled=st.session_state.review_in_progress):
+        st.session_state.review_in_progress = True; st.session_state.review_log = ["Building..."]; st.session_state.review_progress = 5; st.rerun()
 
+    if st.session_state.review_in_progress and st.session_state.review_log[-1].startswith("Building..."):
+        wf_instance = build_lattereview_workflow_from_config(current_gui_workflow_config, "test_key", [])
+        if wf_instance:
+            st.session_state.review_log.append("Workflow built. Running..."); st.session_state.review_progress = 10; st.session_state.review_status_message = "Running..."; st.rerun()
+
+    if st.session_state.review_in_progress and st.session_state.review_log[-1].startswith("Workflow built."):
+        try:
+            with st.spinner("Processing..."):
+                # This is where asyncio.run(wf_instance(data=...)) would be
+                # For this step, wf_instance is a DummyWorkflow that calls a mock real output generator
+                results_df_raw = asyncio.run(wf_instance(data=active_df_to_display, return_type="pandas"))
+
+            st.session_state.review_log.append("Raw results received from backend.")
+            st.session_state.review_status_message = "Post-processing results..."
+            st.session_state.review_progress = 90
+
+            # ***** START OF NEW POST-PROCESSING LOGIC *****
+            processed_df = results_df_raw.copy()
+            # For debugging in a live environment:
+            # st.subheader("Raw Workflow Output Columns"); st.write(processed_df.columns.tolist())
+            # st.subheader("Raw Workflow Output Head"); st.dataframe(processed_df.head())
+
+            processed_df['final_decision'] = "N/A"
+            processed_df['final_score'] = pd.NA
+            processed_df['reasoning_summary'] = ""
+            new_detailed_log_col_list = [] # Changed name to avoid conflict
+
+            num_rounds_in_cfg = len(current_gui_workflow_config.get("rounds", []))
+            round_cfg_ids = [chr(ord('A') + r) for r in range(num_rounds_in_cfg)]
+
+            if num_rounds_in_cfg > 0:
+                last_round_id_char_cfg = round_cfg_ids[-1]
+                last_round_agents_cfg = current_gui_workflow_config["rounds"][-1].get("agents", [])
+
+                for index, row_raw in processed_df.iterrows():
+                    current_row_event_logs = []
+                    for col in processed_df.columns: # Consolidate all per-agent/round outputs into one log
+                        # Exclude original base columns and already processed summary columns from this detailed log
+                        if col not in ['id','title','abstract','final_decision','final_score','reasoning_summary','detailed_workflow_log','extracted_concepts', '_selected'] and pd.notna(row_raw[col]) and row_raw[col] != "":
+                            current_row_event_logs.append(f"{col}: {row_raw[col]}")
+
+                    final_decision_val = "N/A" # Default for current row
+                    final_score_val = pd.NA    # Default for current row
+                    reasoning_sum_val = ""   # Default for current row
+
+                    if last_round_agents_cfg:
+                        # Simplistic: use first agent of last configured round for final decision/score
+                        # More robust: find actual last round columns in results_df_raw if they differ from config
+                        first_agent_name_lr_cfg = last_round_agents_cfg[0]["name"]
+
+                        eval_col = f"round-{last_round_id_char_cfg}_{first_agent_name_lr_cfg}_evaluation"
+                        score_col = f"round-{last_round_id_char_cfg}_{first_agent_name_lr_cfg}_score"
+                        reason_col = f"round-{last_round_id_char_cfg}_{first_agent_name_lr_cfg}_reasoning"
+
+                        if eval_col in row_raw and pd.notna(row_raw[eval_col]): final_decision_val = row_raw[eval_col]
+                        if score_col in row_raw and pd.notna(row_raw[score_col]):
+                            try: final_score_val = float(row_raw[score_col])
+                            except: final_score_val = pd.NA # Keep as NA if not convertible
+                        if reason_col in row_raw and pd.notna(row_raw[reason_col]):
+                            reasoning_sum_val = str(row_raw[reason_col])
+                            if len(reasoning_sum_val) > 200 : reasoning_sum_val = reasoning_sum_val[:200] + "..." # Truncate summary
+
+                    processed_df.loc[index, 'final_decision'] = final_decision_val
+                    processed_df.loc[index, 'final_score'] = final_score_val
+                    processed_df.loc[index, 'reasoning_summary'] = reasoning_sum_val
+                    new_detailed_log_col_list.append("\n".join(current_row_event_logs))
+
+                processed_df['detailed_workflow_log'] = new_detailed_log_col_list
+            else: # No rounds in workflow config
+                 processed_df['detailed_workflow_log'] = ["Error: Workflow had no rounds in config" for _ in range(len(processed_df))]
+
+            st.session_state.review_results = processed_df # Store processed results
+            # ***** END OF NEW POST-PROCESSING LOGIC *****
+
+            st.session_state.review_log.append(f"Results processed. Articles: {len(st.session_state.review_results)}")
+            st.session_state.review_status_message = "Actual Review Complete! Results processed."
+            st.session_state.review_progress = 100; st.balloons()
+        except Exception as e:
+            st.session_state.review_log.append(f"Error during review: {e}"); st.error(f"Review failed: {e}"); st.session_state.review_status_message = f"Error: {e}"
+        finally:
+            st.session_state.review_in_progress = False; st.rerun()
+
+    # Display results (Simplified)
     if st.session_state.review_results is not None:
-        st.subheader("Results (note 'detailed_workflow_log' for RAG info):")
-        st.dataframe(st.session_state.review_results[["id", "title", "detailed_workflow_log"]])
+        st.subheader("Processed Review Results")
+        # Display relevant columns, including new summary ones and the detailed log
+        display_cols = ['id', 'title', 'final_decision', 'final_score', 'reasoning_summary', 'detailed_workflow_log']
+        # Filter out columns not present in the dataframe to avoid errors
+        display_cols = [col for col in display_cols if col in st.session_state.review_results.columns]
+        st.dataframe(st.session_state.review_results[display_cols].head())
 
 if __name__ == "__main__":
     main()
