@@ -14,3 +14,4 @@ flake8>=7.1.1
 pillow>=11.0.0l
 opencv-python>=4.10.0.84
 matplotlib>=3.9.4streamlit
+.
