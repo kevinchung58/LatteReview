@@ -36,3 +36,34 @@ export const askQuery = async (question: string): Promise<QueryResponse> => {
     throw error.response?.data || error.message || new Error('Query failed');
   }
 };
+
+export interface GraphNode {
+  id: string;
+  name: string;
+  labels?: string[];
+  properties?: Record<string, any>;
+  // Add other properties if needed based on what react-force-graph-2d uses, e.g., val, color
+}
+
+export interface GraphLink {
+  source: string; // ID of source node
+  target: string; // ID of target node
+  type?: string;
+  // Add other properties if needed, e.g., value, color
+}
+
+export interface GraphData {
+  nodes: GraphNode[];
+  links: GraphLink[];
+}
+
+export const getGraphData = async (searchTerm?: string): Promise<GraphData> => {
+  try {
+    const params = searchTerm ? { searchTerm } : {};
+    const response = await apiClient.get<GraphData>('/graph-data', { params });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching graph data:', error);
+    throw error.response?.data || error.message || new Error('Failed to fetch graph data');
+  }
+};

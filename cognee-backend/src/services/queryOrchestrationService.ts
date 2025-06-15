@@ -71,6 +71,85 @@ export async function executeQueryAgainstGraph(naturalLanguageQuestion: string):
   }
 }
 
+export async function fetchGraphData(searchTerm?: string): Promise<{ nodes: any[]; links: any[] }> {
+  let cypherQuery: string;
+  const params: { searchTerm?: string } = {};
+
+  if (searchTerm) {
+    cypherQuery = `
+      MATCH (n)-[r]-(m)
+      WHERE (n.name CONTAINS $searchTerm OR n.id CONTAINS $searchTerm OR n.title CONTAINS $searchTerm)
+         OR (m.name CONTAINS $searchTerm OR m.id CONTAINS $searchTerm OR m.title CONTAINS $searchTerm)
+      RETURN n, r, m
+      LIMIT 50`; // Ensure 'name', 'id', 'title' are common properties or adjust
+    params.searchTerm = searchTerm;
+  } else {
+    cypherQuery = `
+      MATCH (n)-[r]-(m)
+      RETURN n, r, m
+      LIMIT 25`;
+  }
+  console.log(`Executing Cypher for graph visualization: ${cypherQuery} with params: ${JSON.stringify(params)}`);
+
+  try {
+    const neo4jResult = await executeNeo4jQuery(cypherQuery, params);
+
+    const nodesMap = new Map<string, any>();
+    const links: any[] = [];
+
+    if (neo4jResult && neo4jResult.records) {
+      neo4jResult.records.forEach(record => {
+        const n = record.get('n');
+        const r = record.get('r');
+        const m = record.get('m');
+
+        if (n && n.elementId) { // Neo4j driver uses elementId for internal ID
+          if (!nodesMap.has(n.elementId)) {
+            nodesMap.set(n.elementId, {
+              id: n.elementId,
+              name: n.properties.name || n.properties.title || n.elementId.substring(0,8), // Fallback for display name
+              labels: n.labels,
+              properties: n.properties,
+            });
+          }
+        }
+        if (m && m.elementId) {
+          if (!nodesMap.has(m.elementId)) {
+            nodesMap.set(m.elementId, {
+              id: m.elementId,
+              name: m.properties.name || m.properties.title || m.elementId.substring(0,8), // Fallback for display name
+              labels: m.labels,
+              properties: m.properties,
+            });
+          }
+        }
+        if (r && r.elementId && n && m && n.elementId && m.elementId) {
+          // Check if link already exists to avoid duplicates if relationship direction isn't fixed by query
+          const linkExists = links.some(l =>
+            (l.source === n.elementId && l.target === m.elementId && l.type === (r.properties.type || r.type)) ||
+            (l.source === m.elementId && l.target === n.elementId && l.type === (r.properties.type || r.type)) // For undirected view
+          );
+          if (!linkExists) { // Or use r.elementId if it's unique per pair and direction for this query
+            links.push({
+              id: r.elementId,
+              source: n.elementId,
+              target: m.elementId,
+              type: r.properties.type || r.type
+            });
+          }
+        }
+      });
+    }
+
+    console.log(`Transformed graph data: ${nodesMap.size} nodes, ${links.length} links.`);
+    return { nodes: Array.from(nodesMap.values()), links };
+
+  } catch (error: any) {
+    console.error('Error fetching graph data from Neo4j:', error.message);
+    throw new Error(`Failed to fetch graph data: ${error.message}`);
+  }
+}
+
 export async function searchVectorStore(
   naturalLanguageQuestion: string,
   collectionName: string = CHROMA_COLLECTION_NAME,

@@ -8,7 +8,7 @@ import { splitText, TextSplitterOptions, splitBySentences } from './services/tex
 import { extractSPO, SPOTriple, generateEmbeddings, synthesizeAnswerWithContext } from './services/llmService'; // generateEmbeddings added, synthesizeAnswerWithContext added
 import { saveTriples as saveSPOsInNeo4j } from './services/neo4jService';
 import { addOrUpdateChunks, getOrCreateCollection as getOrCreateVectorCollection } from './services/vectorDbService';
-import { executeQueryAgainstGraph, searchVectorStore } from './services/queryOrchestrationService'; // Added
+import { executeQueryAgainstGraph, searchVectorStore, fetchGraphData } from './services/queryOrchestrationService'; // fetchGraphData Added
 import { CHROMA_COLLECTION_NAME } from './config';
 
 const app = express();
@@ -136,6 +136,18 @@ app.post('/ingest', upload.single('file'), async (req, res) => { // Make handler
       }
     }
     res.status(500).send({ message: 'Error processing file for vectorization.', error: error.message });
+  }
+});
+
+app.get('/graph-data', async (req, res) => {
+  const searchTerm = req.query.searchTerm as string | undefined;
+  console.log(`Fetching graph data with searchTerm: "${searchTerm || 'None'}"`);
+  try {
+    const graphData = await fetchGraphData(searchTerm);
+    res.json(graphData);
+  } catch (error: any) {
+    console.error('Error fetching graph data:', error.message, error.stack);
+    res.status(500).json({ message: 'Failed to fetch graph data', error: error.message });
   }
 });
 
