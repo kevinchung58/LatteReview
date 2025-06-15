@@ -1,9 +1,40 @@
 /* src/components/GraphDetailPanel.module.css */
-.panelContainer {
-  /* Positioning styles (position, top, right, width, maxHeight, zIndex, boxShadow, bg, border, borderRadius)
-     are complex and work well inline for an overlay. Keep them inline in the TSX.
-     This module will style the *content* of the panel. */
-  padding: 15px; /* This was inline, can be part of the container if we move all styles here */
+.panelOverlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 300px;
+  max-height: calc(100% - 20px); /* Max height relative to parent */
+  overflow-y: auto;
+  background-color: var(--card-background-color, white);
+  border: 1px solid var(--card-border-color, #ccc);
+  border-radius: var(--border-radius, 8px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 1000; /* Ensure it's above the graph canvas */
+  padding: 15px;
+}
+
+/* Responsive adjustments for the panel */
+@media (max-width: 768px) {
+  .panelOverlay {
+    width: 80%; /* Wider on tablets */
+    left: 50%;
+    transform: translateX(-50%);
+    top: 10px; /* Keep near top */
+    max-height: 50vh; /* Shorter to not obscure too much */
+  }
+}
+
+@media (max-width: 480px) { /* More modal-like on small mobile */
+  .panelOverlay {
+    width: calc(100% - 20px); /* Full width with some margin */
+    left: 10px;
+    right: 10px;
+    transform: none; /* Reset transform */
+    top: 10px;
+    bottom: 10px; /* Can make it almost full height */
+    max-height: calc(100vh - 20px); /* Allow more height */
+  }
 }
 
 .panelHeader {

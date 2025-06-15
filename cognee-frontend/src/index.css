@@ -133,3 +133,99 @@ button:disabled {
 .mt-1 { margin-top: 0.25rem !important; }
 .mt-2 { margin-top: 0.5rem !important; }
 .mt-3 { margin-top: 1rem !important; }
+
+.mt-1 { margin-top: 0.25rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+
+/* App container specific styles */
+.app-container {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px; /* Default padding */
+  margin-top: 20px; /* Default top/bottom margin */
+  margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) { /* Tablet and smaller */
+  body {
+    font-size: 15px; /* Slightly smaller base font for tablet */
+  }
+
+  .app-container {
+    padding: 15px; /* Reduced padding for tablet */
+  }
+
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.4rem; }
+  h3 { font-size: 1.15rem; }
+
+  .card {
+    padding: 15px; /* Reduce padding for cards */
+    margin-bottom: 20px; /* Reduce bottom margin for cards */
+  }
+
+  input[type="text"],
+  input[type="file"],
+  textarea,
+  button {
+    font-size: 0.95rem; /* Slightly smaller font for form elements */
+    padding: 0.4rem 0.6rem; /* Adjust padding */
+  }
+
+  /* Specific component responsive adjustments should ideally be in their own (module) CSS files
+     or use more specific selectors if placed here.
+     Example for FileUpload's typical structure if stacking is desired:
+     .file-upload-form > div { flex-direction: column; align-items: stretch; }
+     .file-upload-form button { width: 100%; margin-top: 10px; }
+
+     Example for ChatInterface's form if it uses .chatForm class:
+     form.chatForm { flex-direction: column; }
+     form.chatForm input.chatInput { margin-right: 0; margin-bottom: 10px; }
+     form.chatForm button { width: 100%; }
+  */
+}
+
+@media (max-width: 480px) { /* Mobile */
+  body {
+    font-size: 14px; /* Even smaller base font for mobile */
+  }
+
+  .app-container {
+    padding: 10px; /* Further reduced padding for mobile */
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.1rem; }
+
+  .card {
+    padding: 10px; /* Further reduce padding for cards */
+    margin-bottom: 15px; /* Further reduce bottom margin */
+  }
+
+  input[type="text"],
+  input[type="file"],
+  textarea,
+  button {
+    font-size: 0.9rem; /* Further smaller font for form elements */
+    padding: 0.35rem 0.5rem; /* Adjust padding */
+  }
+
+  /* Footer text might need to be smaller */
+  /* Assuming .app-footer class on footer in App.tsx */
+  .app-footer { /* This class is used in App.tsx for the footer */
+    font-size: 0.8em;
+  }
+}
+
+/* Accessibility: Show focus outline only when navigating with keyboard */
+*:focus-visible {
+  outline: 2px solid var(--primary-color, #007bff);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25); /* Optional: softer glow */
+}

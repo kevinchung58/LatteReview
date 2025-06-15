@@ -15,6 +15,7 @@ const KnowledgeGraphVisualizer: React.FC = () => {
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const [selectedElement, setSelectedElement] = useState<GraphNode | GraphLink | null>(null);
   const [isExpandingNode, setIsExpandingNode] = useState<string | false>(false); // Store ID of node being expanded or false
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
 
 
   const fetchData = useCallback(async (term?: string) => {
@@ -47,6 +48,16 @@ const KnowledgeGraphVisualizer: React.FC = () => {
      window.addEventListener('resize', updateWidth);
      updateWidth(); // Initial width
      return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
+  // Effect to update isMobile state on window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', checkMobile);
+    checkMobile(); // Initial check
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -153,7 +164,7 @@ const KnowledgeGraphVisualizer: React.FC = () => {
              linkDirectionalArrowRelPos={1}
              linkCurvature={0.1}
              width={containerWidth > 0 ? containerWidth - 20 : 300 } // Subtract padding, ensure positive
-             height={400} // Fixed height, or make it responsive
+             height={isMobile ? 300 : 400} // Conditional height
              backgroundColor="#f9f9f9"
              // @ts-ignore: Type problem with linkSource/linkTarget from react-force-graph, common issue.
              linkSource="source"

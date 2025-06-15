@@ -43,22 +43,8 @@ const GraphDetailPanel: React.FC<GraphDetailPanelProps> = ({ element, onClose })
   const isLink = (el: any): el is CustomLinkObject => el && el.source !== undefined && el.target !== undefined;
 
   return (
-    <div
-      className={styles.panelContainer} // Apply panelContainer for padding
-      style={{ // Keep positioning and overlay styles inline
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        width: '300px',
-        maxHeight: 'calc(100% - 20px)',
-        overflowY: 'auto',
-        backgroundColor: 'var(--card-background-color, white)', // Use CSS var
-        border: '1px solid var(--card-border-color, #ccc)',    // Use CSS var
-        borderRadius: 'var(--border-radius, 8px)',        // Use CSS var
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        zIndex: 1000,
-      }}
-    >
+    <div className={styles.panelOverlay}>
+      {/* All positioning and base appearance styles moved to .panelOverlay in CSS module */}
       <div className={styles.panelHeader}>
         <h3 className={styles.panelTitle}>
             {isNode(element) ? "Node Details" : (isLink(element) ? "Relationship Details" : "Details")}

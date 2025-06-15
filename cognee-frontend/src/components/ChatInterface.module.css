@@ -66,3 +66,20 @@
   font-style: italic;
   padding: 0 10px 10px; /* Match chat history padding, add bottom padding */
 }
+
+@media (max-width: 480px) {
+  .chatHistory {
+    max-height: 300px; /* Reduce height on small screens */
+  }
+
+  .chatForm {
+    flex-direction: column; /* Stack input and button */
+  }
+
+  .chatInput {
+    margin-right: 0; /* Remove margin when stacked */
+    margin-bottom: 10px; /* Add space between input and button */
+  }
+
+  /* Button will be full-width due to global styles for button in form context if not overridden */
+}

@@ -51,3 +51,27 @@
   border: 1px solid var(--error-color, #dc3545);
   color: var(--error-color, #dc3545);
 }
+
+@media (max-width: 480px) {
+  .fileInputWrapper {
+    display: flex;
+    flex-direction: column; /* Stack label and filename */
+    align-items: flex-start; /* Align items to the start */
+  }
+
+  .fileInputLabel {
+    width: 100%; /* Make label full width for easier tapping */
+    text-align: center; /* Center text in label */
+    margin-bottom: 8px; /* Space between label and filename */
+  }
+
+  .fileName {
+    margin-left: 0; /* Reset margin when stacked */
+    font-size: 0.9em; /* Slightly smaller filename */
+  }
+
+  /* The main button is already full-width on mobile due to global styles,
+     or could be targeted here if needed:
+     .formContainer button[type="submit"] { width: 100%; }
+  */
+}
