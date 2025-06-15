@@ -8,7 +8,7 @@ import { splitText, TextSplitterOptions, splitBySentences } from './services/tex
 import { extractSPO, SPOTriple, generateEmbeddings, synthesizeAnswerWithContext } from './services/llmService'; // generateEmbeddings added, synthesizeAnswerWithContext added
 import { saveTriples as saveSPOsInNeo4j } from './services/neo4jService';
 import { addOrUpdateChunks, getOrCreateCollection as getOrCreateVectorCollection } from './services/vectorDbService';
-import { executeQueryAgainstGraph, searchVectorStore, fetchGraphData } from './services/queryOrchestrationService'; // fetchGraphData Added
+import { executeQueryAgainstGraph, searchVectorStore, fetchGraphData, fetchNodeNeighbors } from './services/queryOrchestrationService'; // fetchNodeNeighbors Added
 import { CHROMA_COLLECTION_NAME } from './config';
 
 const app = express();
@@ -136,6 +136,21 @@ app.post('/ingest', upload.single('file'), async (req, res) => { // Make handler
       }
     }
     res.status(500).send({ message: 'Error processing file for vectorization.', error: error.message });
+  }
+});
+
+app.get('/node-neighbors/:nodeId', async (req, res) => {
+  const { nodeId } = req.params;
+  if (!nodeId) {
+    return res.status(400).json({ message: 'Node ID is required.' });
+  }
+  console.log(`Fetching neighbors for nodeId: ${nodeId}`);
+  try {
+    const graphData = await fetchNodeNeighbors(nodeId);
+    res.json(graphData);
+  } catch (error: any) {
+    console.error(`Error fetching neighbors for nodeId ${nodeId}:`, error.message, error.stack);
+    res.status(500).json({ message: 'Failed to fetch node neighbors', error: error.message });
   }
 });
 

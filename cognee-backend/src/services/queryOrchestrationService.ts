@@ -71,6 +71,76 @@ export async function executeQueryAgainstGraph(naturalLanguageQuestion: string):
   }
 }
 
+export async function fetchNodeNeighbors(nodeId: string): Promise<{ nodes: any[]; links: any[] }> {
+  // IMPORTANT: The Cypher query uses `WHERE elementId(startNode) = $nodeId`
+  // This assumes $nodeId is the actual internal element ID string.
+  // If nodeId is a property value (e.g., name or a custom id), the query should be:
+  // MATCH (startNode {idProperty: $nodeId})-[r]-(neighborNode) ... (or similar)
+  const cypherQuery = `
+    MATCH (startNode)-[r]-(neighborNode)
+    WHERE elementId(startNode) = $nodeId
+    RETURN startNode, r, neighborNode
+    LIMIT 15
+  `;
+  const params = { nodeId };
+  console.log(`Executing Cypher for node neighbors: ${cypherQuery} with params: ${JSON.stringify(params)}`);
+
+  try {
+    const neo4jResult = await executeNeo4jQuery(cypherQuery, params);
+
+    const nodesMap = new Map<string, any>();
+    const links: any[] = [];
+
+    if (neo4jResult && neo4jResult.records) {
+      neo4jResult.records.forEach(record => {
+        const startNode = record.get('startNode');
+        const r = record.get('r');
+        const neighborNode = record.get('neighborNode');
+
+        if (startNode && startNode.elementId) {
+          if (!nodesMap.has(startNode.elementId)) {
+            nodesMap.set(startNode.elementId, {
+              id: startNode.elementId,
+              name: startNode.properties.name || startNode.properties.title || startNode.elementId.substring(0,8),
+              labels: startNode.labels,
+              properties: startNode.properties,
+            });
+          }
+        }
+        if (neighborNode && neighborNode.elementId) {
+          if (!nodesMap.has(neighborNode.elementId)) {
+            nodesMap.set(neighborNode.elementId, {
+              id: neighborNode.elementId,
+              name: neighborNode.properties.name || neighborNode.properties.title || neighborNode.elementId.substring(0,8),
+              labels: neighborNode.labels,
+              properties: neighborNode.properties,
+            });
+          }
+        }
+        if (r && r.elementId && r.startNodeElementId && r.endNodeElementId) {
+          // Check if link already exists by its own elementId
+          if (!links.some(l => l.id === r.elementId)) {
+            links.push({
+              id: r.elementId,
+              source: r.startNodeElementId,
+              target: r.endNodeElementId,
+              type: r.properties.type || r.type,
+              properties: r.properties
+            });
+          }
+        }
+      });
+    }
+
+    console.log(`Transformed neighbor data: ${nodesMap.size} nodes, ${links.length} links.`);
+    return { nodes: Array.from(nodesMap.values()), links };
+
+  } catch (error: any) {
+    console.error(`Error fetching neighbors for nodeId ${nodeId}:`, error.message);
+    throw new Error(`Failed to fetch neighbors for nodeId ${nodeId}: ${error.message}`);
+  }
+}
+
 export async function fetchGraphData(searchTerm?: string): Promise<{ nodes: any[]; links: any[] }> {
   let cypherQuery: string;
   const params: { searchTerm?: string } = {};

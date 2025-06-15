@@ -67,3 +67,14 @@ export const getGraphData = async (searchTerm?: string): Promise<GraphData> => {
     throw error.response?.data || error.message || new Error('Failed to fetch graph data');
   }
 };
+
+export const getNodeNeighbors = async (nodeId: string): Promise<GraphData> => {
+  try {
+    // Ensure nodeId is properly encoded if it can contain special characters, though elementIds usually don't.
+    const response = await apiClient.get<GraphData>(`/node-neighbors/${nodeId}`);
+    return response.data;
+  } catch (error: any) {
+    console.error(`Error fetching neighbors for node ${nodeId}:`, error);
+    throw error.response?.data || error.message || new Error(`Failed to fetch neighbors for node ${nodeId}`);
+  }
+};

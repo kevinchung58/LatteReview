@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ForceGraph2D, { NodeObject, LinkObject } from 'react-force-graph-2d';
-import { getGraphData, GraphData, GraphNode, GraphLink } from '../services/apiService'; // Assuming GraphNode and GraphLink are exported from apiService
+import { getGraphData, GraphData, GraphNode, GraphLink, getNodeNeighbors } from '../services/apiService'; // getNodeNeighbors imported
 import GraphDetailPanel from './GraphDetailPanel';
 // Note: GraphDetailPanel expects CustomNodeObject/CustomLinkObject.
 // GraphNode/GraphLink from apiService should be compatible if they include all necessary fields.
@@ -13,6 +13,7 @@ const KnowledgeGraphVisualizer: React.FC = () => {
   const [containerWidth, setContainerWidth] = useState<number>(600); // Default width
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const [selectedElement, setSelectedElement] = useState<GraphNode | GraphLink | null>(null);
+  const [isExpandingNode, setIsExpandingNode] = useState<string | false>(false); // Store ID of node being expanded or false
 
 
   const fetchData = useCallback(async (term?: string) => {
@@ -50,6 +51,42 @@ const KnowledgeGraphVisualizer: React.FC = () => {
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     fetchData(searchTerm);
+  };
+
+  const handleNodeDoubleClick = async (node: NodeObject) => {
+    if (!node.id) return;
+    console.log('Double-clicked node:', node);
+    setIsExpandingNode(node.id as string);
+    setError(''); // Clear previous errors
+
+    try {
+      const newGraphData = await getNodeNeighbors(node.id as string);
+
+      setGraphData(prevData => {
+        const existingNodeIds = new Set(prevData.nodes.map(n => n.id));
+        const newNodes = newGraphData.nodes.filter(n => !existingNodeIds.has(n.id));
+
+        const existingLinkIds = new Set(prevData.links.map(l => (l as any).id)); // Assuming links have unique 'id'
+        const newLinks = newGraphData.links.filter(l => !(existingLinkIds.has((l as any).id)));
+
+        if (newNodes.length === 0 && newLinks.length === 0) {
+          console.log('No new nodes or links to add from expansion.');
+          // Optionally set a message to user if desired
+          return prevData; // No change
+        }
+
+        return {
+          nodes: [...prevData.nodes, ...newNodes],
+          links: [...prevData.links, ...newLinks],
+        };
+      });
+
+    } catch (err: any) {
+      console.error(`Failed to fetch neighbors for node ${node.id}:`, err);
+      setError(err.message || `Could not expand node ${node.id}.`);
+    } finally {
+      setIsExpandingNode(false);
+    }
   };
 
   // Custom node rendering
@@ -95,9 +132,13 @@ const KnowledgeGraphVisualizer: React.FC = () => {
       </form>
 
       {isLoading && <p>Loading graph data...</p>}
+      {isExpandingNode &&
+        <p style={{ fontStyle: 'italic', color: '#555', margin: '5px 0', textAlign: 'center' }}>
+          Expanding node (ID: {typeof isExpandingNode === 'string' ? isExpandingNode : ''})...
+        </p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
-      {!isLoading && !error && graphData.nodes.length === 0 && (
+      {!isLoading && !isExpandingNode && !error && graphData.nodes.length === 0 && (
         <p>No graph data to display. Try a different search or ensure data is ingested.</p>
       )}
 
@@ -117,6 +158,7 @@ const KnowledgeGraphVisualizer: React.FC = () => {
              linkSource="source"
              // @ts-ignore:
              linkTarget="target"
+             onNodeDoubleClick={handleNodeDoubleClick} // Added
              onNodeClick={(node, event) => {
                console.log('Clicked node:', node);
                const clickedNode = node as GraphNode;
