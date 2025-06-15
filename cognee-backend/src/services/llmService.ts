@@ -135,3 +135,126 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
     return texts.map(() => Array(1536).fill(0.0));
   }
 }
+
+const CYPHER_GENERATION_PROMPT_TEMPLATE =
+  'Given the following graph schema and a natural language question, generate a Cypher query to answer the question.\n' +
+  'Graph Schema:\n{graphSchema}\n\n' +
+  'Natural Language Question:\n{naturalLanguageQuestion}\n\n' +
+  'Return ONLY the Cypher query. Do not include any explanations, comments, or markdown formatting like ```cypher ... ```.\n' +
+  'The query should be directly executable.\n\n' +
+  'Cypher Query:\n';
+
+export async function generateCypherQuery(naturalLanguageQuestion: string, graphSchema: string = "Nodes are :Entity(name). Relationships are :RELATIONSHIP(type) where 'type' stores the relation name like 'founded'. Example: (:Entity {name: 'SpaceX'})-[:RELATIONSHIP {type: 'launched'}]->(:Entity {name: 'Falcon 9'})."): Promise<string> {
+  if (!openai) {
+    console.warn('OpenAI client not initialized for Cypher generation. OPENAI_API_KEY might be missing.');
+    return 'MATCH (n:Entity) RETURN n.name AS name, labels(n) AS labels, properties(n) AS properties LIMIT 1; // Placeholder: LLM unavailable';
+  }
+
+  const prompt = CYPHER_GENERATION_PROMPT_TEMPLATE
+    .replace('{graphSchema}', graphSchema)
+    .replace('{naturalLanguageQuestion}', naturalLanguageQuestion);
+
+  try {
+    console.log(`Generating Cypher query for question: "${naturalLanguageQuestion}" with schema: "${graphSchema.substring(0,50)}..."`);
+    const response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: 'You are an expert Cypher query generator. You only return Cypher queries without any additional text or formatting.' },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.0,
+      max_tokens: 250,
+      stop: ['\n\n', ';'],
+    });
+
+    let cypherQuery = response.choices[0]?.message?.content?.trim() || '';
+    console.log('LLM raw response for Cypher generation:', cypherQuery);
+
+    if (cypherQuery.toLowerCase().startsWith('```cypher')) {
+      cypherQuery = cypherQuery.substring(9);
+      if (cypherQuery.endsWith('```')) {
+         cypherQuery = cypherQuery.substring(0, cypherQuery.length - 3);
+      }
+      cypherQuery = cypherQuery.trim();
+    } else if (cypherQuery.toLowerCase().startsWith('cypher')) {
+      cypherQuery = cypherQuery.substring(6).trim();
+    }
+
+    if (cypherQuery.endsWith(';')) {
+      cypherQuery = cypherQuery.substring(0, cypherQuery.length - 1).trim();
+    }
+
+    if (!cypherQuery) {
+      console.error('LLM did not return a Cypher query.');
+      return 'MATCH (n) RETURN n LIMIT 0; // Error: LLM returned empty query';
+    }
+
+    console.log('Generated Cypher query (cleaned):', cypherQuery);
+    return cypherQuery;
+
+  } catch (error: any) {
+    console.error('Error calling OpenAI API for Cypher generation:', error.message);
+    if (error.response && error.response.data) {
+      console.error('OpenAI Error Details:', error.response.data);
+    }
+    return 'MATCH (n) RETURN n LIMIT 0; // Error: LLM API call failed for Cypher generation';
+  }
+}
+
+const ANSWER_SYNTHESIS_PROMPT_TEMPLATE =
+    'You are a helpful AI assistant. Answer the following question based *only* on the provided context.\n' +
+    'If the context does not contain enough information to answer the question, state that you cannot answer based on the provided context.\n' +
+    'Do not use any external knowledge or make assumptions beyond what is given in the context.\n\n' +
+    'Context Items:\n---\n{context}\n---\n\n' +
+    'Question: {question}\n\n' +
+    'Answer:\n';
+
+export async function synthesizeAnswerWithContext(question: string, contextItems: string[]): Promise<string> {
+  if (!openai) {
+    console.warn('OpenAI client not initialized for answer synthesis. OPENAI_API_KEY might be missing.');
+    return 'I am currently unable to synthesize an answer as my language processing capabilities are offline. Please ensure the API key is configured.';
+  }
+
+  let contextString = "No specific context provided.";
+  if (contextItems && contextItems.length > 0) {
+     contextString = contextItems.map((item, index) => `Context Item ${index + 1}: ${item}`).join('\n\n');
+  } else {
+     console.log('No context items provided for answer synthesis. The LLM will answer based on its general knowledge for the question: "' + question + '"');
+     // Modify prompt to not mention context if it's empty, or rely on LLM to state it can't answer from context if prompt implies it.
+     // For this version, we'll still use the main prompt, and the LLM should ideally state it can't find info in the (empty) context.
+  }
+
+  const finalPrompt = ANSWER_SYNTHESIS_PROMPT_TEMPLATE
+     .replace('{context}', contextString)
+     .replace('{question}', question);
+
+  try {
+    console.log(`Synthesizing answer for question: "${question}" with ${contextItems ? contextItems.length : 0} context items.`);
+    const response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'user', content: finalPrompt }
+      ],
+      temperature: 0.3, // Slightly lower for more factual adherence to context
+      max_tokens: 350,
+    });
+
+    let answer = response.choices[0]?.message?.content?.trim() || '';
+    console.log('LLM raw response for answer synthesis:', answer);
+
+    if (!answer) {
+      console.error('LLM did not return an answer for synthesis.');
+      return 'The language model did not return a response for this question and context.';
+    }
+
+    console.log('Synthesized answer:', answer);
+    return answer;
+
+  } catch (error: any) {
+    console.error('Error calling OpenAI API for answer synthesis:', error.message);
+    if (error.response && error.response.data) {
+      console.error('OpenAI Error Details:', error.response.data);
+    }
+    return 'An error occurred while trying to synthesize an answer with the language model.';
+  }
+}

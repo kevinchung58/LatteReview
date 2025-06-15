@@ -5,10 +5,11 @@ import path from 'path';
 import fs from 'fs'; // fs.promises will be used for async operations like unlink
 import { parseFile, ParsedFile } from './services/parser';
 import { splitText, TextSplitterOptions, splitBySentences } from './services/textSplitter';
-import { extractSPO, SPOTriple, generateEmbeddings } from './services/llmService'; // generateEmbeddings added
+import { extractSPO, SPOTriple, generateEmbeddings, synthesizeAnswerWithContext } from './services/llmService'; // generateEmbeddings added, synthesizeAnswerWithContext added
 import { saveTriples as saveSPOsInNeo4j } from './services/neo4jService';
 import { addOrUpdateChunks, getOrCreateCollection as getOrCreateVectorCollection } from './services/vectorDbService';
-import { CHROMA_COLLECTION_NAME } from './config'; // To be added to config.ts
+import { executeQueryAgainstGraph, searchVectorStore } from './services/queryOrchestrationService'; // Added
+import { CHROMA_COLLECTION_NAME } from './config';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -135,6 +136,59 @@ app.post('/ingest', upload.single('file'), async (req, res) => { // Make handler
       }
     }
     res.status(500).send({ message: 'Error processing file for vectorization.', error: error.message });
+  }
+});
+
+app.post('/query', (req, res) => {
+  const { question } = req.body;
+
+  if (!question || typeof question !== 'string') {
+    return res.status(400).json({ message: 'Validation error: question is required and must be a string.' });
+  }
+
+  // Placeholder for actual query processing logic
+  console.log(`Received query: ${question}`);
+  // TODO: Implement query orchestration logic here (Steps 3-6 of Module 4 plan) - This is it!
+
+  try {
+    console.log(`Processing query: "${question}"`);
+
+    // Step 1 & 2: Fetch context from Knowledge Graph and Vector Store concurrently
+    console.log('Fetching context from knowledge graph...');
+    const graphContextPromise = executeQueryAgainstGraph(question);
+
+    console.log('Fetching context from vector store...');
+    const vectorContextPromise = searchVectorStore(question, CHROMA_COLLECTION_NAME); // Using default CHROMA_COLLECTION_NAME from config
+
+    const [graphContextItems, vectorContextItems] = await Promise.all([graphContextPromise, vectorContextPromise]);
+
+    console.log('Graph context items:', graphContextItems);
+    console.log('Vector context items:', vectorContextItems);
+
+    // Step 3: Combine contexts
+    const combinedContext = [...graphContextItems, ...vectorContextItems].filter(item => item && !item.toLowerCase().includes('no results found'));
+    // Optional: Deduplicate or further refine combinedContext if needed
+    console.log('Combined context for synthesis:', combinedContext);
+
+    // Step 4: Synthesize answer
+    console.log('Synthesizing answer with LLM...');
+    const answer = await synthesizeAnswerWithContext(question, combinedContext);
+    console.log('Synthesized answer:', answer);
+
+    // Step 5: Return response
+    res.status(200).json({
+      question: question,
+      answer: answer,
+      graphContextItems: graphContextItems, // Optional, for debugging
+      vectorContextItems: vectorContextItems, // Optional, for debugging
+    });
+
+  } catch (error: any) {
+    console.error(`Error processing query "${question}":`, error.message, error.stack);
+    res.status(500).json({
+      message: 'Error processing your query.',
+      error: error.message,
+    });
   }
 });
 

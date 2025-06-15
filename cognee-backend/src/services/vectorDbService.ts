@@ -123,3 +123,14 @@ export async function searchSimilarChunksWithText(
      throw error;
  }
 }
+
+// Exported for testing purposes only
+export function _resetChromaClientForTesting() {
+  client = undefined;
+  // Re-initialize openaiEmbedder based on the current state of OPENAI_API_KEY (which might be mocked in tests)
+  if (OPENAI_API_KEY) {
+      openaiEmbedder = new OpenAIEmbeddingFunction({ openai_api_key: OPENAI_API_KEY });
+  } else {
+      openaiEmbedder = undefined;
+  }
+}
