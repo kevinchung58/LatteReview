@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ForceGraph2D, { NodeObject, LinkObject } from 'react-force-graph-2d';
-import { getGraphData, GraphData } from '../services/apiService';
+import { getGraphData, GraphData, GraphNode, GraphLink } from '../services/apiService'; // Assuming GraphNode and GraphLink are exported from apiService
+import GraphDetailPanel from './GraphDetailPanel';
+// Note: GraphDetailPanel expects CustomNodeObject/CustomLinkObject.
+// GraphNode/GraphLink from apiService should be compatible if they include all necessary fields.
 
 const KnowledgeGraphVisualizer: React.FC = () => {
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], links: [] });
@@ -9,6 +12,8 @@ const KnowledgeGraphVisualizer: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [containerWidth, setContainerWidth] = useState<number>(600); // Default width
   const graphContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedElement, setSelectedElement] = useState<GraphNode | GraphLink | null>(null);
+
 
   const fetchData = useCallback(async (term?: string) => {
     setIsLoading(true);
@@ -61,7 +66,9 @@ const KnowledgeGraphVisualizer: React.FC = () => {
      ctx.beginPath();
      // @ts-ignore: Property 'x' does not exist on type 'NodeObject<NodeObject>'.
      ctx.arc(node.x, node.y, 5 / globalScale, 0, 2 * Math.PI, false);
-     ctx.fillStyle = (node as any).color || ((node as any).labels?.includes('Entity') ? 'blue' : 'red');
+     // Highlight selected node
+     const typedNode = node as GraphNode; // Cast to access custom properties like __selected
+     ctx.fillStyle = typedNode.__selected ? 'orange' : (typedNode.color || (typedNode.labels?.includes('Entity') ? 'blue' : 'red'));
      ctx.fill();
 
      // Node label
@@ -73,7 +80,7 @@ const KnowledgeGraphVisualizer: React.FC = () => {
   };
 
   return (
-    <div ref={graphContainerRef} style={{ border: '1px solid #eee', borderRadius: '8px', padding: '20px' }}>
+    <div ref={graphContainerRef} style={{ border: '1px solid #eee', borderRadius: '8px', padding: '20px', position: 'relative' }}>
       <form onSubmit={handleSearchSubmit} style={{ marginBottom: '10px' }}>
         <input
           type="text"
@@ -110,11 +117,48 @@ const KnowledgeGraphVisualizer: React.FC = () => {
              linkSource="source"
              // @ts-ignore:
              linkTarget="target"
-             onNodeClick={(node: NodeObject, event: MouseEvent) => {
+             onNodeClick={(node, event) => {
                console.log('Clicked node:', node);
-               // Example: Could set state here to display node info in a side panel
+               const clickedNode = node as GraphNode;
+               // Update graphData to mark the node as selected
+               setGraphData(prevGraphData => ({
+                 ...prevGraphData,
+                 nodes: prevGraphData.nodes.map(n => ({
+                   ...n,
+                   __selected: n.id === clickedNode.id
+                 }))
+               }));
+               setSelectedElement(clickedNode);
+             }}
+             onLinkClick={(link, event) => {
+               console.log('Clicked link:', link);
+                // Clear node selection when a link is clicked, or handle link selection differently
+                setGraphData(prevGraphData => ({
+                    ...prevGraphData,
+                    nodes: prevGraphData.nodes.map(n => ({ ...n, __selected: false }))
+                }));
+               setSelectedElement(link as GraphLink);
+             }}
+             onBackgroundClick={() => {
+               setGraphData(prevGraphData => ({
+                 ...prevGraphData,
+                 nodes: prevGraphData.nodes.map(n => ({ ...n, __selected: false }))
+               }));
+               setSelectedElement(null);
              }}
          />
+      )}
+      {selectedElement && (
+        <GraphDetailPanel
+          element={selectedElement}
+          onClose={() => {
+            setGraphData(prevGraphData => ({
+              ...prevGraphData,
+              nodes: prevGraphData.nodes.map(n => ({ ...n, __selected: false }))
+            }));
+            setSelectedElement(null);
+          }}
+        />
       )}
     </div>
   );

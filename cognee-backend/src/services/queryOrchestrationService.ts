@@ -134,7 +134,8 @@ export async function fetchGraphData(searchTerm?: string): Promise<{ nodes: any[
               id: r.elementId,
               source: n.elementId,
               target: m.elementId,
-              type: r.properties.type || r.type
+              type: r.properties.type || r.type,
+              properties: r.properties // Add this line to include all relationship properties
             });
           }
         }
