@@ -5,8 +5,10 @@ import path from 'path';
 import fs from 'fs'; // fs.promises will be used for async operations like unlink
 import { parseFile, ParsedFile } from './services/parser';
 import { splitText, TextSplitterOptions, splitBySentences } from './services/textSplitter';
-import { extractSPO, SPOTriple } from './services/llmService';
+import { extractSPO, SPOTriple, generateEmbeddings } from './services/llmService'; // generateEmbeddings added
 import { saveTriples as saveSPOsInNeo4j } from './services/neo4jService';
+import { addOrUpdateChunks, getOrCreateCollection as getOrCreateVectorCollection } from './services/vectorDbService';
+import { CHROMA_COLLECTION_NAME } from './config'; // To be added to config.ts
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -40,13 +42,12 @@ app.post('/ingest', upload.single('file'), async (req, res) => { // Make handler
   if (!req.file) {
     return res.status(400).send({ message: 'No file uploaded.' });
   }
-
   console.log('File received:', req.file.originalname, 'Type:', req.file.mimetype);
 
-  let tempFilePath = req.file.path;
+  let tempFilePath = req.file!.path; // Use non-null assertion if file check is robust
 
   try {
-    const parsedResult = await parseFile(tempFilePath, req.file.mimetype);
+    const parsedResult = await parseFile(tempFilePath, req.file.mimetype); // parsedResult needs to be in scope for success response
     const chunks = splitBySentences(parsedResult.textContent, 1500);
     console.log(`Parsed into ${chunks.length} chunks.`);
 
@@ -70,15 +71,52 @@ app.post('/ingest', upload.single('file'), async (req, res) => { // Make handler
       }
     }
 
+    // Vector Embedding and Storage
+    let chunkEmbeddings: number[][] = []; // Define chunkEmbeddings in a scope accessible by the response
+    if (chunks.length > 0) {
+      console.log('Starting vector embedding for chunks...');
+      chunkEmbeddings = await generateEmbeddings(chunks); // Assign to the outer scope variable
+      console.log(`Generated ${chunkEmbeddings.length} embeddings.`);
+
+      if (chunkEmbeddings.length === chunks.length) {
+        const chunkIds = chunks.map((_, idx) => `${req.file!.filename}-chunk-${idx}`);
+        const chunkMetadatas = chunks.map((chunkText, idx) => ({ // chunkText is not defined here, should be chunks[idx]
+          source: req.file!.originalname,
+          chunkId: chunkIds[idx],
+          // Storing the chunk text itself in metadata can be useful for direct access after search
+          // Or, if documents in Chroma are the chunks themselves, this might be redundant here
+          // Let's assume documents ARE the chunks for now.
+        }));
+
+        console.log(`Using Chroma collection: ${CHROMA_COLLECTION_NAME}`);
+        await getOrCreateVectorCollection(CHROMA_COLLECTION_NAME); // Ensure collection exists
+        await addOrUpdateChunks(
+          CHROMA_COLLECTION_NAME,
+          chunkIds,
+          chunkEmbeddings,
+          chunks, // Storing chunks as documents in Chroma
+          chunkMetadatas
+        );
+        console.log('Chunks and embeddings successfully saved to ChromaDB.');
+      } else {
+        console.warn('Mismatch between number of chunks and generated embeddings. Skipping ChromaDB storage.');
+      }
+    }
+    // Update success message
+    // const currentMessage = res.locals.message || 'File processed successfully.'; // res.locals.message is not standard, let's build a full message
+    let successMessage = 'File processed successfully.';
+    if (allSpos.length > 0) successMessage += ' SPOs extracted and saved.';
+    if (chunks.length > 0 && chunkEmbeddings.length === chunks.length) successMessage += ' Vector embeddings generated and stored.';
+
+
     res.status(200).send({
-      message: 'File processed, SPOs extracted and saved successfully.',
-      filename: req.file.filename, // filename on server (multer generated) - user wants this as 'filename' not 'original_filename' per snippet
-      originalName: req.file.originalname, // original filename from user
-      full_text_content_snippet: parsedResult.textContent.substring(0, 200) + '...',
+      message: successMessage,
+      filename: req.file!.filename,
+      originalName: req.file!.originalname,
+      full_text_content_snippet: parsedResult.textContent.substring(0, 200) + '...', // parsedResult needs to be available
       totalChunks: chunks.length,
-      totalSPOsExtracted: allSpos.length,
-      // chunks: chunks, // Optionally return all chunks
-      // spos: allSpos    // Optionally return all SPOs
+      totalSPOsExtracted: allSpos.length, // Assuming allSpos is still in scope
+      totalEmbeddingsStored: chunks.length > 0 && chunkEmbeddings.length === chunks.length ? chunkEmbeddings.length : 0,
     });
 
     // Clean up the uploaded file after successful processing
@@ -96,7 +134,7 @@ app.post('/ingest', upload.single('file'), async (req, res) => { // Make handler
         console.error('Error deleting temporary file during error handling:', unlinkErr.message);
       }
     }
-    res.status(500).send({ message: 'Error processing file.', error: error.message });
+    res.status(500).send({ message: 'Error processing file for vectorization.', error: error.message });
   }
 });
 

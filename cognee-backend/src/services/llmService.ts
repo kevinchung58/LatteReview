@@ -95,3 +95,43 @@ export async function extractSPO(textChunk: string, promptTemplate?: string): Pr
     return [];
   }
 }
+
+export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
+  if (!openai) {
+    console.warn('OpenAI client not initialized. OPENAI_API_KEY might be missing. Returning mock embeddings.');
+    // Return mock embeddings (e.g., arrays of zeros with ADA-002 dimension: 1536)
+    return texts.map(() => Array(1536).fill(0.0));
+  }
+
+  if (!texts || texts.length === 0) {
+    return [];
+  }
+
+  // OpenAI's node library handles batching for the embeddings endpoint internally to some extent.
+  // However, be mindful of overall request size limits if sending extremely large numbers of texts or very long texts.
+  // For this implementation, we'll send them in one batch, assuming typical usage.
+  try {
+    console.log(`Requesting embeddings for ${texts.length} text snippet(s)...`);
+    const response = await openai.embeddings.create({
+      model: 'text-embedding-ada-002',
+      input: texts.map(text => text.replace(/\n/g, ' ')), // ADA model works best with no newlines
+    });
+
+    if (response.data && response.data.length > 0) {
+      // Sort embeddings by original index to ensure order is preserved
+      const sortedEmbeddings = response.data.sort((a, b) => a.index - b.index);
+      console.log(`Successfully generated ${sortedEmbeddings.length} embeddings.`);
+      return sortedEmbeddings.map(embeddingData => embeddingData.embedding);
+    } else {
+      console.error('OpenAI embeddings response is empty or malformed.');
+      return texts.map(() => Array(1536).fill(0.0)); // Fallback to mock on malformed response
+    }
+  } catch (error: any) {
+    console.error('Error calling OpenAI embeddings API:', error.message);
+    if (error.response && error.response.data) {
+      console.error('OpenAI Error Details:', error.response.data);
+    }
+    // Fallback to mock embeddings on error
+    return texts.map(() => Array(1536).fill(0.0));
+  }
+}

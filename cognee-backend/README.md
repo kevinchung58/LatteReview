@@ -34,3 +34,35 @@ To run the backend services locally with graph database capabilities, you will n
 **Important:**
 *   Ensure that the Neo4j driver is correctly installed in the project (this should be part of `npm install` if `neo4j-driver` is listed in `package.json`). If not, you might need to install it: `npm install neo4j-driver`.
 *   The application will use these environment variables to connect to the Neo4j database.
+
+### Vector Database Setup (ChromaDB)
+
+For vector embeddings and similarity search, this project uses ChromaDB.
+
+**1. Running ChromaDB with Docker (Recommended):**
+
+*   Ensure you have Docker installed and running on your system.
+*   Pull the ChromaDB image and run the container:
+    ```bash
+    docker pull chromadb/chroma
+    docker run -d -p 8000:8000 --name chromadb_server chromadb/chroma
+    ```
+*   This will start a ChromaDB server accessible at `http://localhost:8000`.
+*   Update your `.env` file in the `cognee-backend` root directory with the ChromaDB server URL:
+    ```env
+    CHROMA_DB_URL="http://localhost:8000"
+    ```
+
+**2. Running ChromaDB as a Persistent Local Service (Alternative):**
+
+*   You can also run ChromaDB as a persistent local service using `pip`:
+    ```bash
+    pip install chromadb
+    chroma run --path /path/to/your/chroma_data --port 8000
+    ```
+    Replace `/path/to/your/chroma_data` with the actual directory where you want ChromaDB to store its data.
+*   Update your `.env` file as shown above with `CHROMA_DB_URL="http://localhost:8000"`.
+
+**Important:**
+*   Ensure the `chromadb` client library is installed in the project (e.g., `npm install @langchain/community @langchain/openai chromadb`). The specific client might vary based on how it's integrated (e.g., directly or via Langchain).
+*   The application will use the `CHROMA_DB_URL` environment variable to connect to the ChromaDB instance.

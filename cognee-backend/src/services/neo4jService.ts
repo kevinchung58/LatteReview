@@ -67,3 +67,17 @@ export async function closeDriver(): Promise<void> {
 process.on('exit', async () => {
   await closeDriver();
 });
+
+// Exported for testing purposes only
+export function _resetDriverForTesting() {
+  if (driver) {
+    // It's good practice to ensure the driver is closed before undefining it,
+    // though in a mock environment 'close' might be a jest.fn()
+    // For real driver instances, this would be important.
+    const promise = driver.close();
+    if (promise && typeof promise.then === 'function') {
+      promise.catch(e => console.error("Error closing driver during test reset:", e));
+    }
+  }
+  driver = undefined;
+}
