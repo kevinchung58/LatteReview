@@ -42,8 +42,8 @@
 
 .successMessage {
   background-color: #e6ffed; /* Light green background */
-  border: 1px solid var(--success-color, #28a745);
-  color: var(--success-color, #28a745);
+  border: 1px solid var(--success-color, #28a745); /* Border can remain the lighter green */
+  color: var(--success-text-color); /* Use darker green for text */
 }
 
 .errorMessage {

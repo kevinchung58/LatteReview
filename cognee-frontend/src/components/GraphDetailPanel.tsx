@@ -43,13 +43,21 @@ const GraphDetailPanel: React.FC<GraphDetailPanelProps> = ({ element, onClose })
   const isLink = (el: any): el is CustomLinkObject => el && el.source !== undefined && el.target !== undefined;
 
   return (
-    <div className={styles.panelOverlay}>
+    <div
+      className={styles.panelOverlay}
+      role="region"
+      aria-labelledby="graph-detail-panel-title"
+    >
       {/* All positioning and base appearance styles moved to .panelOverlay in CSS module */}
       <div className={styles.panelHeader}>
-        <h3 className={styles.panelTitle}>
-            {isNode(element) ? "Node Details" : (isLink(element) ? "Relationship Details" : "Details")}
+        <h3 id="graph-detail-panel-title" className={styles.panelTitle}>
+            {isNode(element) ? 'Node Details' : isLink(element) ? 'Relationship Details' : 'Details'}
         </h3>
-        <button onClick={onClose} className={styles.closeButton}>
+        <button
+          onClick={onClose}
+          className={styles.closeButton}
+          aria-label="Close details panel"
+        >
           &times;
         </button>
       </div>

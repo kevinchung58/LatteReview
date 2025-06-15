@@ -65,7 +65,7 @@ const ChatInterface: React.FC = () => {
 
   return (
     <div className={styles.chatContainer}>
-      <div className={styles.chatHistory}>
+      <div className={styles.chatHistory} aria-live="polite">
         {chatHistory.map((msg) => (
           <div
             key={msg.id}
@@ -98,6 +98,7 @@ const ChatInterface: React.FC = () => {
           value={currentQuestion}
           onChange={handleInputChange}
           placeholder="Ask a question..."
+          aria-label="Ask a question" // Added aria-label
           disabled={isLoading}
           className={styles.chatInput} // Uses global input style, can be overridden by this class
         />
@@ -106,7 +107,7 @@ const ChatInterface: React.FC = () => {
         </button>
       </form>
       {/* Using global .text-error utility class from index.css */}
-      {error && <p className="text-error" style={{ marginTop: '10px' }}>{error}</p>}
+      {error && <p className="text-error" style={{ marginTop: '10px' }} aria-live="assertive">{error}</p>}
     </div>
   );
 };

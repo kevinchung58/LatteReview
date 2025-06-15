@@ -77,7 +77,7 @@ const FileUpload: React.FC = () => {
           {isLoading ? 'Uploading...' : 'Upload File'}
         </button>
       </form>
-      <div className={styles.messageArea}>
+      <div className={styles.messageArea} aria-live="polite">
         {isLoading && <p>Processing file, please wait...</p>}
         {message && <p className={styles.successMessage}>{message}</p>}
         {error && <p className={styles.errorMessage}>{error}</p>}

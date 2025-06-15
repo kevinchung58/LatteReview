@@ -136,6 +136,7 @@ const KnowledgeGraphVisualizer: React.FC = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search graph by term..."
+          aria-label="Search graph by term" // Added aria-label
           className={styles.searchInput}
         />
         <button type="submit" disabled={isLoading || isExpandingNode}> {/* Also disable on expand */}
@@ -143,15 +144,15 @@ const KnowledgeGraphVisualizer: React.FC = () => {
         </button>
       </form>
 
-      {isLoading && <p className={styles.loadingMessage}>Loading graph data...</p>}
+      {isLoading && <p className={styles.loadingMessage} aria-live="polite">Loading graph data...</p>}
       {isExpandingNode &&
-        <p className={styles.loadingMessage}>
+        <p className={styles.loadingMessage} aria-live="polite">
           Expanding node (ID: {typeof isExpandingNode === 'string' ? isExpandingNode : ''})...
         </p>}
-      {error && <p className={styles.errorMessage}>Error: {error}</p>}
+      {error && <p className={styles.errorMessage} aria-live="assertive">Error: {error}</p>}
 
       {!isLoading && !isExpandingNode && !error && graphData.nodes.length === 0 && (
-        <p className={styles.noDataMessage}>No graph data to display. Try a different search or ensure data is ingested.</p>
+        <p className={styles.noDataMessage} aria-live="polite">No graph data to display. Try a different search or ensure data is ingested.</p>
       )}
 
       {!isLoading && !isExpandingNode && !error && graphData.nodes.length > 0 && (
