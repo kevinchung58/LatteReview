@@ -1,0 +1,58 @@
+/* src/components/GraphDetailPanel.module.css */
+.panelContainer {
+  /* Positioning styles (position, top, right, width, maxHeight, zIndex, boxShadow, bg, border, borderRadius)
+     are complex and work well inline for an overlay. Keep them inline in the TSX.
+     This module will style the *content* of the panel. */
+  padding: 15px; /* This was inline, can be part of the container if we move all styles here */
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--card-border-color, #dee2e6); /* Use CSS var */
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 1.2em;
+  color: var(--text-color, #212529);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5em; /* Larger close button */
+  cursor: pointer;
+  padding: 0 5px; /* Easier to click */
+  color: var(--text-muted-color, #6c757d);
+  line-height: 1; /* Ensure consistent alignment */
+}
+.closeButton:hover {
+ color: var(--text-color, #212529);
+}
+
+.detailSectionTitle {
+  margin-top: 15px;
+  margin-bottom: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  color: var(--primary-color, #007bff);
+}
+
+.detailList {
+  list-style-type: none;
+  padding-left: 0;
+  font-size: 0.9em;
+}
+
+.detailListItem {
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+.detailListItem strong {
+  color: var(--text-color, #212529); /* Ensure strong tags are clearly visible */
+}

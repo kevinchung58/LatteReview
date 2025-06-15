@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ForceGraph2D, { NodeObject, LinkObject } from 'react-force-graph-2d';
-import { getGraphData, GraphData, GraphNode, GraphLink, getNodeNeighbors } from '../services/apiService'; // getNodeNeighbors imported
+import { getGraphData, GraphData, GraphNode, GraphLink, getNodeNeighbors } from '../services/apiService';
 import GraphDetailPanel from './GraphDetailPanel';
+import styles from './KnowledgeGraphVisualizer.module.css'; // Import CSS module
 // Note: GraphDetailPanel expects CustomNodeObject/CustomLinkObject.
 // GraphNode/GraphLink from apiService should be compatible if they include all necessary fields.
 
@@ -117,32 +118,32 @@ const KnowledgeGraphVisualizer: React.FC = () => {
   };
 
   return (
-    <div ref={graphContainerRef} style={{ border: '1px solid #eee', borderRadius: '8px', padding: '20px', position: 'relative' }}>
-      <form onSubmit={handleSearchSubmit} style={{ marginBottom: '10px' }}>
+    <div ref={graphContainerRef} className={styles.visualizerContainer} style={{ position: 'relative' }}> {/* Inline position:relative kept as it's crucial for panel */}
+      <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search graph by term..."
-          // style={{ marginRight: '5px' }} // Removed to use global style from index.css
+          className={styles.searchInput}
         />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Searching...' : 'Search Graph'}
+        <button type="submit" disabled={isLoading || isExpandingNode}> {/* Also disable on expand */}
+          {isLoading ? 'Searching...' : (isExpandingNode ? 'Expanding...' : 'Search Graph')}
         </button>
       </form>
 
-      {isLoading && <p>Loading graph data...</p>}
+      {isLoading && <p className={styles.loadingMessage}>Loading graph data...</p>}
       {isExpandingNode &&
-        <p style={{ fontStyle: 'italic', color: '#555', margin: '5px 0', textAlign: 'center' }}>
+        <p className={styles.loadingMessage}>
           Expanding node (ID: {typeof isExpandingNode === 'string' ? isExpandingNode : ''})...
         </p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {error && <p className={styles.errorMessage}>Error: {error}</p>}
 
       {!isLoading && !isExpandingNode && !error && graphData.nodes.length === 0 && (
-        <p>No graph data to display. Try a different search or ensure data is ingested.</p>
+        <p className={styles.noDataMessage}>No graph data to display. Try a different search or ensure data is ingested.</p>
       )}
 
-      {!isLoading && !error && graphData.nodes.length > 0 && (
+      {!isLoading && !isExpandingNode && !error && graphData.nodes.length > 0 && (
          <ForceGraph2D
              graphData={graphData}
              nodeLabel="name" // Property to display on node hover

@@ -1,5 +1,6 @@
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import { askQuery, QueryResponse } from '../services/apiService';
+import styles from './ChatInterface.module.css'; // Import CSS module
 
 interface ChatMessage {
   id: string; // For key prop in React
@@ -63,20 +64,16 @@ const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div>
-      <div className="chat-history" style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
+    <div className={styles.chatContainer}>
+      <div className={styles.chatHistory}>
         {chatHistory.map((msg) => (
-          <div key={msg.id} style={{ marginBottom: '8px', textAlign: msg.type === 'user' ? 'right' : 'left' }}>
-            <div
-              style={{
-                display: 'inline-block',
-                padding: '8px 12px',
-                borderRadius: '10px',
-                backgroundColor: msg.type === 'user' ? '#007bff' : '#e9ecef',
-                color: msg.type === 'user' ? 'white' : 'black',
-              }}
-            >
-              <p><strong>{msg.type === 'user' ? 'You' : 'AI'}:</strong> {msg.text}</p>
+          <div
+            key={msg.id}
+            className={`${styles.messageWrapper} ${msg.type === 'user' ? styles.userMessage : styles.aiMessage}`}
+          >
+            <div className={styles.messageContent}>
+              <p className={styles.messageLabel}>{msg.type === 'user' ? 'You' : 'AI'}:</p>
+              <p className={styles.messageText}>{msg.text}</p>
               {/* Optional: Display context for AI messages for debugging */}
               {/* {msg.type === 'ai' && msg.graphContext && (
                 <details>
@@ -93,22 +90,23 @@ const ChatInterface: React.FC = () => {
             </div>
           </div>
         ))}
-        {isLoading && <p style={{textAlign: 'left', color: '#555'}}>AI is thinking...</p>}
+        {isLoading && <p className={styles.aiThinking}>AI is thinking...</p>}
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className={styles.chatForm}>
         <input
           type="text"
           value={currentQuestion}
           onChange={handleInputChange}
           placeholder="Ask a question..."
           disabled={isLoading}
-          style={{ width: '80%', padding: '10px' }}
+          className={styles.chatInput} // Uses global input style, can be overridden by this class
         />
-        <button type="submit" disabled={isLoading} style={{ padding: '10px' }}>
+        <button type="submit" disabled={isLoading}>
           {isLoading ? 'Sending...' : 'Send'}
         </button>
       </form>
-      {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
+      {/* Using global .text-error utility class from index.css */}
+      {error && <p className="text-error" style={{ marginTop: '10px' }}>{error}</p>}
     </div>
   );
 };

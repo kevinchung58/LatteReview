@@ -1,11 +1,13 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { ingestFile } from '../services/apiService';
+import styles from './FileUpload.module.css'; // Import CSS module
 
 const FileUpload: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const fileInputRef = React.useRef<HTMLInputElement>(null); // Ref to reset file input
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -33,8 +35,6 @@ const FileUpload: React.FC = () => {
 
     try {
       const response = await ingestFile(formData);
-      // Assuming backend returns a message like:
-      // { message: '...', filename: '...', totalChunks: ..., totalSPOsExtracted: ..., totalEmbeddingsStored: ... }
       setMessage(
         `File ingested successfully: ${response.originalName || selectedFile.name}. ` +
         `Server Filename: ${response.filename}. ` +
@@ -42,10 +42,9 @@ const FileUpload: React.FC = () => {
         `SPOs: ${response.totalSPOsExtracted}. ` +
         `Embeddings: ${response.totalEmbeddingsStored}.`
       );
-      setSelectedFile(null); // Clear selection after successful upload
-      // Clear the file input visually (this is a bit tricky, often requires resetting the form or input value)
-      if (event.target instanceof HTMLFormElement) {
-         event.target.reset();
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Reset file input
       }
     } catch (err: any) {
       console.error('Upload error:', err);
@@ -57,25 +56,32 @@ const FileUpload: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className={styles.formContainer}>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="file-input">Choose file to upload:</label>
+        <div className={styles.fileInputWrapper}>
+          <label htmlFor="file-input" className={styles.fileInputLabel}>
+            Choose File
+          </label>
           <input
              id="file-input"
              type="file"
+             ref={fileInputRef} // Added ref
              onChange={handleFileChange}
              accept=".pdf,.txt,.docx"
-             key={selectedFile ? 'file-selected' : 'no-file'} // Helps reset input if needed
+             style={{ display: 'none' }} // Hide the default input
+            //  Using ref to reset is more reliable than key change for hidden inputs
           />
+          {selectedFile && <span className={styles.fileName}>{selectedFile.name}</span>}
         </div>
         <button type="submit" disabled={isLoading || !selectedFile}>
           {isLoading ? 'Uploading...' : 'Upload File'}
         </button>
       </form>
-      {isLoading && <p>Processing file, please wait...</p>}
-      {message && <p style={{ color: 'green' }}>{message}</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <div className={styles.messageArea}>
+        {isLoading && <p>Processing file, please wait...</p>}
+        {message && <p className={styles.successMessage}>{message}</p>}
+        {error && <p className={styles.errorMessage}>{error}</p>}
+      </div>
     </div>
   );
 };

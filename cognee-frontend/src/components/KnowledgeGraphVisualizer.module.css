@@ -1,0 +1,41 @@
+/* src/components/KnowledgeGraphVisualizer.module.css */
+.visualizerContainer {
+  /* position: 'relative' is already inline, keep it there for the ref context
+     border, borderRadius, padding are also inline and consistent with .card now */
+}
+
+.searchForm {
+  display: flex;
+  margin-bottom: 15px;
+  align-items: center; /* Align items vertically */
+}
+
+.searchInput {
+  flex-grow: 1;
+  margin-right: 10px; /* Uses global input styles, this ensures spacing to button */
+}
+
+.statusMessage {
+  margin: 10px 0;
+  padding: 10px;
+  text-align: center;
+  border-radius: var(--border-radius, 4px); /* Use CSS variable */
+}
+
+.loadingMessage {
+  composes: statusMessage;
+  color: var(--text-muted-color, #6c757d);
+  background-color: #f8f9fa; /* Subtle background */
+}
+
+.errorMessage {
+  composes: statusMessage;
+  color: var(--error-color, #dc3545);
+  background-color: #ffe6e6; /* Light red background from FileUpload.module.css */
+  border: 1px solid var(--error-color, #dc3545);
+}
+
+.noDataMessage {
+ composes: statusMessage;
+ color: var(--text-muted-color, #6c757d);
+}
