@@ -234,3 +234,183 @@ describe('LLM Service - generateEmbeddings', () => {
         });
     });
 });
+
+describe('LLM Service - generateCypherQuery', () => {
+    // mockChatCompletionsCreate is already defined at the top level of the file
+    // originalApiKeyForFileScope is also available
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        (OpenAI as jest.Mock).mockImplementation(() => ({
+            chat: { completions: { create: mockChatCompletionsCreate } },
+            // embeddings: { create: mockEmbeddingsCreate } // Not needed for this describe block
+        }));
+        originalApiKeyForFileScope = mockApiKey; // Save current mockApiKey state
+    });
+
+    afterEach(() => {
+        mockApiKey = originalApiKeyForFileScope; // Restore mockApiKey
+        jest.restoreAllMocks();
+    });
+
+    describe('With API Key for Cypher Generation', () => {
+        beforeEach(() => {
+            mockApiKey = 'test-api-key-cypher';
+        });
+
+        it('should call OpenAI API and return cleaned Cypher query', async () => {
+            const question = 'What is the capital of France?';
+            const schema = 'Graph schema details';
+            const rawCypher = 'MATCH (c:Country {name: "France"})-[:HAS_CAPITAL]->(cap:City) RETURN cap.name;';
+            mockChatCompletionsCreate.mockResolvedValue({
+                choices: [{ message: { content: '```cypher\n' + rawCypher + '\n```' } }],
+            });
+
+            jest.resetModules(); // Ensure llmService picks up the new mockApiKey
+            const { generateCypherQuery } = require('../llmService');
+            const result = await generateCypherQuery(question, schema);
+
+            expect(OpenAI).toHaveBeenCalledWith({ apiKey: 'test-api-key-cypher' });
+            expect(mockChatCompletionsCreate).toHaveBeenCalledWith(expect.objectContaining({
+                model: 'gpt-3.5-turbo',
+                messages: expect.arrayContaining([
+                    expect.objectContaining({ role: 'user', content: expect.stringContaining(question) })
+                ]),
+                temperature: 0.0,
+            }));
+            expect(result).toBe('MATCH (c:Country {name: "France"})-[:HAS_CAPITAL]->(cap:City) RETURN cap.name');
+        });
+
+        it('should handle empty or no query from LLM', async () => {
+            mockChatCompletionsCreate.mockResolvedValue({ choices: [{ message: { content: ' ' } }] });
+            jest.resetModules();
+            const { generateCypherQuery } = require('../llmService');
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await generateCypherQuery('test question', 'schema');
+            expect(result).toContain('// Error: LLM returned empty query');
+            expect(consoleErrorSpy).toHaveBeenCalledWith('LLM did not return a Cypher query.');
+            consoleErrorSpy.mockRestore();
+        });
+
+        it('should handle API errors during Cypher generation', async () => {
+            mockChatCompletionsCreate.mockRejectedValue(new Error('Cypher API Error'));
+            jest.resetModules();
+            const { generateCypherQuery } = require('../llmService');
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await generateCypherQuery('test question', 'schema');
+            expect(result).toContain('// Error: LLM API call failed for Cypher generation');
+            expect(consoleErrorSpy).toHaveBeenCalledWith('Error calling OpenAI API for Cypher generation:', 'Cypher API Error');
+            consoleErrorSpy.mockRestore();
+        });
+    });
+
+    describe('Without API Key for Cypher Generation', () => {
+        beforeAll(() => { mockApiKey = ''; });
+        afterAll(() => { mockApiKey = 'test-api-key-cypher'; }); // Restore to a default or previous state
+
+        it('should return placeholder query if API key is missing', async () => {
+            jest.resetModules();
+            const { generateCypherQuery: generateCypherQueryFresh } = require('../llmService');
+            const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+            const result = await generateCypherQueryFresh('test question', 'schema');
+            expect(result).toContain('// Placeholder: LLM unavailable');
+            expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('OpenAI client not initialized for Cypher generation'));
+            consoleWarnSpy.mockRestore();
+        });
+    });
+});
+
+describe('LLM Service - synthesizeAnswerWithContext', () => {
+    // mockChatCompletionsCreate is used here as well
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        (OpenAI as jest.Mock).mockImplementation(() => ({
+            chat: { completions: { create: mockChatCompletionsCreate } },
+        }));
+        originalApiKeyForFileScope = mockApiKey;
+    });
+
+    afterEach(() => {
+        mockApiKey = originalApiKeyForFileScope;
+        jest.restoreAllMocks();
+    });
+
+    describe('With API Key for Answer Synthesis', () => {
+        beforeEach(() => {
+            mockApiKey = 'test-api-key-synthesis';
+        });
+
+        it('should call OpenAI API and return synthesized answer', async () => {
+            const question = 'What is the main topic?';
+            const contextItems = ['Context item 1.', 'Context item 2.'];
+            const expectedAnswer = 'The main topic is based on context items.';
+            mockChatCompletionsCreate.mockResolvedValue({
+                choices: [{ message: { content: expectedAnswer } }],
+            });
+
+            jest.resetModules();
+            const { synthesizeAnswerWithContext } = require('../llmService');
+            const result = await synthesizeAnswerWithContext(question, contextItems);
+
+            expect(OpenAI).toHaveBeenCalledWith({ apiKey: 'test-api-key-synthesis' });
+            expect(mockChatCompletionsCreate).toHaveBeenCalledWith(expect.objectContaining({
+                model: 'gpt-3.5-turbo',
+                messages: expect.arrayContaining([
+                    expect.objectContaining({ role: 'user', content: expect.stringContaining(question) && expect.stringContaining(contextItems[0]) })
+                ]),
+                temperature: 0.3,
+            }));
+            expect(result).toBe(expectedAnswer);
+        });
+
+        it('should handle empty answer from LLM', async () => {
+            mockChatCompletionsCreate.mockResolvedValue({ choices: [{ message: { content: null } }] }); // or undefined or empty string
+            jest.resetModules();
+            const { synthesizeAnswerWithContext } = require('../llmService');
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await synthesizeAnswerWithContext('question', ['context']);
+            expect(result).toBe('The language model did not return a response for this question and context.');
+            expect(consoleErrorSpy).toHaveBeenCalledWith('LLM did not return an answer for synthesis.');
+            consoleErrorSpy.mockRestore();
+        });
+
+        it('should handle API errors during answer synthesis', async () => {
+            mockChatCompletionsCreate.mockRejectedValue(new Error('Synthesis API Error'));
+            jest.resetModules();
+            const { synthesizeAnswerWithContext } = require('../llmService');
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await synthesizeAnswerWithContext('question', ['context']);
+            expect(result).toBe('An error occurred while trying to synthesize an answer with the language model.');
+            expect(consoleErrorSpy).toHaveBeenCalledWith('Error calling OpenAI API for answer synthesis:', 'Synthesis API Error');
+            consoleErrorSpy.mockRestore();
+        });
+
+        it('should correctly handle empty contextItems array', async () => {
+            const question = "What is general knowledge?";
+            mockChatCompletionsCreate.mockResolvedValue({ choices: [{message: { content: "General knowledge response."}}]});
+            jest.resetModules();
+            const { synthesizeAnswerWithContext } = require('../llmService');
+            const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(()=>{}); // To check the log message
+            const result = await synthesizeAnswerWithContext(question, []);
+            expect(result).toBe("General knowledge response.");
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('No context items provided for answer synthesis.'));
+            consoleLogSpy.mockRestore();
+        });
+    });
+
+    describe('Without API Key for Answer Synthesis', () => {
+        beforeAll(() => { mockApiKey = ''; });
+        afterAll(() => { mockApiKey = 'test-api-key-synthesis'; });
+
+        it('should return predefined message if API key is missing', async () => {
+            jest.resetModules();
+            const { synthesizeAnswerWithContext: synthesizeFresh } = require('../llmService');
+            const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+            const result = await synthesizeFresh('question', ['context']);
+            expect(result).toBe('I am currently unable to synthesize an answer as my language processing capabilities are offline. Please ensure the API key is configured.');
+            expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('OpenAI client not initialized for answer synthesis.'));
+            consoleWarnSpy.mockRestore();
+        });
+    });
+});
