@@ -166,16 +166,17 @@ app.get('/graph-data', async (req, res) => {
   }
 });
 
-app.post('/query', (req, res) => {
+app.post('/query', async (req, res) => { // Made async
   const { question } = req.body;
 
   if (!question || typeof question !== 'string') {
     return res.status(400).json({ message: 'Validation error: question is required and must be a string.' });
   }
 
-  // Placeholder for actual query processing logic
-  console.log(`Received query: ${question}`);
-  // TODO: Implement query orchestration logic here (Steps 3-6 of Module 4 plan) - This is it!
+  console.log(`Received query for SSE: ${question}`);
+
+  // Flag to track if headers have been sent
+  let headersSent = false;
 
   try {
     console.log(`Processing query: "${question}"`);
@@ -185,37 +186,50 @@ app.post('/query', (req, res) => {
     const graphContextPromise = executeQueryAgainstGraph(question);
 
     console.log('Fetching context from vector store...');
-    const vectorContextPromise = searchVectorStore(question, CHROMA_COLLECTION_NAME); // Using default CHROMA_COLLECTION_NAME from config
+    const vectorContextPromise = searchVectorStore(question, CHROMA_COLLECTION_NAME);
 
     const [graphContextItems, vectorContextItems] = await Promise.all([graphContextPromise, vectorContextPromise]);
 
-    console.log('Graph context items:', graphContextItems);
-    console.log('Vector context items:', vectorContextItems);
+    console.log('Graph context items (first few):', graphContextItems.slice(0,2));
+    console.log('Vector context items (first few):', vectorContextItems.slice(0,2));
 
     // Step 3: Combine contexts
     const combinedContext = [...graphContextItems, ...vectorContextItems].filter(item => item && !item.toLowerCase().includes('no results found'));
-    // Optional: Deduplicate or further refine combinedContext if needed
-    console.log('Combined context for synthesis:', combinedContext);
+    console.log('Combined context for synthesis (item count):', combinedContext.length);
 
-    // Step 4: Synthesize answer
-    console.log('Synthesizing answer with LLM...');
-    const answer = await synthesizeAnswerWithContext(question, combinedContext);
-    console.log('Synthesized answer:', answer);
+    // Step 4: Set SSE headers and start streaming the answer
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+    headersSent = true;
 
-    // Step 5: Return response
-    res.status(200).json({
-      question: question,
-      answer: answer,
-      graphContextItems: graphContextItems, // Optional, for debugging
-      vectorContextItems: vectorContextItems, // Optional, for debugging
-    });
+    // Send context items first (optional, for debugging on client)
+    // res.write(`data: ${JSON.stringify({ type: 'context', graphContext: graphContextItems, vectorContext: vectorContextItems })}\n\n`);
+
+    console.log('Synthesizing and streaming answer with LLM...');
+    const answerStream = synthesizeAnswerWithContext(question, combinedContext);
+
+    for await (const token of answerStream) {
+      res.write(`data: ${JSON.stringify({ token })}\n\n`);
+    }
+    console.log('Answer stream finished.');
+    res.end();
 
   } catch (error: any) {
     console.error(`Error processing query "${question}":`, error.message, error.stack);
-    res.status(500).json({
-      message: 'Error processing your query.',
-      error: error.message,
-    });
+    if (!headersSent) {
+      // If headers haven't been sent, we can send a normal error response
+      res.status(500).json({
+        message: 'Error processing your query before streaming.',
+        error: error.message,
+      });
+    } else {
+      // If headers were already sent, we can only end the stream, possibly after writing an error event if desired
+      // Example: res.write(`data: ${JSON.stringify({ error: "Streaming error: " + error.message })}\n\n`);
+      console.error('Error occurred after SSE headers were sent. Stream will be closed.');
+      res.end(); // Ensure the stream is closed
+    }
   }
 });
 

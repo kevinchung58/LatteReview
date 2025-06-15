@@ -20,22 +20,97 @@ export const ingestFile = async (formData: FormData): Promise<any> => {
   }
 };
 
-export interface QueryResponse {
-  question: string;
-  answer: string;
-  graphContextItems?: string[];
-  vectorContextItems?: string[];
-}
+// QueryResponse might not be needed here if we only get tokens, or it could represent the final assembled object if desired.
+// For now, the function calls onToken, onComplete, onError, and doesn't return a Promise<QueryResponse>.
+// The component will be responsible for assembling the final answer.
 
-export const askQuery = async (question: string): Promise<QueryResponse> => {
+export const askQuery = async (
+  question: string,
+  onToken: (token: string) => void,
+  onComplete: () => void,
+  onError: (error: Error) => void
+): Promise<void> => {
   try {
-    const response = await apiClient.post<QueryResponse>('/query', { question });
-    return response.data;
+    const response = await fetch(VITE_API_BASE_URL + '/query', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream' // Important to tell the server we expect an SSE stream
+      },
+      body: JSON.stringify({ question }),
+    });
+
+    if (!response.ok) {
+      // Handle HTTP errors before trying to read stream
+      const errorBody = await response.text();
+      onError(new Error(`Failed to fetch stream: ${response.status} ${response.statusText} - ${errorBody}`));
+      return;
+    }
+
+    if (!response.body) {
+      onError(new Error('Response body is null.'));
+      return;
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        // Process any remaining buffer content if needed
+        if (buffer.trim().startsWith('data:')) { // Check if buffer has a final complete message
+            const jsonString = buffer.substring(buffer.indexOf('data:') + 5).trim();
+            try {
+                const parsed = JSON.parse(jsonString);
+                if (parsed.token) {
+                    onToken(parsed.token);
+                }
+            } catch (e) {
+                console.error('Failed to parse final SSE JSON from buffer:', jsonString, e);
+            }
+        }
+        break; // Stream finished
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+
+      let eolIndex;
+      // SSE messages are separated by double newlines (\n\n)
+      // A single message can also span multiple lines, each starting with 'data: '
+      // Robust parsing should handle multi-line data fields and other event types (event:, id:, retry:)
+      // This simplified parser looks for "data: {...}\n\n"
+      while ((eolIndex = buffer.indexOf('\n\n')) >= 0) {
+        const messageLine = buffer.substring(0, eolIndex).trim();
+        buffer = buffer.substring(eolIndex + 2); // Consume the message including \n\n
+
+        if (messageLine.startsWith('data:')) {
+          const jsonString = messageLine.substring(5).trim();
+          try {
+            const parsed = JSON.parse(jsonString);
+            if (parsed.token) {
+              onToken(parsed.token);
+            }
+            // Potentially handle other event types here if backend sends them
+            // e.g., if(parsed.type === 'context') { onContext(parsed.data); }
+          } catch (e) {
+            console.error('Failed to parse SSE JSON:', jsonString, e);
+            // Potentially call onError or ignore malformed message
+          }
+        }
+      }
+    }
+    onComplete();
   } catch (error: any) {
-    console.error('Error asking query:', error);
-    throw error.response?.data || error.message || new Error('Query failed');
+    console.error('Error in askQuery stream processing:', error);
+    onError(error);
   }
+  // No finally block for reader.releaseLock() as it's handled by stream consumption ending
+  // or if an error during reader.read() or processing occurs, it's caught.
+  // If specific cancellation logic were added, releaseLock would be important there.
 };
+
 
 export interface GraphNode {
   id: string;

@@ -1,5 +1,5 @@
-import React, { useState, FormEvent, ChangeEvent } from 'react';
-import { askQuery, QueryResponse } from '../services/apiService';
+import React, { useState, FormEvent, ChangeEvent, useRef } from 'react'; // Added useRef
+import { askQuery } from '../services/apiService'; // QueryResponse no longer directly used by handleSubmit
 import styles from './ChatInterface.module.css'; // Import CSS module
 
 interface ChatMessage {
@@ -7,8 +7,9 @@ interface ChatMessage {
   type: 'user' | 'ai';
   text: string;
   // Optional: include context items if you want to display them
-  graphContext?: string[];
-  vectorContext?: string[];
+  // These would need to be sent via SSE if desired with streaming text
+  // graphContext?: string[];
+  // vectorContext?: string[];
 }
 
 const ChatInterface: React.FC = () => {
@@ -37,30 +38,45 @@ const ChatInterface: React.FC = () => {
     setChatHistory(prevHistory => [...prevHistory, userMessage]);
     setIsLoading(true);
     setError('');
+    setCurrentQuestion(''); // Clear input field immediately after sending
 
-    try {
-      const response: QueryResponse = await askQuery(currentQuestion.trim());
-      const aiMessage: ChatMessage = {
-        id: `ai-${Date.now()}`,
-        type: 'ai',
-        text: response.answer,
-        graphContext: response.graphContextItems,
-        vectorContext: response.vectorContextItems,
-      };
-      setChatHistory(prevHistory => [...prevHistory, aiMessage]);
-    } catch (err: any) {
-      console.error('Query error:', err);
-      const aiErrorMessage: ChatMessage = {
-         id: `ai-error-${Date.now()}`,
-         type: 'ai',
-         text: err.message || 'Sorry, I encountered an error trying to answer your question.',
-      };
-      setChatHistory(prevHistory => [...prevHistory, aiErrorMessage]);
-      setError(err.message || 'Failed to get an answer. Check console for details.');
-    } finally {
+    const aiMessageId = `ai-${Date.now()}`;
+    const initialAiMessage: ChatMessage = {
+      id: aiMessageId,
+      type: 'ai',
+      text: '', // Start with empty text, tokens will append here
+    };
+    setChatHistory(prevHistory => [...prevHistory, initialAiMessage]);
+
+    const onToken = (token: string) => {
+      setChatHistory(prevHistory =>
+        prevHistory.map(msg =>
+          msg.id === aiMessageId ? { ...msg, text: msg.text + token } : msg
+        )
+      );
+    };
+
+    const onComplete = () => {
+      console.log('Streaming complete.');
       setIsLoading(false);
-      setCurrentQuestion(''); // Clear input field
-    }
+    };
+
+    const onError = (error: Error) => {
+      console.error('Streaming error:', error);
+      setChatHistory(prevHistory =>
+        prevHistory.map(msg =>
+          msg.id === aiMessageId
+            ? { ...msg, text: msg.text + `\n\nError: ${error.message || 'Failed to get full response.'}` }
+            : msg
+        )
+      );
+      setError(error.message || 'Failed to get an answer stream.');
+      setIsLoading(false);
+    };
+
+    // No await here, as askQuery now uses callbacks for stream handling
+    askQuery(userMessage.text, onToken, onComplete, onError);
+    // The function itself is async due to operations inside it, but we don't await the stream here.
   };
 
   return (

@@ -209,19 +209,18 @@ const ANSWER_SYNTHESIS_PROMPT_TEMPLATE =
     'Question: {question}\n\n' +
     'Answer:\n';
 
-export async function synthesizeAnswerWithContext(question: string, contextItems: string[]): Promise<string> {
+export async function* synthesizeAnswerWithContext(question: string, contextItems: string[]): AsyncIterable<string> {
   if (!openai) {
     console.warn('OpenAI client not initialized for answer synthesis. OPENAI_API_KEY might be missing.');
-    return 'I am currently unable to synthesize an answer as my language processing capabilities are offline. Please ensure the API key is configured.';
+    yield 'I am currently unable to synthesize an answer as my language processing capabilities are offline. Please ensure the API key is configured.';
+    return;
   }
 
   let contextString = "No specific context provided.";
   if (contextItems && contextItems.length > 0) {
      contextString = contextItems.map((item, index) => `Context Item ${index + 1}: ${item}`).join('\n\n');
   } else {
-     console.log('No context items provided for answer synthesis. The LLM will answer based on its general knowledge for the question: "' + question + '"');
-     // Modify prompt to not mention context if it's empty, or rely on LLM to state it can't answer from context if prompt implies it.
-     // For this version, we'll still use the main prompt, and the LLM should ideally state it can't find info in the (empty) context.
+     console.log('No context items provided for answer synthesis for question: "' + question + '"');
   }
 
   const finalPrompt = ANSWER_SYNTHESIS_PROMPT_TEMPLATE
@@ -229,32 +228,34 @@ export async function synthesizeAnswerWithContext(question: string, contextItems
      .replace('{question}', question);
 
   try {
-    console.log(`Synthesizing answer for question: "${question}" with ${contextItems ? contextItems.length : 0} context items.`);
-    const response = await openai.chat.completions.create({
+    console.log(`Requesting stream for answer synthesis for question: "${question}" with ${contextItems ? contextItems.length : 0} context items.`);
+    const stream = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
         { role: 'user', content: finalPrompt }
       ],
-      temperature: 0.3, // Slightly lower for more factual adherence to context
+      temperature: 0.3,
       max_tokens: 350,
+      stream: true, // Enable streaming
     });
 
-    let answer = response.choices[0]?.message?.content?.trim() || '';
-    console.log('LLM raw response for answer synthesis:', answer);
-
-    if (!answer) {
-      console.error('LLM did not return an answer for synthesis.');
-      return 'The language model did not return a response for this question and context.';
+    for await (const chunk of stream) {
+      const contentDelta = chunk.choices[0]?.delta?.content;
+      if (contentDelta) {
+        yield contentDelta;
+      }
+      if (chunk.choices[0]?.finish_reason === 'stop') {
+         // Optionally yield a special end-of-stream marker if needed by client, or just complete.
+         break;
+      }
     }
-
-    console.log('Synthesized answer:', answer);
-    return answer;
+    console.log('Answer synthesis stream completed.');
 
   } catch (error: any) {
-    console.error('Error calling OpenAI API for answer synthesis:', error.message);
+    console.error('Error calling OpenAI API for streaming answer synthesis:', error.message);
     if (error.response && error.response.data) {
       console.error('OpenAI Error Details:', error.response.data);
     }
-    return 'An error occurred while trying to synthesize an answer with the language model.';
+    yield 'An error occurred while trying to synthesize an answer with the language model.';
   }
 }
