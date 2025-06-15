@@ -1,9 +1,12 @@
+import './config'; // Ensures .env variables are loaded at the very beginning
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs'; // fs.promises will be used for async operations like unlink
 import { parseFile, ParsedFile } from './services/parser';
-import { splitText, TextSplitterOptions, splitBySentences } from './services/textSplitter'; // Import the new service
+import { splitText, TextSplitterOptions, splitBySentences } from './services/textSplitter';
+import { extractSPO, SPOTriple } from './services/llmService';
+import { saveTriples as saveSPOsInNeo4j } from './services/neo4jService';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -40,40 +43,58 @@ app.post('/ingest', upload.single('file'), async (req, res) => { // Make handler
 
   console.log('File received:', req.file.originalname, 'Type:', req.file.mimetype);
 
+  let tempFilePath = req.file.path;
+
   try {
-    const parsedResult: ParsedFile = await parseFile(req.file.path, req.file.mimetype);
+    const parsedResult = await parseFile(tempFilePath, req.file.mimetype);
+    const chunks = splitBySentences(parsedResult.textContent, 1500);
+    console.log(`Parsed into ${chunks.length} chunks.`);
 
-    // Define options for the text splitter
-    // const simpleSplitOptions: TextSplitterOptions = { chunkSize: 1000, chunkOverlap: 100 };
-    // const chunks = splitText(parsedResult.textContent, simpleSplitOptions);
+    const allSpos: SPOTriple[] = [];
+    if (chunks.length > 0) {
+      console.log('Starting SPO extraction from chunks...');
+      for (let i = 0; i < chunks.length; i++) {
+        console.log(`Processing chunk ${i + 1} of ${chunks.length} for SPOs...`);
+        const sposFromChunk = await extractSPO(chunks[i]);
+        if (sposFromChunk.length > 0) {
+          allSpos.push(...sposFromChunk);
+          console.log(`Extracted ${sposFromChunk.length} SPOs from chunk ${i + 1}.`);
+        }
+      }
+      console.log(`Total SPOs extracted from all chunks: ${allSpos.length}`);
 
-    // Or using sentence splitter
-    const chunks = splitBySentences(parsedResult.textContent, 1500); // Target 1500 chars per chunk
-
-    console.log(`Original text length: ${parsedResult.textContent.length}, Number of chunks: ${chunks.length}`);
-
-    res.status(200).send({
-      message: 'File parsed and chunked successfully.',
-      original_filename: req.file.filename, // filename on server (multer generated)
-      originalName: req.file.originalname, // original filename from user
-      full_text_content: parsedResult.textContent, // Full parsed text
-      totalChunks: chunks.length,
-      chunks: chunks // All chunks
-    });
-
-    // Clean up the uploaded file after processing
-    try {
-      await fs.promises.unlink(req.file.path);
-      console.log('Temporary file deleted:', req.file.path);
-    } catch (unlinkError) {
-      console.error('Error deleting temporary file:', unlinkError);
+      if (allSpos.length > 0) {
+        console.log('Saving extracted SPOs to Neo4j...');
+        await saveSPOsInNeo4j(allSpos);
+        console.log('SPOs successfully saved to Neo4j.');
+      }
     }
 
+    res.status(200).send({
+      message: 'File processed, SPOs extracted and saved successfully.',
+      filename: req.file.filename, // filename on server (multer generated) - user wants this as 'filename' not 'original_filename' per snippet
+      originalName: req.file.originalname, // original filename from user
+      full_text_content_snippet: parsedResult.textContent.substring(0, 200) + '...',
+      totalChunks: chunks.length,
+      totalSPOsExtracted: allSpos.length,
+      // chunks: chunks, // Optionally return all chunks
+      // spos: allSpos    // Optionally return all SPOs
+    });
+
+    // Clean up the uploaded file after successful processing
+    await fs.promises.unlink(tempFilePath);
+    console.log('Temporary file deleted:', tempFilePath);
+    tempFilePath = ''; // Clear path to prevent double deletion in catch
+
   } catch (error: any) {
-    console.error('Error processing file in /ingest:', error);
-    // parseFile should handle deleting the file on its own error, but if error happens after parseFile, ensure cleanup
-    if (req.file && req.file.path) {
-        try { await fs.promises.unlink(req.file.path); } catch (e) { /* ignore */ }
+    console.error('Error processing file in /ingest:', error.message, error.stack);
+    if (tempFilePath) { // Ensure file is cleaned up on error too
+      try {
+        await fs.promises.unlink(tempFilePath);
+        console.log('Temporary file deleted due to error:', tempFilePath);
+      } catch (unlinkErr: any) {
+        console.error('Error deleting temporary file during error handling:', unlinkErr.message);
+      }
     }
     res.status(500).send({ message: 'Error processing file.', error: error.message });
   }
