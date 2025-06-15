@@ -81,7 +81,7 @@ const ChatInterface: React.FC = () => {
 
   return (
     <div className={styles.chatContainer}>
-      <div className={styles.chatHistory} aria-live="polite">
+      <div className={styles.chatHistory} aria-live="polite" role="log"> {/* Added role="log" */}
         {chatHistory.map((msg) => (
           <div
             key={msg.id}
