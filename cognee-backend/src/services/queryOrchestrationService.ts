@@ -71,6 +71,24 @@ export async function executeQueryAgainstGraph(naturalLanguageQuestion: string):
   }
 }
 
+export async function fetchGraphSchemaSummary(): Promise<{ nodeLabels: string[], relationshipTypes: string[] }> {
+  console.log('Fetching graph schema summary (labels and relationship types)...');
+  try {
+    const labelsResult = await executeNeo4jQuery('CALL db.labels() YIELD label RETURN collect(label) AS nodeLabels');
+    const nodeLabels: string[] = (labelsResult.records.length > 0 && labelsResult.records[0].get('nodeLabels')) ? labelsResult.records[0].get('nodeLabels') : [];
+
+    const typesResult = await executeNeo4jQuery('CALL db.relationshipTypes() YIELD relationshipType RETURN collect(relationshipType) AS relationshipTypes');
+    const relationshipTypes: string[] = (typesResult.records.length > 0 && typesResult.records[0].get('relationshipTypes')) ? typesResult.records[0].get('relationshipTypes') : [];
+
+    console.log(`Found labels: ${nodeLabels.join(', ')} and types: ${relationshipTypes.join(', ')}`);
+    return { nodeLabels, relationshipTypes };
+
+  } catch (error: any) {
+    console.error('Error fetching graph schema summary:', error.message);
+    throw new Error(`Failed to fetch graph schema summary: ${error.message}`);
+  }
+}
+
 export async function fetchNodeNeighbors(nodeId: string): Promise<{ nodes: any[]; links: any[] }> {
   // IMPORTANT: The Cypher query uses `WHERE elementId(startNode) = $nodeId`
   // This assumes $nodeId is the actual internal element ID string.

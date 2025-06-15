@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'; // useMemo imported
 import ForceGraph2D, { NodeObject, LinkObject } from 'react-force-graph-2d';
-import { getGraphData, GraphData, GraphNode, GraphLink, getNodeNeighbors } from '../services/apiService';
+import { getGraphData, GraphData, GraphNode, GraphLink, getNodeNeighbors, getGraphSchemaSummary, GraphSchemaSummary } from '../services/apiService';
 import GraphDetailPanel from './GraphDetailPanel';
 import styles from './KnowledgeGraphVisualizer.module.css'; // Import CSS module
 // Note: GraphDetailPanel expects CustomNodeObject/CustomLinkObject.
@@ -16,6 +16,11 @@ const KnowledgeGraphVisualizer: React.FC = () => {
   const [selectedElement, setSelectedElement] = useState<GraphNode | GraphLink | null>(null);
   const [isExpandingNode, setIsExpandingNode] = useState<string | false>(false); // Store ID of node being expanded or false
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
+
+  const [availableSchema, setAvailableSchema] = useState<GraphSchemaSummary>({ nodeLabels: [], relationshipTypes: [] });
+  const [activeNodeLabelFilters, setActiveNodeLabelFilters] = useState<Set<string>>(new Set());
+  const [activeRelationshipTypeFilters, setActiveRelationshipTypeFilters] = useState<Set<string>>(new Set());
+  const [schemaError, setSchemaError] = useState<string>('');
 
 
   const fetchData = useCallback(async (term?: string) => {
@@ -37,6 +42,24 @@ const KnowledgeGraphVisualizer: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Fetch schema on component mount
+  useEffect(() => {
+    const fetchSchema = async () => {
+      try {
+        setSchemaError('');
+        const schema = await getGraphSchemaSummary();
+        setAvailableSchema(schema);
+        // Initialize filters to all selected by default
+        setActiveNodeLabelFilters(new Set(schema.nodeLabels));
+        setActiveRelationshipTypeFilters(new Set(schema.relationshipTypes));
+      } catch (err: any) {
+        console.error('Failed to fetch graph schema:', err);
+        setSchemaError(err.message || 'Could not load graph schema.');
+      }
+    };
+    fetchSchema();
+  }, []);
 
   // Update graph width on resize
   useEffect(() => {
@@ -63,6 +86,30 @@ const KnowledgeGraphVisualizer: React.FC = () => {
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     fetchData(searchTerm);
+  };
+
+  const handleNodeLabelFilterChange = (label: string) => {
+    setActiveNodeLabelFilters(prevFilters => {
+      const newFilters = new Set(prevFilters);
+      if (newFilters.has(label)) {
+        newFilters.delete(label);
+      } else {
+        newFilters.add(label);
+      }
+      return newFilters;
+    });
+  };
+
+  const handleRelationshipTypeFilterChange = (type: string) => {
+    setActiveRelationshipTypeFilters(prevFilters => {
+      const newFilters = new Set(prevFilters);
+      if (newFilters.has(type)) {
+        newFilters.delete(type);
+      } else {
+        newFilters.add(type);
+      }
+      return newFilters;
+    });
   };
 
   const handleNodeDoubleClick = async (node: NodeObject) => {
@@ -128,6 +175,61 @@ const KnowledgeGraphVisualizer: React.FC = () => {
      ctx.fillText(label, node.x, node.y + 10 / globalScale);
   };
 
+  const displayedGraphData = useMemo(() => {
+    // If schema isn't fully loaded yet, or if there are no active filters, return original data.
+    // This also handles the initial state where all filters are active by default.
+    const allNodeLabelsSelected = activeNodeLabelFilters.size === availableSchema.nodeLabels.length;
+    const allRelationshipTypesSelected = activeRelationshipTypeFilters.size === availableSchema.relationshipTypes.length;
+
+    // If all filters are active (initial state or user re-selects all), no filtering needed, unless schema is empty
+    if ( (availableSchema.nodeLabels.length > 0 && allNodeLabelsSelected) &&
+         (availableSchema.relationshipTypes.length > 0 && allRelationshipTypesSelected) ) {
+        // This condition might be too simple if we want "show all if no filters touched" vs "show all if ALL filters explicitly checked"
+        // The current setup initializes filters to all checked, so this path is taken initially.
+        // If user deselects any, then filtering logic below applies.
+        // return graphData; // This was the original thought, but this doesn't apply filtering if only one category is fully selected
+    }
+
+
+    const filteredNodes = graphData.nodes.filter(node => {
+      const graphNode = node as GraphNode; // Ensure we're working with our extended GraphNode type
+      const nodeActualLabels = graphNode.labels || [];
+
+      // If no label filters are defined in the schema yet, or if all available labels are selected, show the node (subject to relationship checks later)
+      if (availableSchema.nodeLabels.length === 0 || activeNodeLabelFilters.size === availableSchema.nodeLabels.length) return true;
+      // If there are label filters defined and the set of active filters is empty, show no nodes.
+      if (activeNodeLabelFilters.size === 0) return false;
+      // If the node has no labels, it cannot satisfy any specific active filter unless all filters are active (covered above)
+      if (nodeActualLabels.length === 0) return false;
+
+      return nodeActualLabels.some(label => activeNodeLabelFilters.has(label));
+    });
+
+    const filteredNodeIds = new Set(filteredNodes.map(node => node.id));
+
+    const filteredLinks = graphData.links.filter(link => {
+      const graphLink = link as GraphLink; // Ensure we're working with our extended GraphLink type
+      const linkType = graphLink.type || '';
+
+      let typeMatch = false;
+      // If no relationship type filters are defined in schema, or all available types are selected, consider it a match for type
+      if (availableSchema.relationshipTypes.length === 0 || activeRelationshipTypeFilters.size === availableSchema.relationshipTypes.length) {
+        typeMatch = true;
+      } else if (activeRelationshipTypeFilters.size === 0) { // All type filters exist but are deselected
+        typeMatch = false;
+      } else {
+        typeMatch = activeRelationshipTypeFilters.has(linkType);
+      }
+
+      if (!typeMatch) return false;
+
+      const sourceId = typeof graphLink.source === 'object' && graphLink.source !== null ? (graphLink.source as any).id : graphLink.source;
+      const targetId = typeof graphLink.target === 'object' && graphLink.target !== null ? (graphLink.target as any).id : graphLink.target;
+      return filteredNodeIds.has(sourceId as string | number) && filteredNodeIds.has(targetId as string | number);
+    });
+    return { nodes: filteredNodes, links: filteredLinks };
+  }, [graphData, activeNodeLabelFilters, activeRelationshipTypeFilters, availableSchema]);
+
   return (
     <div ref={graphContainerRef} className={styles.visualizerContainer} style={{ position: 'relative' }}> {/* Inline position:relative kept as it's crucial for panel */}
       <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
@@ -144,6 +246,41 @@ const KnowledgeGraphVisualizer: React.FC = () => {
         </button>
       </form>
 
+      {schemaError && <p className={styles.errorMessage} aria-live="assertive">Error loading schema: {schemaError}</p>}
+
+      <div className={styles.filtersContainer}>
+        {availableSchema.nodeLabels.length > 0 && (
+          <div className={styles.filterSection}>
+              <h4>Filter Node Labels:</h4> {/* Will pick up styles.filterSection h4 */}
+              {availableSchema.nodeLabels.map(label => (
+                  <label key={`label-${label}`} className={styles.filterCheckboxLabel}>
+                      <input
+                          type="checkbox"
+                          checked={activeNodeLabelFilters.has(label)}
+                          onChange={() => handleNodeLabelFilterChange(label)}
+                          // input specific style is in the CSS module
+                      /> {label}
+                  </label>
+              ))}
+          </div>
+        )}
+        {availableSchema.relationshipTypes.length > 0 && (
+          <div className={styles.filterSection}>
+              <h4>Filter Relationship Types:</h4> {/* Will pick up styles.filterSection h4 */}
+              {availableSchema.relationshipTypes.map(type => (
+                  <label key={`type-${type}`} className={styles.filterCheckboxLabel}>
+                      <input
+                          type="checkbox"
+                          checked={activeRelationshipTypeFilters.has(type)}
+                          onChange={() => handleRelationshipTypeFilterChange(type)}
+                          // input specific style is in the CSS module
+                      /> {type}
+                  </label>
+              ))}
+          </div>
+        )}
+      </div>
+
       {isLoading && <p className={styles.loadingMessage} aria-live="polite">Loading graph data...</p>}
       {isExpandingNode &&
         <p className={styles.loadingMessage} aria-live="polite">
@@ -151,13 +288,14 @@ const KnowledgeGraphVisualizer: React.FC = () => {
         </p>}
       {error && <p className={styles.errorMessage} aria-live="assertive">Error: {error}</p>}
 
-      {!isLoading && !isExpandingNode && !error && graphData.nodes.length === 0 && (
-        <p className={styles.noDataMessage} aria-live="polite">No graph data to display. Try a different search or ensure data is ingested.</p>
+      {!isLoading && !isExpandingNode && !error && displayedGraphData.nodes.length === 0 && (
+        <p className={styles.noDataMessage} aria-live="polite">No graph data to display with current filters. Try adjusting filters or searching.</p>
       )}
 
-      {!isLoading && !isExpandingNode && !error && graphData.nodes.length > 0 && (
+      {/* Use displayedGraphData here */}
+      {!isLoading && !isExpandingNode && !error && displayedGraphData.nodes.length > 0 && (
          <ForceGraph2D
-             graphData={graphData}
+             graphData={displayedGraphData}
              nodeLabel="name" // Property to display on node hover
              nodeCanvasObject={renderNode} // Custom node rendering
              linkLabel="type"   // Property to display on link hover

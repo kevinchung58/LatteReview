@@ -39,3 +39,49 @@
  composes: statusMessage;
  color: var(--text-muted-color, #6c757d);
 }
+
+/* Styles for Filter UI */
+.filtersContainer {
+  display: flex;
+  flex-wrap: wrap; /* Allow sections to wrap on smaller screens */
+  gap: 20px; /* Space between filter sections */
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f9f9f9; /* Light background for the filter area */
+  border-radius: var(--border-radius, 4px);
+}
+
+.filterSection {
+  flex: 1 1 200px; /* Allow sections to grow and shrink, with a base size */
+  min-width: 180px; /* Prevent sections from becoming too narrow */
+}
+
+.filterSection h4 { /* Targets h4 within .filterSection */
+  font-size: 0.95em;
+  margin-top: 0; /* Already global, but good to be explicit if needed */
+  margin-bottom: 8px;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--card-border-color, #eee);
+  padding-bottom: 5px;
+}
+
+.filterCheckboxLabel {
+  display: block; /* Each checkbox on its own line for clarity */
+  margin-bottom: 5px;
+  font-weight: normal; /* Global label style might make it bold */
+  cursor: pointer;
+  padding: 3px 0;
+  border-radius: var(--border-radius, 4px); /* Added for hover effect consistency */
+  transition: background-color 0.1s ease-in-out;
+}
+
+.filterCheckboxLabel input[type="checkbox"] {
+  width: auto; /* Override global 100% width for inputs */
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.filterCheckboxLabel:hover {
+  /* color: var(--primary-color, #007bff); // Color change on text might be too much */
+  background-color: #efefef; /* Slight background change on hover for the whole label */
+}

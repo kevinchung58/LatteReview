@@ -8,7 +8,7 @@ import { splitText, TextSplitterOptions, splitBySentences } from './services/tex
 import { extractSPO, SPOTriple, generateEmbeddings, synthesizeAnswerWithContext } from './services/llmService'; // generateEmbeddings added, synthesizeAnswerWithContext added
 import { saveTriples as saveSPOsInNeo4j } from './services/neo4jService';
 import { addOrUpdateChunks, getOrCreateCollection as getOrCreateVectorCollection } from './services/vectorDbService';
-import { executeQueryAgainstGraph, searchVectorStore, fetchGraphData, fetchNodeNeighbors } from './services/queryOrchestrationService'; // fetchNodeNeighbors Added
+import { executeQueryAgainstGraph, searchVectorStore, fetchGraphData, fetchNodeNeighbors, fetchGraphSchemaSummary } from './services/queryOrchestrationService'; // fetchGraphSchemaSummary Added
 import { CHROMA_COLLECTION_NAME } from './config';
 
 const app = express();
@@ -136,6 +136,17 @@ app.post('/ingest', upload.single('file'), async (req, res) => { // Make handler
       }
     }
     res.status(500).send({ message: 'Error processing file for vectorization.', error: error.message });
+  }
+});
+
+app.get('/graph-schema-summary', async (req, res) => {
+  console.log('Received request for graph schema summary.');
+  try {
+    const schemaSummary = await fetchGraphSchemaSummary();
+    res.json(schemaSummary);
+  } catch (error: any) {
+    console.error('Error in /graph-schema-summary route:', error.message, error.stack);
+    res.status(500).json({ message: 'Failed to fetch graph schema summary', error: error.message });
   }
 });
 

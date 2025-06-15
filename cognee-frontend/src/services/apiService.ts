@@ -20,6 +20,21 @@ export const ingestFile = async (formData: FormData): Promise<any> => {
   }
 };
 
+export interface GraphSchemaSummary {
+  nodeLabels: string[];
+  relationshipTypes: string[];
+}
+
+export const getGraphSchemaSummary = async (): Promise<GraphSchemaSummary> => {
+  try {
+    const response = await apiClient.get<GraphSchemaSummary>('/graph-schema-summary');
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching graph schema summary:', error);
+    throw error.response?.data || error.message || new Error('Failed to fetch graph schema summary');
+  }
+};
+
 // QueryResponse might not be needed here if we only get tokens, or it could represent the final assembled object if desired.
 // For now, the function calls onToken, onComplete, onError, and doesn't return a Promise<QueryResponse>.
 // The component will be responsible for assembling the final answer.
