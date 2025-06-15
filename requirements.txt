@@ -19,3 +19,4 @@ wordcloud
 nest_asyncio
 PyPDF2
 pyvis
+pytest
