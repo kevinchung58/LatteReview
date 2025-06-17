@@ -25,9 +25,13 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@langchain/community": "^0.3.46",
+    "@langchain/google-genai": "^0.2.12",
+    "@langchain/openai": "^0.5.13",
     "@types/multer": "^1.4.13",
     "chromadb": "^3.0.3",
     "dotenv": "^16.5.0",
+    "langchain": "^0.3.28",
     "mammoth": "^1.9.1",
     "multer": "^2.0.1",
     "neo4j-driver": "^5.28.1",
