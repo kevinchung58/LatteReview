@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  neo4j:
+    image: neo4j:5 # Using a specific major version like 5 is good practice
+    container_name: cognee_neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    environment:
+      # IMPORTANT: Change 'yourStrongPassword' here to a strong password.
+      # If you use a .env file for the backend, ensure NEO4J_PASSWORD there matches the password set here.
+      - NEO4J_AUTH=neo4j/yourStrongPassword
+      # - NEO4J_PLUGINS=["graph-data-science"] # Example if plugins needed later
+    networks:
+      - cognee_network
+
+  chroma:
+    image: chromadb/chroma:latest # Or a specific version like 0.4.22
+    container_name: cognee_chroma
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/.chroma/index_data # Path based on common Chroma setup, verify if different
+      # For older versions or different persistence setup, it might be just /chroma_data or similar
+    networks:
+      - cognee_network
+    # Command to reset Chroma on startup (useful for dev if you want fresh state often):
+    # command: ["chroma", "run", "--path", "/chroma/.chroma/index_data", "--reset"]
+    # command: ["uvicorn", "chromadb.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] # Default command
+
+  backend:
+    build:
+      context: ./cognee-backend
+      dockerfile: Dockerfile
+    container_name: cognee_backend
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./cognee-backend/.env # Ensure this .env file is populated correctly for Docker
+    depends_on:
+      - neo4j
+      - chroma
+    networks:
+      - cognee_network
+    # volumes:
+      # - ./cognee-backend:/usr/src/app # For development: mount local code (optional)
+      # - /usr/src/app/node_modules # For development: anonymous volume for node_modules (optional)
+
+  frontend:
+    build:
+      context: ./cognee-frontend
+      dockerfile: Dockerfile
+      args:
+        # This should point to the backend service name and port within the Docker network
+        VITE_API_BASE_URL: http://backend:3001
+    container_name: cognee_frontend
+    ports:
+      - "8080:80" # Map host 8080 to Nginx default port 80 in container
+    depends_on:
+      - backend
+    networks:
+      - cognee_network
+    # volumes:
+      # - ./cognee-frontend/src:/app/src # For development: mount local code (optional)
+
+networks:
+  cognee_network:
+    driver: bridge
+
+volumes:
+  neo4j_data:
+  chroma_data:

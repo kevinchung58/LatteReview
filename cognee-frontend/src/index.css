@@ -1,0 +1,232 @@
+/* src/index.css */
+:root {
+  --primary-color: #007bff;
+  --primary-color-hover: #0056b3;
+  --secondary-color: #6c757d;
+  --background-color: #f4f7f6;
+  --text-color: #333;
+  --text-muted-color: #777;
+  --card-background-color: #ffffff;
+  --card-border-color: #e0e0e0;
+  --success-color: #28a745;
+  --success-text-color: #155724; /* Darker green for text on light success backgrounds */
+  --error-color: #dc3545;
+  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  --font-family-monospace: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+  --border-radius: 0.375rem; /* Approx 6px if base font is 16px */
+  --card-padding: 20px;
+  --card-margin-bottom: 30px;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+code {
+  font-family: var(--font-family-monospace);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.5rem; }
+
+p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+input[type="text"],
+input[type="file"],
+textarea { /* Added textarea for consistency */
+  padding: 0.5rem 0.75rem; /* 8px 12px */
+  margin-bottom: 0.5rem; /* Added some bottom margin */
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  width: 100%; /* Make inputs generally full-width */
+}
+
+/* Specific adjustments for file input and text input if they are side-by-side */
+form > div { /* Assuming inputs are wrapped in divs for layout */
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+form > div > input[type="file"] {
+    flex-grow: 1;
+}
+form > div > label {
+    margin-right: 0.5rem;
+}
+
+
+button {
+  padding: 0.5rem 1rem; /* 8px 16px */
+  border: none;
+  border-radius: var(--border-radius);
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+button:hover {
+  background-color: var(--primary-color-hover);
+}
+
+button:disabled {
+  background-color: var(--secondary-color);
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Utility Classes */
+.card {
+  background-color: var(--card-background-color);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--border-radius);
+  padding: var(--card-padding);
+  margin-bottom: var(--card-margin-bottom);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.text-success {
+  color: var(--success-text-color);
+}
+
+.text-error {
+  color: var(--error-color);
+}
+
+.text-muted {
+  color: var(--text-muted-color);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mt-1 { margin-top: 0.25rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+
+.mt-1 { margin-top: 0.25rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+
+/* App container specific styles */
+.app-container {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px; /* Default padding */
+  margin-top: 20px; /* Default top/bottom margin */
+  margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) { /* Tablet and smaller */
+  body {
+    font-size: 15px; /* Slightly smaller base font for tablet */
+  }
+
+  .app-container {
+    padding: 15px; /* Reduced padding for tablet */
+  }
+
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.4rem; }
+  h3 { font-size: 1.15rem; }
+
+  .card {
+    padding: 15px; /* Reduce padding for cards */
+    margin-bottom: 20px; /* Reduce bottom margin for cards */
+  }
+
+  input[type="text"],
+  input[type="file"],
+  textarea,
+  button {
+    font-size: 0.95rem; /* Slightly smaller font for form elements */
+    padding: 0.4rem 0.6rem; /* Adjust padding */
+  }
+
+  /* Specific component responsive adjustments should ideally be in their own (module) CSS files
+     or use more specific selectors if placed here.
+     Example for FileUpload's typical structure if stacking is desired:
+     .file-upload-form > div { flex-direction: column; align-items: stretch; }
+     .file-upload-form button { width: 100%; margin-top: 10px; }
+
+     Example for ChatInterface's form if it uses .chatForm class:
+     form.chatForm { flex-direction: column; }
+     form.chatForm input.chatInput { margin-right: 0; margin-bottom: 10px; }
+     form.chatForm button { width: 100%; }
+  */
+}
+
+@media (max-width: 480px) { /* Mobile */
+  body {
+    font-size: 14px; /* Even smaller base font for mobile */
+  }
+
+  .app-container {
+    padding: 10px; /* Further reduced padding for mobile */
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.1rem; }
+
+  .card {
+    padding: 10px; /* Further reduce padding for cards */
+    margin-bottom: 15px; /* Further reduce bottom margin */
+  }
+
+  input[type="text"],
+  input[type="file"],
+  textarea,
+  button {
+    font-size: 0.9rem; /* Further smaller font for form elements */
+    padding: 0.35rem 0.5rem; /* Adjust padding */
+  }
+
+  /* Footer text might need to be smaller */
+  /* Assuming .app-footer class on footer in App.tsx */
+  .app-footer { /* This class is used in App.tsx for the footer */
+    font-size: 0.8em;
+  }
+}
+
+/* Accessibility: Show focus outline only when navigating with keyboard */
+*:focus-visible {
+  outline: 2px solid var(--primary-color, #007bff);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25); /* Optional: softer glow */
+}

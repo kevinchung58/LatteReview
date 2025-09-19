@@ -1,0 +1,85 @@
+/* src/components/ChatInterface.module.css */
+.chatContainer {
+  /* Max height and overflow were previously inline, can be moved here or kept based on preference */
+}
+
+.chatHistory {
+  max-height: 400px; /* Or a different value */
+  overflow-y: auto;
+  border: 1px solid var(--card-border-color, #dee2e6); /* Changed to --card-border-color for consistency */
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: var(--border-radius, 4px); /* Used --border-radius */
+  background-color: var(--card-background-color, #fff); /* Used --card-background-color */
+}
+
+.messageWrapper {
+  margin-bottom: 12px;
+  display: flex; /* For aligning message content */
+}
+
+.userMessage .messageContent { /* Targeting .messageContent within .userMessage */
+  margin-left: auto; /* Align user messages to the right */
+  background-color: var(--primary-color, #007bff);
+  color: white;
+}
+
+.aiMessage .messageContent { /* Targeting .messageContent within .aiMessage */
+  margin-right: auto; /* Align AI messages to the left */
+  background-color: #e9ecef; /* Standard light grey for AI responses */
+  color: var(--text-color, #212529);
+  border: 1px solid var(--card-border-color, #dee2e6); /* Changed to --card-border-color */
+}
+
+.messageContent {
+  display: inline-block;
+  padding: 10px 15px;
+  border-radius: 15px; /* More rounded bubbles */
+  max-width: 80%; /* Prevent messages from taking full width */
+  word-break: break-word;
+}
+
+.messageLabel {
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 0.9em;
+}
+
+.messageText {
+ margin: 0; /* Remove default paragraph margin */
+}
+
+.chatForm {
+  display: flex;
+}
+
+.chatInput {
+  flex-grow: 1;
+  /* margin-right will be handled by global input styles if input is not display:block/flex-item by default */
+  /* Global input styles make it width: 100%, so flex-grow:1 might be fine with some parent width constraint */
+}
+
+/* Loading/Error messages can use global .text-error or custom styles */
+.aiThinking {
+  text-align: left;
+  color: var(--text-muted-color, #6c757d);
+  font-style: italic;
+  padding: 0 10px 10px; /* Match chat history padding, add bottom padding */
+}
+
+@media (max-width: 480px) {
+  .chatHistory {
+    max-height: 300px; /* Reduce height on small screens */
+  }
+
+  .chatForm {
+    flex-direction: column; /* Stack input and button */
+  }
+
+  .chatInput {
+    margin-right: 0; /* Remove margin when stacked */
+    margin-bottom: 10px; /* Add space between input and button */
+  }
+
+  /* Button will be full-width due to global styles for button in form context if not overridden */
+}

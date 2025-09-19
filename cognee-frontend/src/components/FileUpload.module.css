@@ -1,0 +1,77 @@
+/* src/components/FileUpload.module.css */
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.fileInputWrapper {
+  margin-bottom: 15px; /* Space between input and button */
+  /* Custom file input styling can be complex; this is a basic structure */
+  /* For a truly custom look, often involves hiding the default input
+     and styling a label that's connected to it via htmlFor. */
+}
+
+.fileInputLabel {
+  display: inline-block;
+  padding: 10px 15px;
+  background-color: var(--secondary-color, #6c757d);
+  color: white;
+  border-radius: 4px; /* Use var(--border-radius) for consistency if desired */
+  cursor: pointer;
+  margin-bottom: 5px; /* If input itself is also visible or for spacing */
+  transition: background-color 0.2s ease-in-out;
+}
+
+.fileInputLabel:hover {
+  background-color: #5a6268; /* Consider deriving from var(--secondary-color-hover) if defined */
+}
+
+.fileName {
+  margin-left: 10px;
+  font-style: italic;
+  color: var(--text-muted-color, #6c757d);
+}
+
+.messageArea p {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 4px; /* Use var(--border-radius) */
+  word-break: break-word; /* Ensure long messages wrap */
+}
+
+.successMessage {
+  background-color: #e6ffed; /* Light green background */
+  border: 1px solid var(--success-color, #28a745); /* Border can remain the lighter green */
+  color: var(--success-text-color); /* Use darker green for text */
+}
+
+.errorMessage {
+  background-color: #ffe6e6; /* Light red background */
+  border: 1px solid var(--error-color, #dc3545);
+  color: var(--error-color, #dc3545);
+}
+
+@media (max-width: 480px) {
+  .fileInputWrapper {
+    display: flex;
+    flex-direction: column; /* Stack label and filename */
+    align-items: flex-start; /* Align items to the start */
+  }
+
+  .fileInputLabel {
+    width: 100%; /* Make label full width for easier tapping */
+    text-align: center; /* Center text in label */
+    margin-bottom: 8px; /* Space between label and filename */
+  }
+
+  .fileName {
+    margin-left: 0; /* Reset margin when stacked */
+    font-size: 0.9em; /* Slightly smaller filename */
+  }
+
+  /* The main button is already full-width on mobile due to global styles,
+     or could be targeted here if needed:
+     .formContainer button[type="submit"] { width: 100%; }
+  */
+}
